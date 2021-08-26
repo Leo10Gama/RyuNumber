@@ -8,6 +8,24 @@ class game:
         return str(self.__dict__)
 
 
+def insertGame(title, release_date):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Run the command
+    cursor.execute(queries.insertGame(title, release_date))
+    mydb.commit()
+    mydb.close()
+    return True
+
+
 def getByTitle(title):
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()

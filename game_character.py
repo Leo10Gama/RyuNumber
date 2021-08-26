@@ -13,6 +13,45 @@ class game_character:
         return str(self.__dict__)
 
 
+def insertCharacter(name):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Run the command
+    cursor.execute(queries.insertCharacter(name))
+    mydb.commit()
+    mydb.close()
+    return True
+
+
+def insertCharactersToGame(names, title):
+    names = list(names)
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Run the commands
+    for n in names:
+        cursor.execute(queries.insertCharacter(n))
+        cursor.execute(queries.insertRelation(n, title))
+    mydb.commit()
+    mydb.close()
+    return True
+    
+
 def getByName(name):
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()
@@ -109,4 +148,10 @@ def getCharactersByRyuNumber(rn):
         for row in cursor.fetchall():
             c.appears_in.append(game.game(row[0], row[1], row[2]))
     return result
-    
+
+
+def main():
+    print(insertCharactersToGame(("Sonic", "Mario"), "Smash Bros"))
+
+if __name__=="__main__":
+    main()
