@@ -1,0 +1,4 @@
+localhost
+root
+Password!
+ryu_number
