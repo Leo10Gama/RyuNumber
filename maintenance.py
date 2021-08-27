@@ -17,14 +17,16 @@ def updateRelations():
     characterQueue = []
     gameQueue = []
     characterQueue.append("Ryu")
-    for i in range(6):
+    rn = 0
+    while characterQueue or gameQueue:
         for c in characterQueue:
             characterQueue.pop(0)
             cursor.execute(queries.getRelationByCharacter(c))
             relations = cursor.fetchall()
             cursor.execute(queries.removeCharacterRelations(c))
             for row in relations:
-                if row[1] not in gameQueue:
+                temp = gameQueue
+                if row[1] not in gameQueue and row[2] >= rn:
                     gameQueue.append(row[1])
                 cursor.execute(queries.insertRelation(c, row[1]))
         for g in gameQueue:
@@ -33,9 +35,10 @@ def updateRelations():
             relations = cursor.fetchall()
             cursor.execute(queries.removeGameRelations(g))
             for row in relations:
-                if row[0] not in characterQueue:
+                if row[0] not in characterQueue and row[2] >= rn:
                     characterQueue.append(row[0])
                 cursor.execute(queries.insertRelation(row[0], g))
+        rn += 1
     
     mydb.commit()
     mydb.close()

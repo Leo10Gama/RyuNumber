@@ -16,7 +16,7 @@ getGamesByRyu = lambda rn: "SELECT * FROM game WHERE ryu_number=%d" % rn
 
 # Relation queries
 insertRelation = lambda cname, gtitle: "INSERT IGNORE INTO appears_in (cname, gtitle) VALUES ('%s', '%s')" % (cname, gtitle)
-getRelationByCharacter = lambda gc: "SELECT * FROM appears_in WHERE cname='%s'" % gc
-getRelationByGame = lambda gt: "SELECT * FROM appears_in WHERE gtitle='%s'" % gt
+getRelationByCharacter = lambda gc: "SELECT cname, gtitle, ryu_number FROM appears_in INNER JOIN game_character ON cname=name WHERE cname='%s'" % gc
+getRelationByGame = lambda gt: "SELECT cname, gtitle, ryu_number FROM appears_in INNER JOIN game ON gtitle=title WHERE gtitle='%s'" % gt
 removeCharacterRelations = lambda gc: "DELETE FROM appears_in WHERE cname='%s'" % gc
 removeGameRelations = lambda gt: "DELETE FROM appears_in WHERE gtitle='%s'" % gt
