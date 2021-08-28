@@ -129,6 +129,7 @@ Atlas (Portal 2)
 P-Body
 GLaDOS
 Wheatley
+HAL 9000
 Hagrid
 Arthur Weasley
 George Weasley
