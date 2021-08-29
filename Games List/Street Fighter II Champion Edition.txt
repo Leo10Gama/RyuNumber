@@ -11,3 +11,4 @@ Ryu
 Sagat
 Vega
 Zangief
+Mikhail Gorbachev
