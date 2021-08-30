@@ -12,6 +12,12 @@ class game_character:
     def __str__ (self):
         return str(self.__dict__)
 
+class game_character_simple:
+    def __init__ (self, name, ryu_number):
+        self.name, self.ryu_number = name, ryu_number
+    def __str__ (self):
+        return str(self.__dict__)
+
 
 def insertCharacter(name):
     # Connect to the db
@@ -64,12 +70,36 @@ def getByName(name):
     cursor = mydb.cursor()
 
     # Query and retrieve result
-    result = None
+    result = []
     cursor.execute(queries.getCharacterByName(str(name)))
+    for row in cursor.fetchall():
+        result.append(game_character(row[0], row[1]))
+    # Get games character is in as well
+    for c in result:
+        cursor.execute(queries.getGamesByCharacter(str(c.name)))
+        for row in cursor.fetchall():
+            c.appears_in.append(game.game(row[0], row[1], row[2]))
+    return result
+
+
+def getByNameExact(name):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve result
+    result = None
+    cursor.execute(queries.getCharacterByNameExact(str(name)))
     for row in cursor.fetchall():
         result = game_character(row[0], row[1])
     # Get games character is in as well
-    cursor.execute(queries.getGamesByCharacter(str(name)))
+    cursor.execute(queries.getGamesByCharacter(str(result.name)))
     for row in cursor.fetchall():
         result.appears_in.append(game.game(row[0], row[1], row[2]))
     return result

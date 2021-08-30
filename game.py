@@ -38,8 +38,27 @@ def getByTitle(title):
     cursor = mydb.cursor()
 
     # Query and retrieve result
-    result = None
+    result = []
     cursor.execute(queries.getGameByTitle(str(title)))
+    for row in cursor.fetchall():
+        result.append(game(row[0], row[1], row[2]))
+    return result
+
+
+def getByTitleExact(title):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve result
+    result = None
+    cursor.execute(queries.getGameByTitleExact(str(title)))
     for row in cursor.fetchall():
         result = game(row[0], row[1], row[2])
     return result

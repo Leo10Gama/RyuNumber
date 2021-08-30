@@ -1,5 +1,6 @@
 2018-12-07
 Super Mario
+Cappy
 Donkey Kong
 Link
 Samus
@@ -51,6 +52,7 @@ Toon Link
 Wolf ODonnell
 Villager (Animal Crossing)
 Mega Man
+Rush (Mega Man)
 Wii Fit Trainer
 Rosalina
 Little Mac
@@ -238,7 +240,6 @@ Ralf Jones
 Clark Still
 Heihachi Mishima
 Birdo
-Shy Guy
 Kamek
 Nabbit
 Tingle
