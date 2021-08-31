@@ -2,7 +2,8 @@
 import mysql.connector
 import queries
 
-def main():
+def main(debug = False, debug_detailed = False):
+    if debug or debug_detailed: print("Establishing connection...")
     # Create database if not exists
     dbCreds = open("db.txt", "r").read().splitlines()
 
@@ -12,6 +13,7 @@ def main():
         password    =dbCreds[2]
     )
     cursor = db1.cursor()
+    if debug or debug_detailed: print("Creating database...")
     cursor.execute("CREATE DATABASE IF NOT EXISTS ryu_number;")
     # Connect to the db we just created
     mydb = mysql.connector.connect(
@@ -22,6 +24,7 @@ def main():
     )
     cursor = mydb.cursor()
 
+    if debug or debug_detailed: print("Creating tables...")
     # Create 'character' table
     characterTable = "CREATE TABLE IF NOT EXISTS game_character (name VARCHAR(64) NOT NULL, ryu_number INTEGER DEFAULT 99, PRIMARY KEY (name));"
     cursor.execute(characterTable)
@@ -32,6 +35,7 @@ def main():
     appearsInTable = "CREATE TABLE IF NOT EXISTS appears_in (cname VARCHAR(64) NOT NULL, gtitle VARCHAR(64) NOT NULL, PRIMARY KEY (cname, gtitle), FOREIGN KEY (cname) REFERENCES game_character(name), FOREIGN KEY (gtitle) REFERENCES game(title));"
     cursor.execute(appearsInTable)
 
+    if debug or debug_detailed: print("Creating triggers...")
     # Create the triggers to automatically set the Ryu Numbers
     dropAI = "DROP TRIGGER IF EXISTS update_ai;"
     dropAI2 = "DROP TRIGGER IF EXISTS insert_ai;"
@@ -65,6 +69,8 @@ def main():
 
     mydb.commit()
     mydb.close
+    
+    if debug or debug_detailed: print("Database initialized.")
 
 if __name__ == "__main__":
     main()

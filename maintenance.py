@@ -6,7 +6,7 @@ import queries
 
 # THIS IS A VERY TIME-COSTLY METHOD SO ONLY USE IT IF ABSOLUTELY NECESSARY
 def updateRelations(debug = False, debug_detailed = False):
-    if debug or debug_detailed: print("Connecting to db...")
+    if debug or debug_detailed: print("Connecting to database...")
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()
     mydb = mysql.connector.connect(
@@ -90,5 +90,5 @@ def reset_db(debug = False, debug_detailed = False):
     # ... and now drop the db
     cursor.execute("DROP SCHEMA IF EXISTS ryu_number")
     # Now refill the whole db
-    init.main()
+    init.main(debug, debug_detailed)
     fill_db.main(debug, debug_detailed)

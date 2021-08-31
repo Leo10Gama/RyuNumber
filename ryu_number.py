@@ -33,7 +33,7 @@ def getPathFromCharacter(name):
         return "Error: character did not exist in database"
 
 def main():
-    for elem in getPathFromCharacter("aiai"):
+    for elem in getPathFromCharacter("filia"):
         if isinstance(elem, game_character.game_character):
             print("(%d) Name: %s" % (elem.ryu_number, elem.name))
             for g in elem.appears_in:
