@@ -10,13 +10,16 @@ class game_character:
         else:
             self.appears_in = []
     def __str__ (self):
-        return str(self.__dict__)
+        returnStr = "(%d) %s\n" % (self.ryu_number, self.name)
+        for g in self.appears_in:
+            returnStr += "\t%s\n" % g
+        return returnStr
 
 class game_character_simple:
     def __init__ (self, name, ryu_number):
         self.name, self.ryu_number = name, ryu_number
     def __str__ (self):
-        return str(self.__dict__)
+        return "(%d) %s\n" % (self.ryu_number, self.name)
 
 
 def insertCharacter(name):
@@ -99,9 +102,10 @@ def getByNameExact(name):
     for row in cursor.fetchall():
         result = game_character(row[0], row[1])
     # Get games character is in as well
-    cursor.execute(queries.getGamesByCharacter(str(result.name)))
-    for row in cursor.fetchall():
-        result.appears_in.append(game.game(row[0], row[1], row[2]))
+    if result:
+        cursor.execute(queries.getGamesByCharacter(str(result.name)))
+        for row in cursor.fetchall():
+            result.appears_in.append(game.game(row[0], row[1], row[2]))
     return result
 
 

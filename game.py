@@ -5,7 +5,7 @@ class game:
     def __init__ (self, title, ryu_number, release_date):
         self.title, self.ryu_number, self.release_date = title, ryu_number, release_date
     def __str__ (self):
-        return str(self.__dict__)
+        return "%s (%s)" % (self.title, self.release_date)
 
 
 def insertGame(title, release_date):
