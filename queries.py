@@ -10,10 +10,10 @@ getCharacterByRyu = lambda rn: "SELECT * FROM game_character WHERE ryu_number=%d
 
 # Game queries
 insertGame = lambda game_title, release_date: "INSERT IGNORE INTO game (title, release_date) VALUES ('%s', '%s')" % (game_title, release_date)
-getGameByTitle = lambda gt: "SELECT * FROM game WHERE title LIKE '%%%s%%' ORDER BY ryu_number ASC, release_date ASC" % gt
+getGameByTitle = lambda gt: "SELECT * FROM game WHERE title LIKE '%%%s%%' ORDER BY release_date ASC, ryu_number ASC" % gt
 getGameByTitleExact = lambda gt: "SELECT * FROM game WHERE title='%s'" % gt
 getGamesByTitles = lambda gt: "SELECT * FROM game WHERE title IN %s ORDER BY ryu_number ASC" % gt   # NOTE: param must be a tuple
-getGamesByCharacter = lambda gc: "SELECT title, ryu_number, release_date FROM appears_in, game WHERE appears_in.cname='%s' AND appears_in.gtitle=game.title" % gc
+getGamesByCharacter = lambda gc: "SELECT title, ryu_number, release_date FROM appears_in, game WHERE appears_in.cname='%s' AND appears_in.gtitle=game.title ORDER BY release_date ASC" % gc
 getGamesByRyu = lambda rn: "SELECT * FROM game WHERE ryu_number=%d" % rn
 
 # Relation queries
