@@ -17,8 +17,8 @@ def main(debug = False, debug_detailed = False):
         for x in priorityInserts:
             if x in data:
                 data.remove(x)
-        game_character.insertCharactersToGame(priorityInserts, filename)
-        game_character.insertCharactersToGame(data, filename)
+        if priorityInserts: game_character.insertCharactersToGame(priorityInserts, filename)
+        if data: game_character.insertCharactersToGame(data, filename)
 
     if debug or debug_detailed: print("Raw data inserted successfully.")
 

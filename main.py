@@ -70,7 +70,7 @@ def addCharacters():
             if possibleCharacters:
                 print("Found %d character(s) with similar name:\n" % len(possibleCharacters))
                 for i in range(len(possibleCharacters)):
-                    print("(%d) %s" % (i, possibleCharacters[i].name))
+                    print("(%d) %s (%s)" % (i, possibleCharacters[i].name, possibleCharacters[i].appears_in[0].title))
                 print("\nWhat would you like to do?\n[num] Use that character name\n[n/N] Use what I wrote\n[anything else] Enter another name\n")
                 whatDo = input()
                 # Number is inputted, use that value
@@ -130,12 +130,13 @@ def insertGame():
         # Insert into the database
         print("Adding to database...", end="")
         game.insertGame(newGame, releaseDate)
-        priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
+        priorityInserts = []
+        if len(charactersToAdd) > 1: priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
         for x in priorityInserts:
             if x in charactersToAdd:
                 charactersToAdd.remove(x)
-        game_character.insertCharactersToGame(priorityInserts, newGame)
-        game_character.insertCharactersToGame(charactersToAdd, newGame)
+        if priorityInserts: game_character.insertCharactersToGame(priorityInserts, newGame)
+        if charactersToAdd: game_character.insertCharactersToGame(charactersToAdd, newGame)
         print("Done")
 
 def addToGame():
@@ -164,18 +165,19 @@ def addToGame():
             print("Done")
             # Insert into the database
             print("Adding to database...", end="")
-            priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
+            priorityInserts = []
+            if len(charactersToAdd) > 1: priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
             for x in priorityInserts:
                 if x in charactersToAdd:
                     charactersToAdd.remove(x)
-            game_character.insertCharactersToGame(priorityInserts, gameToAddTo)
-            game_character.insertCharactersToGame(charactersToAdd, gameToAddTo)
+            if priorityInserts: game_character.insertCharactersToGame(priorityInserts, gameToAddTo)
+            if charactersToAdd: game_character.insertCharactersToGame(charactersToAdd, gameToAddTo)
             print("Done")
         else:
             print("Invalid input. Cancelling action...")
 
 def resetDatabase(detailed = False):
-    response = input("\nThis command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
+    response = input("This command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
     print()
     if response.lower() in ["y", "yes", "yea", "ye", "ok", "okay"]:
         maintenance.reset_db(not detailed, detailed)
