@@ -21,6 +21,7 @@ illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`
 def queryCharacter(exact = False):
     limiter = 4     # Limiter will limit how many "appears_in" games show
     charToQuery = input("Please enter a character's name%s" % (" exactly: " if exact else ": "))
+    print()
     if exact:       # Querying by exact name (myCharacters is a game_character object)
         myCharacters = game_character.getByNameExact(charToQuery)
         if myCharacters:
@@ -38,6 +39,7 @@ def queryCharacter(exact = False):
 def queryGame(exact = False):
     gameToQuery = input("Please enter a game name%s" % (" exactly: " if exact else ": "))
     myGames = game.getByTitleExact(gameToQuery) if exact else game.getByTitle(gameToQuery)
+    print()
     if exact:           # Querying by exact title (myGames is a game object)
         if myGames:
             print(myGames)
@@ -56,8 +58,9 @@ def addCharacters():
     while not c2add:
         # Receive input
         c2add = input("Enter character name, or enter '.' to cancel the insert (enter nothing to finish):\n")
+        print()
         for c in illegalCharacters:
-            c2add.replace(c, "")
+            c2add = c2add.replace(c, "")
         # Query if character already exists
         if c2add == ".":
             return []
@@ -81,12 +84,12 @@ def addCharacters():
                 else:
                     print("Cancelling that insert...")
             else:
-                whatDo = input("\n'%s' does not exist in the database yet.\nAdd them anyway? (y/n): " % c2add)
+                whatDo = input("'%s' does not exist in the database yet.\nAdd them anyway? (y/n): " % c2add)
                 if whatDo.lower() in ["y", "ye", "yes", "yea"]:
-                    print("Adding '%s'..." % c2add)
+                    print("\nAdding '%s'..." % c2add)
                     charactersToAdd.append(c2add)
                 else:
-                    print("Cancelling that insert...")
+                    print("\nCancelling that insert...")
             c2add = None
         else:
             c2add = "owo"
@@ -97,8 +100,9 @@ def insertGame():
     # newGame contains the name of the game to be inserted
     # Parse it with characters that can be used in text file names
     newGame = input("Enter the game's name: ")
+    print()
     for c in illegalCharacters:
-        newGame.replace(c, "")
+        newGame = newGame.replace(c, "")
     if game.getByTitleExact(newGame):
         print("That game already exists in the database!")
     else:
@@ -106,6 +110,7 @@ def insertGame():
         releaseDate = None
         while not releaseDate:
             releaseDate = input("Enter the game's release date (YYYY-MM-DD): ")
+            print()
             # Verify format
             if len(releaseDate) == 10:
                 if releaseDate[0:4].isnumeric() and releaseDate[5:7].isnumeric() and releaseDate[8:10].isnumeric() and releaseDate[4] == "-" and releaseDate[7] == "-":
@@ -137,6 +142,7 @@ def addToGame():
     path = "Games List"
     # Get game to add to
     gameToAddTo = input("Enter game title: ")
+    print()
     # Verify game in DB and cross-check with user
     gameToAddTo = game.getByTitle(gameToAddTo)
     if not gameToAddTo:
@@ -169,7 +175,8 @@ def addToGame():
             print("Invalid input. Cancelling action...")
 
 def resetDatabase(detailed = False):
-    response = input("This command will take a while to execute.\nAre you sure you want to reset the database? (y/n): ")
+    response = input("\nThis command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
+    print()
     if response.lower() in ["y", "yes", "yea", "ye", "ok", "okay"]:
         maintenance.reset_db(not detailed, detailed)
     else:
@@ -177,23 +184,35 @@ def resetDatabase(detailed = False):
 
 def getPath():
     limiter = 4     # Limit how many "appears_in" games are displayed
-    charToPath = input("Enter the character's name (as accurately as possible): ")
-    p = ryu_number.getPathFromCharacter(charToPath) # Get the path
-    if p:       # If the path actually exists
-        for elem in p:
-            if isinstance(elem, game_character.game_character):
-                print("%s" % (elem.printSelf(limiter)))
-            else:
-                print("(%d) %s" % (elem.ryu_number, elem.title))
-        print("\nNote: if this isn't the character you meant to search, try querying that character first and use that name!")
+    charToPath = input("Enter the character's name: ")
+    print()
+    characterToQuery = game_character.getByName(charToPath)
+    if not characterToQuery:
+        print("No character by that name could be found in the database.")
+        return
+    for i in range(len(characterToQuery)): 
+        print("(%d) %s" % (i, characterToQuery[i].name))
+    charIndex = input("\nWhich character are you referring to? (int)\n")
+    print()
+    if charIndex.isnumeric() and int(charIndex) < len(characterToQuery):
+        p = ryu_number.getPathFromCharacter(characterToQuery[int(charIndex)].name) # Get the path
+        if p:       # If the path actually exists
+            for elem in p:
+                if isinstance(elem, game_character.game_character):
+                    print("%s" % (elem.printSelf(limiter)))
+                else:
+                    print("(%d) %s" % (elem.ryu_number, elem.title))
+        else:
+            print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
     else:
-        print("No character by that name could be found")
+        print("Invalid input. Cancelling...")
 
 def main():
     command = ""
     while (command != "Q" and command != "q"):
         print(MENU)
         command = input().strip()
+        print()
         if command == "c" or command == "C":
             queryCharacter(True if command == "C" else False)
         elif command == "g" or command == "G":
