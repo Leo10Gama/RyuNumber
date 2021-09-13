@@ -10,6 +10,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 | (g/G) Query a game (exactly)                   |\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
+| (x/X) Remove a character from the db entirely  |\n\
 | (r/R) Reset the database (include all details) |\n\
 | (p/P) Get a path from a character to Ryu       |\n\
 | (q/Q) Close the database and quit              |\n\
@@ -17,6 +18,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
+path = "Games List"
 
 def queryCharacter(exact = False):
     limiter = 4     # Limiter will limit how many "appears_in" games show
@@ -32,7 +34,7 @@ def queryCharacter(exact = False):
         myCharacters = game_character.getByNameExact(charToQuery) if exact else game_character.getByName(charToQuery)  
         if myCharacters:
             for i in range(len(myCharacters)):
-                print("(Result %d): %s" % (i + 1, myCharacters[i].printSelf(limiter)))
+                print("(Result %d): %s\n" % (i + 1, myCharacters[i].printSelf(limiter)))
         else:
             print("No characters by that name could be found")
 
@@ -48,12 +50,11 @@ def queryGame(exact = False):
     else:               # Querying by generalized title (myGames is a list of game objects)
         if myGames:
             for i in range(len(myGames)):
-                print("(Result %d): %s" % (i + 1, myGames[i]))
+                print("(Result %d): %s\n" % (i + 1, myGames[i]))
         else:
             print("No games by that name could be found")
 
-def addCharacters():
-    charactersToAdd = []
+def addCharacters(charactersToAdd = []):
     c2add = None
     while not c2add:
         # Receive input
@@ -75,28 +76,36 @@ def addCharacters():
                 whatDo = input()
                 # Number is inputted, use that value
                 if whatDo.isnumeric() and int(whatDo) < len(possibleCharacters):
-                    print("Adding '%s'..." % possibleCharacters[int(whatDo)].name)
-                    charactersToAdd.append(possibleCharacters[int(whatDo)].name)
+                    if possibleCharacters[int(whatDo)].name in charactersToAdd:
+                        print("That character is already in this game!")
+                    else:
+                        print("Adding '%s'..." % possibleCharacters[int(whatDo)].name)
+                        charactersToAdd.append(possibleCharacters[int(whatDo)].name)
                 # Use the value I inserted
                 elif whatDo.lower() == "n":
-                    print("Adding '%s'..." % c2add)
-                    charactersToAdd.append(c2add)
+                    if c2add in charactersToAdd:
+                        print("That character is already in this game!")
+                    else:
+                        print("Adding '%s'..." % c2add)
+                        charactersToAdd.append(c2add)
                 else:
                     print("Cancelling that insert...")
             else:
                 whatDo = input("'%s' does not exist in the database yet.\nAdd them anyway? (y/n): " % c2add)
                 if whatDo.lower() in ["y", "ye", "yes", "yea"]:
-                    print("\nAdding '%s'..." % c2add)
-                    charactersToAdd.append(c2add)
+                    if c2add in charactersToAdd:
+                        print("That character is already in this game!")
+                    else:
+                        print("Adding '%s'...\n" % c2add)
+                        charactersToAdd.append(c2add)
                 else:
-                    print("\nCancelling that insert...")
+                    print("Cancelling that insert...\n")
             c2add = None
         else:
             c2add = "owo"
     return charactersToAdd
 
 def insertGame():
-    path = "Games List"
     # newGame contains the name of the game to be inserted
     # Parse it with characters that can be used in text file names
     newGame = input("Enter the game's name: ")
@@ -140,7 +149,6 @@ def insertGame():
         print("Done")
 
 def addToGame():
-    path = "Games List"
     # Get game to add to
     gameToAddTo = input("Enter game title: ")
     print()
@@ -155,10 +163,15 @@ def addToGame():
         if gameIndex.isnumeric() and int(gameIndex) < len(gameToAddTo):
             gameToAddTo = gameToAddTo[int(gameIndex)].title
             # Start receiving character input
-            charactersToAdd = addCharacters()
+            charactersToAdd = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
+            charactersToAdd = addCharacters(charactersToAdd)
             if not charactersToAdd: return
             # Write the file
             print("Writing to file...", end="")
+            currChars = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
+            for c in currChars:
+                if c in charactersToAdd:
+                    charactersToAdd.remove(c)
             with open("%s/%s.txt" % (path, gameToAddTo), "a") as f:
                 for c in charactersToAdd:
                     f.write("\n%s" % c)
@@ -175,6 +188,46 @@ def addToGame():
             print("Done")
         else:
             print("Invalid input. Cancelling action...")
+
+def removeCharacter():
+    # Query character
+    charToRemove = input("Enter the name of the character to remove: ")
+    myChars = game_character.getByName(charToRemove)
+    # Select character to remove
+    print()
+    for i in range(len(myChars)):
+        print("(%d) %s (%s)" % (i, myChars[i].name, myChars[i].appears_in[0].title))
+    else:
+        print("(%d) Cancel" % len(myChars))
+    print()
+    charIndex = input("Which character would you like to remove? (int): ")
+    # Find and remove that character from each game
+    print()
+    if charIndex.isnumeric():
+        charIndex = int(charIndex)
+        if charIndex >= 0 and charIndex <= len(myChars):
+            if charIndex == len(myChars):
+                print("Cancelling the operation...")
+                return
+            else:
+                charToRemove = myChars[charIndex]
+                for myGame in charToRemove.appears_in:
+                    myGame = myGame.title
+                    print("Opening %s/%s.txt" % (path, myGame))
+                    with open("%s/%s.txt" % (path, myGame), "r+") as f:
+                        lines = f.readlines()
+                        print(lines)
+                        f.seek(0)
+                        for line in lines:
+                            print("%s vs %s" % (line.strip("\n"), charToRemove.name))
+                            if line.strip("\n") != charToRemove.name:
+                                f.write(line)
+                        f.truncate()
+                print("'%s' removed successfully.\nNOTE: This change will only be noticed when the database is reset." % charToRemove.name)
+        else:
+            print("Number not in range. Cancelling...")
+    else:
+        print("You have not entered a number. Cancelling...")
 
 def resetDatabase(detailed = False):
     response = input("This command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
@@ -223,6 +276,8 @@ def main():
             insertGame()
         elif command == "a" or command == "A":
             addToGame()
+        elif command == "x" or command == "X":
+            removeCharacter()
         elif command == "r" or command == "R":
             resetDatabase(True if command == "R" else False)
         elif command == "p" or command == "P":

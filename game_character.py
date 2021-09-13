@@ -17,11 +17,11 @@ class game_character:
     def printSelf(self, limit=-1):
         if limit == -1: limit = len(self.appears_in)
         if limit < 0: limit = 0
-        returnStr = "(%d) %s\n" % (self.ryu_number, self.name)
+        returnStr = "(%d) %s" % (self.ryu_number, self.name)
         for i in range(min(limit, len(self.appears_in))):
-            returnStr += "\t%s\n" % self.appears_in[i]
+            returnStr += "\n\t%s" % self.appears_in[i]
         if limit < len(self.appears_in):
-            returnStr += "\t... and %d more" % (len(self.appears_in) - limit)
+            returnStr += "\n\t... and %d more" % (len(self.appears_in) - limit)
         return returnStr
 
 class game_character_simple:
