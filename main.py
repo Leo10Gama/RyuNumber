@@ -3,25 +3,42 @@ import game_character
 import maintenance
 import ryu_number
 
+### BEGIN CONSTANTS ###
+
 MENU = "\n+------------------RYU DATABASE------------------+\n\
 |         Enter a letter to get started.         |\n\
 |                                                |\n\
++---QUERY COMMANDS-------------------------------+\n\
+|                                                |\n\
 | (c/C) Query a character (exactly)              |\n\
+|       [num] Limit visible games                |\n\
+|             Default = 4; All = -1;             |\n\
 | (g/G) Query a game (exactly)                   |\n\
 | (i/I) Insert a game and characters into the DB |\n\
+|                                                |\n\
++---ALTER DATABASE COMMANDS----------------------+\n\
+|                                                |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove a character from the db entirely  |\n\
-| (r/R) Reset the database (include all details) |\n\
+|                                                |\n\
++---MAINTENANCE----------------------------------+\n\
+|                                                |\n\
 | (p/P) Get a path from a character to Ryu       |\n\
+|       [num] Limit visible games                |\n\
+|             Default = 4; All = -1;             |\n\
+| (r/R) Reset the database (include all details) |\n\
 | (q/Q) Close the database and quit              |\n\
 |                                                |\n\
++------------------------------------------------+\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
 path = "Games List"
+defaultLimiter = 4
 
-def queryCharacter(exact = False):
-    limiter = 4     # Limiter will limit how many "appears_in" games show
+### END CONSTANTS ###
+
+def queryCharacter(exact = False, limiter = defaultLimiter):
     charToQuery = input("Please enter a character's name%s" % (" exactly: " if exact else ": "))
     print()
     if exact:       # Querying by exact name (myCharacters is a game_character object)
@@ -237,8 +254,7 @@ def resetDatabase(detailed = False):
     else:
         print("Cancelling...")
 
-def getPath():
-    limiter = 4     # Limit how many "appears_in" games are displayed
+def getPath(limiter = defaultLimiter):
     charToPath = input("Enter the character's name: ")
     print()
     characterToQuery = game_character.getByName(charToPath)
@@ -250,6 +266,8 @@ def getPath():
     charIndex = input("\nWhich character are you referring to? (int)\n")
     print()
     if charIndex.isnumeric() and int(charIndex) < len(characterToQuery):
+        print("Input was %d" % int(charIndex))
+        print("Retrieving %s" % characterToQuery[int(charIndex)].name)
         p = ryu_number.getPathFromCharacter(characterToQuery[int(charIndex)].name) # Get the path
         if p:       # If the path actually exists
             for elem in p:
@@ -268,20 +286,20 @@ def main():
         print(MENU)
         command = input().strip()
         print()
-        if command == "c" or command == "C":
-            queryCharacter(True if command == "C" else False)
-        elif command == "g" or command == "G":
+        if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else defaultLimiter)
+        elif command.lower() == "g":
             queryGame(True if command == "G" else False)
-        elif command == "i" or command == "I":
+        elif command.lower() == "i":
             insertGame()
-        elif command == "a" or command == "A":
+        elif command.lower() == "a":
             addToGame()
-        elif command == "x" or command == "X":
+        elif command.lower() == "x":
             removeCharacter()
-        elif command == "r" or command == "R":
+        elif command.lower() == "r":
             resetDatabase(True if command == "R" else False)
-        elif command == "p" or command == "P":
-            getPath()
+        elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            getPath(int(command[1:]) if command[1:] else defaultLimiter)
         elif command == "q" or command == "Q":
             print("Thank you for using the Ryu Database! :)")
         else:

@@ -19,7 +19,7 @@ def getPathFromCharacter(name):
     # Get our first character
     path = []
     try:
-        path.append(game_character.getByName(name)[0])
+        path.append(game_character.getByNameExact(name))
         if name == "Ryu": return path
         while (path[-1].name != "Ryu"):
             cursor.execute(queries.getGameFromCharacter(path[-1].name))

@@ -20,8 +20,10 @@ class game_character:
         returnStr = "(%d) %s" % (self.ryu_number, self.name)
         for i in range(min(limit, len(self.appears_in))):
             returnStr += "\n\t%s" % self.appears_in[i]
-        if limit < len(self.appears_in):
+        if limit < len(self.appears_in) and limit != 0:
             returnStr += "\n\t... and %d more" % (len(self.appears_in) - limit)
+        elif limit == 0:
+            returnStr += "\n\t(Appears in %d game%s)" % (len(self.appears_in), "" if len(self.appears_in) == 1 else "s")
         return returnStr
 
 class game_character_simple:
