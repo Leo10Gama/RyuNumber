@@ -14,24 +14,45 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 |       [num] Limit visible games                |\n\
 |             Default = 4; All = -1;             |\n\
 | (g/G) Query a game (exactly)                   |\n\
-| (i/I) Insert a game and characters into the DB |\n\
+| (p/P) Get a path from a character to Ryu       |\n\
+|       [num] Limit visible games                |\n\
+|             Default = 4; All = -1;             |\n\
 |                                                |\n\
 +---ALTER DATABASE COMMANDS----------------------+\n\
 |                                                |\n\
+| (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove a character from the db entirely  |\n\
 |                                                |\n\
 +---MAINTENANCE----------------------------------+\n\
 |                                                |\n\
-| (p/P) Get a path from a character to Ryu       |\n\
-|       [num] Limit visible games                |\n\
-|             Default = 4; All = -1;             |\n\
+| (v/V) Toggle view (compact or descriptive)     |\n\
 | (r/R) Reset the database (include all details) |\n\
 | (q/Q) Close the database and quit              |\n\
 |                                                |\n\
 +------------------------------------------------+\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
+
+MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
+|         Enter a letter to get started.         |\n\
+|                                                |\n\
+| (c/C)* Query a character (exactly)             |\n\
+| (g/G) Query a game (exactly)                   |\n\
+| (p/P)* Get a path from a character to Ryu      |\n\
+| (i/I) Insert a game and characters into the DB |\n\
+| (a/A) Add characters to an existing game       |\n\
+| (x/X) Remove a character from the db entirely  |\n\
+| (v/V) Toggle view (compact or descriptive)     |\n\
+| (r/R) Reset the database (include all details) |\n\
+| (q/Q) Close the database and quit              |\n\
+|                                                |\n\
++------------------------------------------------+\n\
+|      * = [num] Limit visible games, where      |\n\
+|            (Default = 4; All = -1;)            |\n\
+|   (Note: brackets in desc. = capital letter)   |\n\
++------------------------------------------------+\n"
+
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
 path = "Games List"
 defaultLimiter = 4
@@ -70,6 +91,32 @@ def queryGame(exact = False):
                 print("(Result %d): %s\n" % (i + 1, myGames[i]))
         else:
             print("No games by that name could be found")
+
+def getPath(limiter = defaultLimiter):
+    charToPath = input("Enter the character's name: ")
+    print()
+    characterToQuery = game_character.getByName(charToPath)
+    if not characterToQuery:
+        print("No character by that name could be found in the database.")
+        return
+    for i in range(len(characterToQuery)): 
+        print("(%d) %s" % (i, characterToQuery[i].name))
+    charIndex = input("\nWhich character are you referring to? (int)\n")
+    print()
+    if charIndex.isnumeric() and int(charIndex) < len(characterToQuery):
+        print("Input was %d" % int(charIndex))
+        print("Retrieving %s" % characterToQuery[int(charIndex)].name)
+        p = ryu_number.getPathFromCharacter(characterToQuery[int(charIndex)].name) # Get the path
+        if p:       # If the path actually exists
+            for elem in p:
+                if isinstance(elem, game_character.game_character):
+                    print("%s" % (elem.printSelf(limiter)))
+                else:
+                    print("(%d) %s" % (elem.ryu_number, elem.title))
+        else:
+            print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
+    else:
+        print("Invalid input. Cancelling...")
 
 def addCharacters(charactersToAdd = []):
     c2add = None
@@ -246,6 +293,10 @@ def removeCharacter():
     else:
         print("You have not entered a number. Cancelling...")
 
+def toggleView(currStyle):
+    currStyle = "default" if currStyle == "compacat" else "compact"
+    return currStyle
+
 def resetDatabase(detailed = False):
     response = input("This command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
     print()
@@ -254,53 +305,30 @@ def resetDatabase(detailed = False):
     else:
         print("Cancelling...")
 
-def getPath(limiter = defaultLimiter):
-    charToPath = input("Enter the character's name: ")
-    print()
-    characterToQuery = game_character.getByName(charToPath)
-    if not characterToQuery:
-        print("No character by that name could be found in the database.")
-        return
-    for i in range(len(characterToQuery)): 
-        print("(%d) %s" % (i, characterToQuery[i].name))
-    charIndex = input("\nWhich character are you referring to? (int)\n")
-    print()
-    if charIndex.isnumeric() and int(charIndex) < len(characterToQuery):
-        print("Input was %d" % int(charIndex))
-        print("Retrieving %s" % characterToQuery[int(charIndex)].name)
-        p = ryu_number.getPathFromCharacter(characterToQuery[int(charIndex)].name) # Get the path
-        if p:       # If the path actually exists
-            for elem in p:
-                if isinstance(elem, game_character.game_character):
-                    print("%s" % (elem.printSelf(limiter)))
-                else:
-                    print("(%d) %s" % (elem.ryu_number, elem.title))
-        else:
-            print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
-    else:
-        print("Invalid input. Cancelling...")
-
 def main():
     command = ""
+    menuStyle = "default"
     while (command != "Q" and command != "q"):
-        print(MENU)
+        print(MENU_COMPACT if menuStyle == "compact" else MENU)
         command = input().strip()
         print()
         if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
             queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else defaultLimiter)
         elif command.lower() == "g":
             queryGame(True if command == "G" else False)
+        elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            getPath(int(command[1:]) if command[1:] else defaultLimiter)
         elif command.lower() == "i":
             insertGame()
         elif command.lower() == "a":
             addToGame()
         elif command.lower() == "x":
             removeCharacter()
+        elif command.lower() == "v":
+            menuStyle = toggleView(menuStyle)
         elif command.lower() == "r":
             resetDatabase(True if command == "R" else False)
-        elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
-            getPath(int(command[1:]) if command[1:] else defaultLimiter)
-        elif command == "q" or command == "Q":
+        elif command.lower() == "q":
             print("Thank you for using the Ryu Database! :)")
         else:
             print("Command not recognized. Please try again")
