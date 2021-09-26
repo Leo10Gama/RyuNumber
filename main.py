@@ -17,6 +17,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 | (p/P) Get a path from a character to Ryu       |\n\
 |       [num] Limit visible games                |\n\
 |             Default = 4; All = -1;             |\n\
+| (n/N) See stats about the database             |\n\
 |                                                |\n\
 +---ALTER DATABASE COMMANDS----------------------+\n\
 |                                                |\n\
@@ -40,6 +41,7 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 | (c/C)* Query a character (exactly)             |\n\
 | (g/G) Query a game (exactly)                   |\n\
 | (p/P)* Get a path from a character to Ryu      |\n\
+| (n/N) See stats about the database             |\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove a character from the db entirely  |\n\
@@ -117,6 +119,23 @@ def getPath(limiter = defaultLimiter):
             print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
     else:
         print("Invalid input. Cancelling...")
+
+def getStats():
+    statsToSee = input("(g) Games\n(c) Characters\n(a) All \n(*) Back\n\nWhich stats would you like to see?\n")
+    print()
+    if statsToSee[0].lower() == "g":
+        # See games
+        print("Current number of games in database: %d" % game.getNumberOfGames())
+    elif statsToSee[0].lower() == "c":
+        # See characters
+        print("Current number of characters in database: %d" % game_character.getNumberOfCharacters())
+    elif statsToSee[0].lower() == "a":
+        # See all
+        print("Current number of games in database: %d" % game.getNumberOfGames())
+        print("Current number of characters in database: %d" % game_character.getNumberOfCharacters())
+    else:
+        # Do nothing
+        print("Not a recognized command. Cancelling query...")
 
 def addCharacters(charactersToAdd = []):
     c2add = None
@@ -318,6 +337,8 @@ def main():
             queryGame(True if command == "G" else False)
         elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
             getPath(int(command[1:]) if command[1:] else defaultLimiter)
+        elif command.lower() == "n":
+            getStats()
         elif command.lower() == "i":
             insertGame()
         elif command.lower() == "a":

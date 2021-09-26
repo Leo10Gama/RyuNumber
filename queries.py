@@ -7,6 +7,7 @@ getCharacterByNameExact = lambda gc: "SELECT * FROM game_character WHERE name='%
 getCharactersByNames = lambda gc: "SELECT * FROM game_character WHERE name IN %s ORDER BY ryu_number ASC" % gc  # NOTE: param must be a tuple
 getCharactersByGame = lambda gt: "SELECT name, ryu_number FROM game_character, appears_in WHERE appears_in.cname=game_character.name AND appears_in.gtitle='%s'" % gt
 getCharacterByRyu = lambda rn: "SELECT * FROM game_character WHERE ryu_number=%d" % rn
+getNumberOfCharacters = "SELECT COUNT(*) FROM game_character"
 
 # Game queries
 insertGame = lambda game_title, release_date: "INSERT IGNORE INTO game (title, release_date) VALUES ('%s', '%s')" % (game_title, release_date)
@@ -15,6 +16,7 @@ getGameByTitleExact = lambda gt: "SELECT * FROM game WHERE title='%s'" % gt
 getGamesByTitles = lambda gt: "SELECT * FROM game WHERE title IN %s ORDER BY ryu_number ASC" % gt   # NOTE: param must be a tuple
 getGamesByCharacter = lambda gc: "SELECT title, ryu_number, release_date FROM appears_in, game WHERE appears_in.cname='%s' AND appears_in.gtitle=game.title ORDER BY release_date ASC" % gc
 getGamesByRyu = lambda rn: "SELECT * FROM game WHERE ryu_number=%d" % rn
+getNumberOfGames = "SELECT COUNT(*) FROM game"
 
 # Relation queries
 insertRelation = lambda cname, gtitle: "INSERT IGNORE INTO appears_in (cname, gtitle) VALUES ('%s', '%s')" % (cname, gtitle)

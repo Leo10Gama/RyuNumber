@@ -195,6 +195,23 @@ def getCharactersByRyuNumber(rn):
     return result
 
 
+def getNumberOfCharacters():
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve results
+    cursor.execute(queries.getNumberOfCharacters)
+    for row in cursor.fetchall():
+        return row
+
+
 def main():
     print(insertCharactersToGame(("Sonic", "Mario"), "Smash Bros"))
 

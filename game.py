@@ -122,3 +122,20 @@ def getGamesByRyuNumber(rn):
     for row in cursor.fetchall():
         result.append(game(row[0], row[1], row[2]))
     return result   
+
+
+def getNumberOfGames():
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve results
+    cursor.execute(queries.getNumberOfGames)
+    for row in cursor.fetchall():
+        return row
