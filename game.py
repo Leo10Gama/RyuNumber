@@ -139,3 +139,20 @@ def getNumberOfGames():
     cursor.execute(queries.getNumberOfGames)
     for row in cursor.fetchall():
         return row
+
+
+def getGamesCountWithRN(rn):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve results
+    cursor.execute(queries.getGameCountWithRN(rn))
+    for row in cursor.fetchall():
+        return row[0]

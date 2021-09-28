@@ -212,6 +212,23 @@ def getNumberOfCharacters():
         return row
 
 
+def getCharactersCountWithRN(rn):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Query and retrieve results
+    cursor.execute(queries.getCharacterCountWithRN(rn))
+    for row in cursor.fetchall():
+        return row[0]
+
+
 def main():
     print(insertCharactersToGame(("Sonic", "Mario"), "Smash Bros"))
 

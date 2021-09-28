@@ -28,3 +28,5 @@ removeGameRelations = lambda gt: "DELETE FROM appears_in WHERE gtitle='%s'" % gt
 # Ryu Number queries
 getGameFromCharacter = lambda cname: "SELECT DISTINCT G.title, G.ryu_number FROM appears_in INNER JOIN game_character AS C ON cname=C.name INNER JOIN game AS G ON gtitle=G.title WHERE cname LIKE '%s' AND G.ryu_number=C.ryu_number;" % cname
 getCharacterFromGame = lambda gtitle: "SELECT DISTINCT C.name, C.ryu_number FROM appears_in INNER JOIN game_character AS C ON cname=C.name INNER JOIN game AS G ON gtitle=G.title WHERE gtitle LIKE '%s' AND C.ryu_number=G.ryu_number-1;" % gtitle
+getCharacterCountWithRN = lambda rn: "SELECT COUNT(*) FROM game_character WHERE ryu_number=%d" % rn
+getGameCountWithRN = lambda rn: "SELECT COUNT(*) FROM game WHERE ryu_number=%d" % rn

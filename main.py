@@ -123,19 +123,36 @@ def getPath(limiter = defaultLimiter):
 def getStats():
     statsToSee = input("(g) Games\n(c) Characters\n(a) All \n(*) Back\n\nWhich stats would you like to see?\n")
     print()
+    def getGames():
+        rn = 1
+        val = game.getGamesCountWithRN(rn)
+        while val:
+            print("Games with Ryu Number %d: %d" % (rn, val))
+            rn += 1
+            val = game.getGamesCountWithRN(rn)
+        print("\nTotal number of games in database: %d" % game.getNumberOfGames())
+    def getCharacters():
+        rn = 0
+        val = game_character.getCharactersCountWithRN(rn)
+        while val:
+            print("Characters with Ryu Number %d: %d" % (rn, val))
+            rn += 1
+            val = game_character.getCharactersCountWithRN(rn)
+        print("\nTotal number of characters in database: %d" % game_character.getNumberOfCharacters())
     if statsToSee[0].lower() == "g":
         # See games
-        print("Current number of games in database: %d" % game.getNumberOfGames())
+        getGames()
     elif statsToSee[0].lower() == "c":
         # See characters
-        print("Current number of characters in database: %d" % game_character.getNumberOfCharacters())
+        getCharacters()
     elif statsToSee[0].lower() == "a":
         # See all
-        print("Current number of games in database: %d" % game.getNumberOfGames())
-        print("Current number of characters in database: %d" % game_character.getNumberOfCharacters())
+        getGames()
+        print()
+        getCharacters()
     else:
         # Do nothing
-        print("Not a recognized command. Cancelling query...")
+        print("Not a recognized option. Cancelling query...")
 
 def addCharacters(charactersToAdd = []):
     c2add = None
