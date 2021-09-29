@@ -61,6 +61,64 @@ defaultLimiter = 4
 
 ### END CONSTANTS ###
 
+### BEGIN FUNCTIONS ###
+
+# USEFUL HELPER FUNCTIONS
+
+def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limiter = defaultLimiter):
+    # NOTE: `page` is the on-screen number, thus the index should be one fewer (i.e. page 1 = results[0])
+    # NOTE: ensure 1 <= `page` <= `totalPages` holds ALWAYS
+    prompt = "(p) Previous page\n(n) Next page\n(#) Select this one\n(*) Close view\n\n" if canSelect else "(p) Previous page\n(n) Next page\n(*) Close view\n\n"
+    cmd = "."
+    totalPages = len(results) / resultsPerPage
+    if len(results) % resultsPerPage != 0: totalPages += 1
+    while cmd:
+        # Print results
+        print("%d results:\n" % len(results))
+        for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
+            print("(%d) %s" % (i + 1, results[i].printSelf(limiter)))
+        else:
+            print()
+        # Print nav bar
+        # Print prefix part
+        print("<(p) ", end="")
+        if page > 2:
+            print("1 ... ", end="")
+        # Print current selection
+        if page == 1:
+            print("{%d} " % page, end="")
+            if page + 1 <= totalPages:
+                print("%d " % (page + 1), end="")
+        else:
+            # Previous and current number
+            print("%d {%d} " % (page - 1, page), end="")
+            # Next number (if possible)
+            if page + 1 <= totalPages:
+                print("%d " % (page + 1), end="")
+        # Print suffix part
+        if (page + 1) <= totalPages - 1:
+            print("... %d " % totalPages, end="")
+        print("(n)>\n")
+        # Prompt next action
+        cmd = input(prompt).lower()
+        print()
+        if cmd != "" and not canSelect: cmd = cmd[0]
+        if cmd.isnumeric() and canSelect:
+            cmd = int(cmd)
+            if cmd >= 1 and cmd <= len(results):
+                print("Selected option (%d)" % cmd)
+                return results[cmd - 1]
+        if cmd != "p" and cmd != "n": cmd = ""
+        if cmd == "p":
+            if page > 1: page -= 1
+            else: print("This is the first page; cannot go back\n")
+        elif cmd == "n":
+            if page + 1 <= totalPages: page += 1
+            else: print("This is the last page; cannot go further\n")
+    return None
+
+# QUERY FUNCTIONS
+
 def queryCharacter(exact = False, limiter = defaultLimiter):
     charToQuery = input("Please enter a character's name%s" % (" exactly: " if exact else ": "))
     print()
@@ -73,8 +131,9 @@ def queryCharacter(exact = False, limiter = defaultLimiter):
     else:           # Querying by generalized name (myCharacters is a list of game_character objects)
         myCharacters = game_character.getByNameExact(charToQuery) if exact else game_character.getByName(charToQuery)  
         if myCharacters:
-            for i in range(len(myCharacters)):
-                print("(Result %d): %s\n" % (i + 1, myCharacters[i].printSelf(limiter)))
+            myChar = resultViewer(myCharacters, canSelect = True)
+            if myChar:
+                print(myChar.printSelf())
         else:
             print("No characters by that name could be found")
 
@@ -89,8 +148,7 @@ def queryGame(exact = False):
             print("No games by that name could be found")
     else:               # Querying by generalized title (myGames is a list of game objects)
         if myGames:
-            for i in range(len(myGames)):
-                print("(Result %d): %s\n" % (i + 1, myGames[i]))
+            resultViewer(myGames)
         else:
             print("No games by that name could be found")
 
@@ -154,6 +212,8 @@ def getStats():
         # Do nothing
         print("Not a recognized option. Cancelling query...")
 
+# ALTER DATABASE FUNCTIONS
+
 def addCharacters(charactersToAdd = []):
     c2add = None
     while not c2add:
@@ -179,7 +239,7 @@ def addCharacters(charactersToAdd = []):
                     if possibleCharacters[int(whatDo)].name in charactersToAdd:
                         print("That character is already in this game!")
                     else:
-                        print("Adding '%s'..." % possibleCharacters[int(whatDo)].name)
+                        print("Adding '%s'...\n" % possibleCharacters[int(whatDo)].name)
                         charactersToAdd.append(possibleCharacters[int(whatDo)].name)
                 # Use the value I inserted
                 elif whatDo.lower() == "n":
@@ -310,24 +370,29 @@ def removeCharacter():
                 print("Cancelling the operation...")
                 return
             else:
-                charToRemove = myChars[charIndex]
-                for myGame in charToRemove.appears_in:
-                    myGame = myGame.title
-                    print("Opening %s/%s.txt" % (path, myGame))
-                    with open("%s/%s.txt" % (path, myGame), "r+") as f:
-                        lines = f.readlines()
-                        print(lines)
-                        f.seek(0)
-                        for line in lines:
-                            print("%s vs %s" % (line.strip("\n"), charToRemove.name))
-                            if line.strip("\n") != charToRemove.name:
-                                f.write(line)
-                        f.truncate()
-                print("'%s' removed successfully.\nNOTE: This change will only be noticed when the database is reset." % charToRemove.name)
+                confirm = input("Are you sure you want to remove '%s' from the database?\n(y/n): " % myChars[charIndex].name)
+                if confirm.lower() == "y":
+                    charToRemove = myChars[charIndex]
+                    for myGame in charToRemove.appears_in:
+                        myGame = myGame.title
+                        with open("%s/%s.txt" % (path, myGame), "r+") as f:
+                            lines = f.readlines()
+                            f.seek(0)
+                            for line in lines:
+                                if line.strip("\n") != charToRemove.name:
+                                    f.write(line)
+                            f.truncate()
+                    print("'%s' removed successfully.\nNOTE: This change will only be noticed when the database is reset." % charToRemove.name)
+                    return True
+                else:
+                    print("Cancelling the operation...")
         else:
             print("Number not in range. Cancelling...")
     else:
         print("You have not entered a number. Cancelling...")
+    return False
+
+# MAINTENANCE FUNCTIONS
 
 def toggleView(currStyle):
     currStyle = "default" if currStyle == "compacat" else "compact"
@@ -341,35 +406,48 @@ def resetDatabase(detailed = False):
     else:
         print("Cancelling...")
 
+### END FUNCTIONS ###
+
 def main():
     command = ""
     menuStyle = "default"
+    uncommittedChanges = False
     while (command != "Q" and command != "q"):
         print(MENU_COMPACT if menuStyle == "compact" else MENU)
         command = input().strip()
         print()
-        if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
-            queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else defaultLimiter)
-        elif command.lower() == "g":
-            queryGame(True if command == "G" else False)
-        elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
-            getPath(int(command[1:]) if command[1:] else defaultLimiter)
-        elif command.lower() == "n":
-            getStats()
-        elif command.lower() == "i":
-            insertGame()
-        elif command.lower() == "a":
-            addToGame()
-        elif command.lower() == "x":
-            removeCharacter()
-        elif command.lower() == "v":
-            menuStyle = toggleView(menuStyle)
-        elif command.lower() == "r":
-            resetDatabase(True if command == "R" else False)
-        elif command.lower() == "q":
-            print("Thank you for using the Ryu Database! :)")
-        else:
-            print("Command not recognized. Please try again")
+        if command != "":
+            if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+                queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else defaultLimiter)
+            elif command.lower() == "g":
+                queryGame(True if command == "G" else False)
+            elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+                getPath(int(command[1:]) if command[1:] else defaultLimiter)
+            elif command.lower() == "n":
+                getStats()
+            elif command.lower() == "i":
+                insertGame()
+            elif command.lower() == "a":
+                addToGame()
+            elif command.lower() == "x":
+                if removeCharacter():
+                    uncommittedChanges = True
+            elif command.lower() == "v":
+                menuStyle = toggleView(menuStyle)
+            elif command.lower() == "r":
+                resetDatabase(True if command == "R" else False)
+                uncommittedChanges = False
+            elif command.lower() == "q":
+                if uncommittedChanges:
+                    confirm = input("You have unsaved changes that have not yet been added to the database.\nClose anyways? (y/n): ")
+                    if confirm[0].lower() == "y":
+                        print("\nThank you for using the Ryu Database! :)")
+                    else:
+                        command = ""
+                else:
+                    print("Thank you for using the Ryu Database! :)")
+            else:
+                print("Command not recognized. Please try again")
     quit()
 
 

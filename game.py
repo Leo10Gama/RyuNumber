@@ -6,6 +6,8 @@ class game:
         self.title, self.ryu_number, self.release_date = title, ryu_number, release_date
     def __str__ (self):
         return "%s (%s)" % (self.title, self.release_date)
+    def printSelf(self, limit=-1):
+        return str(self)
 
 
 def insertGame(title, release_date):
