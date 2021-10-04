@@ -12,11 +12,11 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 |                                                |\n\
 | (c/C) Query a character (exactly)              |\n\
 |       [num] Limit visible games                |\n\
-|             Default = 4; All = -1;             |\n\
+|             Default = 3; All = -1;             |\n\
 | (g/G) Query a game (exactly)                   |\n\
 | (p/P) Get a path from a character to Ryu       |\n\
 |       [num] Limit visible games                |\n\
-|             Default = 4; All = -1;             |\n\
+|             Default = 3; All = -1;             |\n\
 | (n/N) See stats about the database             |\n\
 |                                                |\n\
 +---ALTER DATABASE COMMANDS----------------------+\n\
@@ -51,13 +51,13 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 |                                                |\n\
 +------------------------------------------------+\n\
 |      * = [num] Limit visible games, where      |\n\
-|            (Default = 4; All = -1;)            |\n\
+|            (Default = 3; All = -1;)            |\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
 
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
 path = "Games List"
-defaultLimiter = 4
+defaultLimiter = 3
 
 ### END CONSTANTS ###
 
@@ -65,7 +65,7 @@ defaultLimiter = 4
 
 # USEFUL HELPER FUNCTIONS
 
-def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limiter = defaultLimiter):
+def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limiter = 1):
     # NOTE: `page` is the on-screen number, thus the index should be one fewer (i.e. page 1 = results[0])
     # NOTE: ensure 1 <= `page` <= `totalPages` holds ALWAYS
     prompt = "(p) Previous page\n(n) Next page\n(#) Select this one\n(*) Close view\n\n" if canSelect else "(p) Previous page\n(n) Next page\n(*) Close view\n\n"
@@ -74,7 +74,8 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
     if len(results) % resultsPerPage != 0: totalPages += 1
     while cmd:
         # Print results
-        print("%d results:\n" % len(results))
+        print("======================== RESULT  VIEWER ========================")
+        print("\t%d results:\n" % len(results))
         for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
             print("(%d) %s" % (i + 1, results[i].printSelf(limiter)))
         else:
@@ -98,7 +99,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         # Print suffix part
         if (page + 1) <= totalPages - 1:
             print("... %d " % totalPages, end="")
-        print("(n)>\n")
+        print("(n)>\n================================================================\n")
         # Prompt next action
         cmd = input(prompt).lower()
         print()
@@ -106,7 +107,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if cmd.isnumeric() and canSelect:
             cmd = int(cmd)
             if cmd >= 1 and cmd <= len(results):
-                print("Selected option (%d)" % cmd)
+                print("Selected option (%d)\n" % cmd)
                 return results[cmd - 1]
         if cmd != "p" and cmd != "n": cmd = ""
         if cmd == "p":
@@ -119,13 +120,13 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
 
 # QUERY FUNCTIONS
 
-def queryCharacter(exact = False, limiter = defaultLimiter):
+def queryCharacter(exact = False, limiter = -1):
     charToQuery = input("Please enter a character's name%s" % (" exactly: " if exact else ": "))
     print()
     if exact:       # Querying by exact name (myCharacters is a game_character object)
         myCharacters = game_character.getByNameExact(charToQuery)
         if myCharacters:
-            print(myCharacters.printSelf(limiter))
+            print(myCharacters.printSelf(limiter, withRn = True))
         else:
             print("No characters by that name could be found")        
     else:           # Querying by generalized name (myCharacters is a list of game_character objects)
@@ -133,7 +134,7 @@ def queryCharacter(exact = False, limiter = defaultLimiter):
         if myCharacters:
             myChar = resultViewer(myCharacters, canSelect = True)
             if myChar:
-                print(myChar.printSelf())
+                print(myChar.printSelf(withRn = True))
         else:
             print("No characters by that name could be found")
 
@@ -143,40 +144,40 @@ def queryGame(exact = False):
     print()
     if exact:           # Querying by exact title (myGames is a game object)
         if myGames:
-            print(myGames)
+            print(myGames[0].printSelf(withRn = True))
         else:
             print("No games by that name could be found")
     else:               # Querying by generalized title (myGames is a list of game objects)
         if myGames:
-            resultViewer(myGames)
+            g = resultViewer(myGames, canSelect = True)
+            if g:
+                print(g.printSelf(withRn = True))
         else:
             print("No games by that name could be found")
 
 def getPath(limiter = defaultLimiter):
+    # Get query
     charToPath = input("Enter the character's name: ")
     print()
     characterToQuery = game_character.getByName(charToPath)
     if not characterToQuery:
         print("No character by that name could be found in the database.")
         return
-    for i in range(len(characterToQuery)): 
-        print("(%d) %s" % (i, characterToQuery[i].name))
-    charIndex = input("\nWhich character are you referring to? (int)\n")
-    print()
-    if charIndex.isnumeric() and int(charIndex) < len(characterToQuery):
-        print("Input was %d" % int(charIndex))
-        print("Retrieving %s" % characterToQuery[int(charIndex)].name)
-        p = ryu_number.getPathFromCharacter(characterToQuery[int(charIndex)].name) # Get the path
+    # Get selection
+    myChar = resultViewer(characterToQuery, True)
+    if myChar:
+        print("Retrieving %s" % myChar.name)
+        p = ryu_number.getPathFromCharacter(myChar.name) # Get the path
         if p:       # If the path actually exists
             for elem in p:
-                if isinstance(elem, game_character.game_character):
-                    print("%s" % (elem.printSelf(limiter)))
+                if isinstance(elem, game.game):
+                    print("(↓) %s" % (elem.printSelf(limiter)))
                 else:
-                    print("(%d) %s" % (elem.ryu_number, elem.title))
+                    print("(%d) %s" % (elem.ryu_number, elem.printSelf(limiter)))
         else:
             print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
     else:
-        print("Invalid input. Cancelling...")
+        print("No character selected. Cancelling...")
 
 def getStats():
     statsToSee = input("(g) Games\n(c) Characters\n(a) All \n(*) Back\n\nWhich stats would you like to see?\n")
@@ -395,7 +396,7 @@ def removeCharacter():
 # MAINTENANCE FUNCTIONS
 
 def toggleView(currStyle):
-    currStyle = "default" if currStyle == "compacat" else "compact"
+    currStyle = "default" if currStyle == "compact" else "compact"
     return currStyle
 
 def resetDatabase(detailed = False):
@@ -418,7 +419,7 @@ def main():
         print()
         if command != "":
             if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
-                queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else defaultLimiter)
+                queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else -1)
             elif command.lower() == "g":
                 queryGame(True if command == "G" else False)
             elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
