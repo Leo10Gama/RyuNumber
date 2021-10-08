@@ -303,3 +303,4 @@ Victini
 Keldeo
 Meloetta
 Genesect
+Sora

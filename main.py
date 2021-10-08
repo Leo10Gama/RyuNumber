@@ -1,6 +1,7 @@
 import game
 import game_character
 import maintenance
+import os
 import ryu_number
 
 ### BEGIN CONSTANTS ###
@@ -24,6 +25,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove a character from the db entirely  |\n\
+| (u/U) Update a character or game               |\n\
 |                                                |\n\
 +---MAINTENANCE----------------------------------+\n\
 |                                                |\n\
@@ -45,6 +47,7 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove a character from the db entirely  |\n\
+| (u/U) Update a character or game               |\n\
 | (v/V) Toggle view (compact or descriptive)     |\n\
 | (r/R) Reset the database (include all details) |\n\
 | (q/Q) Close the database and quit              |\n\
@@ -58,6 +61,19 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
 path = "Games List"
 defaultLimiter = 3
+
+# Returns whether a string `date` follows the format (####-##-##)
+def validDate(date):
+    if len(date) == 10:
+        return date[0:4].isnumeric() and date[5:7].isnumeric() and date[8:10].isnumeric() and date[4] == "-" and date[7] == "-"
+    return False
+
+# Returns a string without any illegal characters
+def removeIllegalChars(s):
+    if s:
+        for c in illegalCharacters:
+            s = s.replace(c, "")
+    return s
 
 ### END CONSTANTS ###
 
@@ -107,7 +123,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if cmd.isnumeric() and canSelect:
             cmd = int(cmd)
             if cmd >= 1 and cmd <= len(results):
-                print("Selected option (%d)\n" % cmd)
+                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].printSelf(limit = 0, withRn = False)))
                 return results[cmd - 1]
         if cmd != "p" and cmd != "n": cmd = ""
         if cmd == "p":
@@ -121,7 +137,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
 # QUERY FUNCTIONS
 
 def queryCharacter(exact = False, limiter = -1):
-    charToQuery = input("Please enter a character's name%s" % (" exactly: " if exact else ": "))
+    charToQuery = removeIllegalChars(input("Please enter a character's name%s" % (" exactly: " if exact else ": ")))
     print()
     if exact:       # Querying by exact name (myCharacters is a game_character object)
         myCharacters = game_character.getByNameExact(charToQuery)
@@ -130,7 +146,7 @@ def queryCharacter(exact = False, limiter = -1):
         else:
             print("No characters by that name could be found")        
     else:           # Querying by generalized name (myCharacters is a list of game_character objects)
-        myCharacters = game_character.getByNameExact(charToQuery) if exact else game_character.getByName(charToQuery)  
+        myCharacters = game_character.getByName(charToQuery)  
         if myCharacters:
             myChar = resultViewer(myCharacters, canSelect = True)
             if myChar:
@@ -139,15 +155,16 @@ def queryCharacter(exact = False, limiter = -1):
             print("No characters by that name could be found")
 
 def queryGame(exact = False):
-    gameToQuery = input("Please enter a game name%s" % (" exactly: " if exact else ": "))
-    myGames = game.getByTitleExact(gameToQuery) if exact else game.getByTitle(gameToQuery)
+    gameToQuery = removeIllegalChars(input("Please enter a game name%s" % (" exactly: " if exact else ": ")))
     print()
     if exact:           # Querying by exact title (myGames is a game object)
+        myGames = game.getByTitleExact(gameToQuery)
         if myGames:
-            print(myGames[0].printSelf(withRn = True))
+            print(myGames.printSelf(withRn = True))
         else:
             print("No games by that name could be found")
     else:               # Querying by generalized title (myGames is a list of game objects)
+        myGames = game.getByTitle(gameToQuery)
         if myGames:
             g = resultViewer(myGames, canSelect = True)
             if g:
@@ -157,7 +174,7 @@ def queryGame(exact = False):
 
 def getPath(limiter = defaultLimiter):
     # Get query
-    charToPath = input("Enter the character's name: ")
+    charToPath = removeIllegalChars(input("Enter the character's name: "))
     print()
     characterToQuery = game_character.getByName(charToPath)
     if not characterToQuery:
@@ -219,10 +236,8 @@ def addCharacters(charactersToAdd = []):
     c2add = None
     while not c2add:
         # Receive input
-        c2add = input("Enter character name, or enter '.' to cancel the insert (enter nothing to finish):\n")
+        c2add = removeIllegalChars(input("Enter character name, or enter '.' to cancel the insert (enter nothing to finish):\n"))
         print()
-        for c in illegalCharacters:
-            c2add = c2add.replace(c, "")
         # Query if character already exists
         if c2add == ".":
             return []
@@ -233,8 +248,7 @@ def addCharacters(charactersToAdd = []):
                 print("Found %d character(s) with similar name:\n" % len(possibleCharacters))
                 for i in range(len(possibleCharacters)):
                     print("(%d) %s (%s)" % (i, possibleCharacters[i].name, possibleCharacters[i].appears_in[0].title))
-                print("\nWhat would you like to do?\n[num] Use that character name\n[n/N] Use what I wrote\n[anything else] Enter another name\n")
-                whatDo = input()
+                whatDo = input("\nWhat would you like to do?\n[num] Use that character name\n[n/N] Use what I wrote\n[anything else] Enter another name\n")
                 # Number is inputted, use that value
                 if whatDo.isnumeric() and int(whatDo) < len(possibleCharacters):
                     if possibleCharacters[int(whatDo)].name in charactersToAdd:
@@ -269,10 +283,8 @@ def addCharacters(charactersToAdd = []):
 def insertGame():
     # newGame contains the name of the game to be inserted
     # Parse it with characters that can be used in text file names
-    newGame = input("Enter the game's name: ")
+    newGame = removeIllegalChars(input("Enter the game's name: "))
     print()
-    for c in illegalCharacters:
-        newGame = newGame.replace(c, "")
     if game.getByTitleExact(newGame):
         print("That game already exists in the database!")
     else:
@@ -282,9 +294,8 @@ def insertGame():
             releaseDate = input("Enter the game's release date (YYYY-MM-DD): ")
             print()
             # Verify format
-            if len(releaseDate) == 10:
-                if releaseDate[0:4].isnumeric() and releaseDate[5:7].isnumeric() and releaseDate[8:10].isnumeric() and releaseDate[4] == "-" and releaseDate[7] == "-":
-                    break
+            if validDate(releaseDate):
+                break
             releaseDate = None
             print("Format invalid. Please enter the release date in the proper format!")
         # Get characters
@@ -311,18 +322,16 @@ def insertGame():
 
 def addToGame():
     # Get game to add to
-    gameToAddTo = input("Enter game title: ")
+    gameToAddTo = removeIllegalChars(input("Enter game title: "))
     print()
     # Verify game in DB and cross-check with user
     gameToAddTo = game.getByTitle(gameToAddTo)
     if not gameToAddTo:
         print("That game does not exist in the database! Try inserting the game yourself.")
     else:
-        for i in range(len(gameToAddTo)):
-            print("(%d) %s" % (i, gameToAddTo[i]))
-        gameIndex = input("\nPlease select which game to add to (int): ")
-        if gameIndex.isnumeric() and int(gameIndex) < len(gameToAddTo):
-            gameToAddTo = gameToAddTo[int(gameIndex)].title
+        gameToAddTo = resultViewer(gameToAddTo, True)
+        if gameToAddTo:
+            gameToAddTo = gameToAddTo.title
             # Start receiving character input
             charactersToAdd = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
             charactersToAdd = addCharacters(charactersToAdd)
@@ -353,6 +362,7 @@ def addToGame():
 def removeCharacter():
     # Query character
     charToRemove = input("Enter the name of the character to remove: ")
+    removeIllegalChars(charToRemove)
     myChars = game_character.getByName(charToRemove)
     # Select character to remove
     print()
@@ -392,6 +402,83 @@ def removeCharacter():
     else:
         print("You have not entered a number. Cancelling...")
     return False
+
+def updateData():
+    # Update Character
+    def updateCharacter():
+        pass
+
+    # Update Game
+    def updateGame():
+        # Query game
+        g = removeIllegalChars(input("Enter game title: "))
+        print()
+        results = game.getByTitle(g)
+        # Select game
+        g = resultViewer(results, True)
+        if g:
+            # Decide what to update and what to change it to
+            attribute = input("What would you like to update?\n\n(t) Title\n(r) Release Date\n(*) Cancel\n\n")
+            print()
+            if attribute:
+                if attribute[0].lower() == "t":
+                    # Update title
+                    oldTitle = g.title
+                    newTitle = removeIllegalChars(input("Enter new title: "))
+                    print()
+                    if game.getByTitleExact(newTitle):
+                        print("A game with that name already exists! Cancelling the action...")
+                    else:
+                        confirmUpdate = input("You are about to change the following game's title:\n\n%s\n↓\n%s\n\nConfirm update? (y/n): " % (oldTitle, newTitle))
+                        if confirmUpdate.lower() == "y":
+                            # Update file name
+                            os.rename("%s/%s.txt" % (path, oldTitle), "%s/%s.txt" % (path, newTitle))
+                            # Update database
+                            game.updateGameTitle(oldTitle, newTitle)
+                            print("Changes made successfully.")
+                        else:
+                            print("Update cancelled.")
+                    return
+                elif attribute[0].lower() == "r":
+                    # Update release date
+                    gameTitle = g.title
+                    newRDate = input("Enter new release date (YYYY-MM-DD): ")
+                    print()
+                    if validDate(newRDate):
+                        confirmUpdate = input("You are about to change the release date for:\n\n%s\n\nTo the following:\n\n%s\n↓\n%s\n\nConfirm update? (y/n): " % (gameTitle, g.release_date, newRDate))
+                        if confirmUpdate.lower() == "y":
+                            # Update file (line 1 of text file)
+                            f = open("%s/%s.txt" % (path, gameTitle), "r")
+                            lines = f.readlines()
+                            lines[0] = "%s\n" % newRDate
+                            f = open("%s/%s.txt" % (path, gameTitle), "w")
+                            f.writelines(lines)
+                            f.close()
+                            # Update database
+                            game.updateGameReleaseDate(gameTitle, newRDate)
+                            print("Changes made successfully.")
+                        else:
+                            print("Update cancelled.")
+                    else:
+                        print("Date entered is invalid. Cancelling the update...")
+                    return
+            print("No valid option selected. Cancelling the operation...")
+            # Make changes to file
+        else:
+            print("No game selected. Cancelling the operation...")
+            return
+
+    # Decide what to do
+    action = input("Which would you like to update?\n\n(c) Character\n(g) Game\n(*) Cancel\n\n")
+    if action:
+        if action[0].lower() == "c":
+            updateCharacter()
+            return
+        elif action[0].lower() == "g":
+            updateGame()
+            return
+    print("Invalid input. Cancelling the action...")
+    
 
 # MAINTENANCE FUNCTIONS
 
@@ -433,6 +520,8 @@ def main():
             elif command.lower() == "x":
                 if removeCharacter():
                     uncommittedChanges = True
+            elif command.lower() == "u":
+                updateData()
             elif command.lower() == "v":
                 menuStyle = toggleView(menuStyle)
             elif command.lower() == "r":
