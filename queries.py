@@ -17,8 +17,8 @@ getGamesByTitles = lambda gt: "SELECT * FROM game WHERE title IN %s ORDER BY ryu
 getGamesByCharacter = lambda gc: "SELECT title, ryu_number, release_date FROM appears_in, game WHERE appears_in.cname='%s' AND appears_in.gtitle=game.title ORDER BY release_date ASC" % gc
 getGamesByRyu = lambda rn: "SELECT * FROM game WHERE ryu_number=%d" % rn
 removeGame = lambda gt: "DELETE FROM game WHERE title='%s'" % gt
-updateGameTitle = lambda old, newTitle: "UPDATE CASCADE game SET title='%s' WHERE title='%s'" % (newTitle, old)
-updateGameReleaseDate = lambda title, newRDate: "UPDATE CASCADE game SET release_date='%s' WHERE title='%s'" % (newRDate, title)
+updateGameTitle = lambda old, newTitle: "UPDATE game SET title='%s' WHERE title='%s'" % (newTitle, old)
+updateGameReleaseDate = lambda title, newRDate: "UPDATE game SET release_date='%s' WHERE title='%s'" % (newRDate, title)
 getNumberOfGames = "SELECT COUNT(*) FROM game"
 
 # Relation queries

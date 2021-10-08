@@ -123,7 +123,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if cmd.isnumeric() and canSelect:
             cmd = int(cmd)
             if cmd >= 1 and cmd <= len(results):
-                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].printSelf(limit = 0, withRn = False)))
+                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].name if isinstance(results[cmd - 1], game_character.game_character) else results[cmd - 1].title if isinstance(results[cmd - 1], game.game) else results[cmd - 1].printSelf(limit = 0, withRn = False)))
                 return results[cmd - 1]
         if cmd != "p" and cmd != "n": cmd = ""
         if cmd == "p":
@@ -410,6 +410,45 @@ def updateData():
 
     # Update Game
     def updateGame():
+        # Update title
+        def updateTitle(oldTitle):
+            newTitle = removeIllegalChars(input("Enter new title: "))
+            print()
+            if game.getByTitleExact(newTitle):
+                print("A game with that name already exists! Cancelling the action...")
+            else:
+                confirmUpdate = input("You are about to change the following game's title:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (oldTitle, newTitle))
+                if confirmUpdate.lower() == "y":
+                    # Update file name
+                    os.rename("%s/%s.txt" % (path, oldTitle), "%s/%s.txt" % (path, newTitle))
+                    # Update database
+                    game.updateGameTitle(oldTitle, newTitle)
+                    print("Changes made successfully.")
+                else:
+                    print("Update cancelled.")
+
+        # Update release date
+        def updateReleaseDate(gameTitle):
+            newRDate = input("Enter new release date (YYYY-MM-DD): ")
+            print()
+            if validDate(newRDate):
+                confirmUpdate = input("You are about to change the release date for:\n\n%s\n\nTo the following:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (gameTitle, g.release_date, newRDate))
+                if confirmUpdate.lower() == "y":
+                    # Update file (line 1 of text file)
+                    f = open("%s/%s.txt" % (path, gameTitle), "r")
+                    lines = f.readlines()
+                    lines[0] = "%s\n" % newRDate
+                    f = open("%s/%s.txt" % (path, gameTitle), "w")
+                    f.writelines(lines)
+                    f.close()
+                    # Update database
+                    game.updateGameReleaseDate(gameTitle, newRDate)
+                    print("Changes made successfully.")
+                else:
+                    print("Update cancelled.")
+            else:
+                print("Date entered is invalid. Cancelling the update...")
+
         # Query game
         g = removeIllegalChars(input("Enter game title: "))
         print()
@@ -421,52 +460,15 @@ def updateData():
             attribute = input("What would you like to update?\n\n(t) Title\n(r) Release Date\n(*) Cancel\n\n")
             print()
             if attribute:
-                if attribute[0].lower() == "t":
-                    # Update title
-                    oldTitle = g.title
-                    newTitle = removeIllegalChars(input("Enter new title: "))
-                    print()
-                    if game.getByTitleExact(newTitle):
-                        print("A game with that name already exists! Cancelling the action...")
-                    else:
-                        confirmUpdate = input("You are about to change the following game's title:\n\n%s\n↓\n%s\n\nConfirm update? (y/n): " % (oldTitle, newTitle))
-                        if confirmUpdate.lower() == "y":
-                            # Update file name
-                            os.rename("%s/%s.txt" % (path, oldTitle), "%s/%s.txt" % (path, newTitle))
-                            # Update database
-                            game.updateGameTitle(oldTitle, newTitle)
-                            print("Changes made successfully.")
-                        else:
-                            print("Update cancelled.")
+                if attribute[0].lower() == "t":     # Update title
+                    updateTitle(g.title)
                     return
-                elif attribute[0].lower() == "r":
-                    # Update release date
-                    gameTitle = g.title
-                    newRDate = input("Enter new release date (YYYY-MM-DD): ")
-                    print()
-                    if validDate(newRDate):
-                        confirmUpdate = input("You are about to change the release date for:\n\n%s\n\nTo the following:\n\n%s\n↓\n%s\n\nConfirm update? (y/n): " % (gameTitle, g.release_date, newRDate))
-                        if confirmUpdate.lower() == "y":
-                            # Update file (line 1 of text file)
-                            f = open("%s/%s.txt" % (path, gameTitle), "r")
-                            lines = f.readlines()
-                            lines[0] = "%s\n" % newRDate
-                            f = open("%s/%s.txt" % (path, gameTitle), "w")
-                            f.writelines(lines)
-                            f.close()
-                            # Update database
-                            game.updateGameReleaseDate(gameTitle, newRDate)
-                            print("Changes made successfully.")
-                        else:
-                            print("Update cancelled.")
-                    else:
-                        print("Date entered is invalid. Cancelling the update...")
+                elif attribute[0].lower() == "r":   # Update release date
+                    updateReleaseDate(g.title)                    
                     return
             print("No valid option selected. Cancelling the operation...")
-            # Make changes to file
         else:
             print("No game selected. Cancelling the operation...")
-            return
 
     # Decide what to do
     action = input("Which would you like to update?\n\n(c) Character\n(g) Game\n(*) Cancel\n\n")

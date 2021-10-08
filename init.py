@@ -32,7 +32,7 @@ def main(debug = False, debug_detailed = False):
     gameTable = "CREATE TABLE IF NOT EXISTS game (title VARCHAR(64) NOT NULL, ryu_number INTEGER DEFAULT 99, release_date DATE, PRIMARY KEY (title));"
     cursor.execute(gameTable)
     # Create 'appears_in' relation table
-    appearsInTable = "CREATE TABLE IF NOT EXISTS appears_in (cname VARCHAR(64) NOT NULL, gtitle VARCHAR(64) NOT NULL, PRIMARY KEY (cname, gtitle), FOREIGN KEY (cname) REFERENCES game_character(name), FOREIGN KEY (gtitle) REFERENCES game(title));"
+    appearsInTable = "CREATE TABLE IF NOT EXISTS appears_in (cname VARCHAR(64) NOT NULL, gtitle VARCHAR(64) NOT NULL, PRIMARY KEY (cname, gtitle), FOREIGN KEY (cname) REFERENCES game_character(name) ON UPDATE CASCADE, FOREIGN KEY (gtitle) REFERENCES game(title) ON UPDATE CASCADE);"
     cursor.execute(appearsInTable)
 
     if debug or debug_detailed: print("Creating triggers...")

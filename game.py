@@ -140,6 +140,8 @@ def updateGameTitle(oldTitle, newTitle):
 
     # Make changes
     cursor.execute(queries.updateGameTitle(oldTitle, newTitle))
+    mydb.commit()
+    mydb.close()
     return True
 
 
@@ -156,6 +158,8 @@ def updateGameReleaseDate(title, release_date):
 
     # Make changes
     cursor.execute(queries.updateGameReleaseDate(title, release_date))
+    mydb.commit()
+    mydb.close()
     return True
 
 
