@@ -7,6 +7,8 @@ getCharacterByNameExact = lambda gc: "SELECT * FROM game_character WHERE name='%
 getCharactersByNames = lambda gc: "SELECT * FROM game_character WHERE name IN %s ORDER BY ryu_number ASC" % gc  # NOTE: param must be a tuple
 getCharactersByGame = lambda gt: "SELECT name, ryu_number FROM game_character, appears_in WHERE appears_in.cname=game_character.name AND appears_in.gtitle='%s'" % gt
 getCharacterByRyu = lambda rn: "SELECT * FROM game_character WHERE ryu_number=%d" % rn
+removeCharacter = lambda gc: "DELETE FROM game_character WHERE name='%s'" % gc
+updateCharacterName = lambda oldName, newName: "UPDATE game_character SET name='%s' WHERE name='%s'" % (newName, oldName)
 getNumberOfCharacters = "SELECT COUNT(*) FROM game_character"
 
 # Game queries

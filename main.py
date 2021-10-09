@@ -75,6 +75,21 @@ def removeIllegalChars(s):
             s = s.replace(c, "")
     return s
 
+# Replaces a given line in a file with another line
+def replaceLine(oldLine, newLine, filePath):
+    with open(filePath, "r+") as f:
+        lines = f.readlines()
+        for i in range(len(lines)):
+            if lines[i].strip('\n') == oldLine:
+                if i < len(lines) - 1:
+                    lines[i] = "%s\n" % newLine
+                else:
+                    lines[i] = "%s" % newLine
+        f.seek(0)
+        f.truncate()
+        f.seek(0)
+        f.writelines(lines)
+
 ### END CONSTANTS ###
 
 ### BEGIN FUNCTIONS ###
@@ -252,7 +267,7 @@ def addCharacters(charactersToAdd = []):
                 # Number is inputted, use that value
                 if whatDo.isnumeric() and int(whatDo) < len(possibleCharacters):
                     if possibleCharacters[int(whatDo)].name in charactersToAdd:
-                        print("That character is already in this game!")
+                        print("That character is already in this game!\n")
                     else:
                         print("Adding '%s'...\n" % possibleCharacters[int(whatDo)].name)
                         charactersToAdd.append(possibleCharacters[int(whatDo)].name)
@@ -406,7 +421,56 @@ def removeCharacter():
 def updateData():
     # Update Character
     def updateCharacter():
-        pass
+        # Update name
+        def updateName(oldName):
+            # This function acts as a helper, since its code is duplicated otherwise
+            def updateFiles(oldName, newName):
+                c = game_character.getByNameExact(oldName)
+                for g in c.appears_in:
+                    replaceLine(oldName, newName, "%s/%s.txt" % (path, g.title))
+
+            newName = removeIllegalChars(input("Enter new name: "))
+            print()
+            existing = game_character.getByNameExact(newName)
+            if existing:    # Overwriting character
+                confirmUpdate = input("A character with that name already exists:\n\n%s\n\nThis will merge that character with '%s'.\nProceed? (y/n): " % (existing.printSelf(), oldName))
+                if confirmUpdate.lower() == "y":
+                    updateFiles(oldName, existing.name)
+                    c = game_character.getByNameExact(oldName)
+                    for g in c.appears_in:
+                        game_character.insertCharactersToGame([oldName], g.title)
+                    else:
+                        game_character.removeCharacter(oldName)
+                    print("Changes made successfully.\n(NOTE: Some Ryu Numbers may not have updated accordingly.\nTo fix this, you may need to reset the database.)")
+                else:
+                    print("Update cancelled.")
+            else:           # Not overwriting character
+                confirmUpdate = input("You are about to change the following character's name:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (oldName, newName))
+                if confirmUpdate.lower() == "y":
+                    updateFiles(oldName, newName)
+                    game_character.updateCharacterName(oldName, newName)
+                    print("Changes made successfully.")
+                else:
+                    print("Update cancelled.")
+
+
+        # Query character
+        c = removeIllegalChars(input("Enter character name: "))
+        print()
+        results = game_character.getByName(c)
+        # Select character
+        c = resultViewer(results, True)
+        if c:
+            # Decide what to update and what to change it to
+            # NOTE: Right now, the only attribute characters have is `name`, but more functionality could be possible in the future
+            attribute = input("What would you like to update?\n\n(n) Name\n(*) Cancel\n\n")
+            print()
+            if attribute.lower() == "n":    # Update name
+                updateName(c.name)
+            else:
+                print("No valid option selected. Cancelling the operation...")
+        else:
+            print("No character selected. Cancelling the operation...")
 
     # Update Game
     def updateGame():
@@ -459,14 +523,12 @@ def updateData():
             # Decide what to update and what to change it to
             attribute = input("What would you like to update?\n\n(t) Title\n(r) Release Date\n(*) Cancel\n\n")
             print()
-            if attribute:
-                if attribute[0].lower() == "t":     # Update title
-                    updateTitle(g.title)
-                    return
-                elif attribute[0].lower() == "r":   # Update release date
-                    updateReleaseDate(g.title)                    
-                    return
-            print("No valid option selected. Cancelling the operation...")
+            if attribute.lower() == "t":     # Update title
+                updateTitle(g.title)
+            elif attribute.lower() == "r":   # Update release date
+                updateReleaseDate(g.title)                    
+            else:
+                print("No valid option selected. Cancelling the operation...")
         else:
             print("No game selected. Cancelling the operation...")
 
@@ -481,7 +543,6 @@ def updateData():
             return
     print("Invalid input. Cancelling the action...")
     
-
 # MAINTENANCE FUNCTIONS
 
 def toggleView(currStyle):

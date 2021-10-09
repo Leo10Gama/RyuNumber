@@ -87,7 +87,8 @@ Eleven (Dragon Quest)
 Arusu (Dragon Quest)
 Solo (Dragon Quest)
 Eight (Dragon Quest)
-Banjo & Kazooie
+Banjo
+Kazooie
 Terry Bogard
 Byleth
 Min Min
@@ -153,7 +154,7 @@ Poo (Earthbound)
 Kumatora
 Boney (Mother 3)
 Tom Nook
-Timmy and Tommy Nook
+Timmy Nook
 Doc Louis
 Dunban
 Fiora (Xenoblade)
@@ -304,3 +305,24 @@ Keldeo
 Meloetta
 Genesect
 Sora
+Toadette
+Linebeck
+Charlie (Pikmin)
+Honey Queen (Super Mario Bros.)
+Darunia
+Dr. Stewart (F-Zero)
+Ryoma (Fire Emblem)
+Dyntos
+Kat (WarioWare)
+Ana (WarioWare)
+Copper (Animal Crossing)
+Booker (Animal Crossing)
+Gravity Man
+Wii Balance Board
+Zangief
+Capn Cuttlefish
+Funky Kong
+Beedle
+Anna (Fire Emblem)
+Sheldon (Splatoon)
+Tommy Nook

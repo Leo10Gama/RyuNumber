@@ -25,4 +25,5 @@ Zobiko
 AiAi
 Akira Yuki
 Jacky Bryant
-Banjo & Kazooie
+Banjo
+Kazooie

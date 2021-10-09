@@ -228,3 +228,39 @@ def getCharactersCountWithRN(rn):
     cursor.execute(queries.getCharacterCountWithRN(rn))
     for row in cursor.fetchall():
         return row[0]
+
+
+def removeCharacter(name):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Make the changes
+    cursor.execute(queries.removeCharacter(name))
+    mydb.commit()
+    mydb.close()
+    return True
+
+
+def updateCharacterName(oldName, newName):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Make changes
+    cursor.execute(queries.updateCharacterName(oldName, newName))
+    mydb.commit()
+    mydb.close()
+    return True
