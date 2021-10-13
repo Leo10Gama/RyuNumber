@@ -34,8 +34,7 @@ class game_character_simple:
         return "(%d) %s\n" % (self.ryu_number, self.name)
 
 
-def insertCharacter(name):
-    # Connect to the db
+def __connectToDatabase():
     dbCreds = open("db.txt", "r").read().splitlines()
     mydb = mysql.connector.connect(
         host        =dbCreds[0],
@@ -43,8 +42,13 @@ def insertCharacter(name):
         password    =dbCreds[2],
         database    =dbCreds[3]
     )
-    cursor = mydb.cursor()
+    return mydb
 
+
+def insertCharacter(name):
+    # Connect to the db
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Run the command
     cursor.execute(queries.insertCharacter(name))
     mydb.commit()
@@ -55,15 +59,8 @@ def insertCharacter(name):
 def insertCharactersToGame(names, title):
     names = list(names)
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
+    mydb = __connectToDatabase()
     cursor = mydb.cursor()
-
     # Run the commands
     for n in names:
         cursor.execute(queries.insertCharacter(n))
@@ -75,15 +72,7 @@ def insertCharactersToGame(names, title):
 
 def getByName(name):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve result
     result = []
     cursor.execute(queries.getCharacterByName(str(name)))
@@ -99,15 +88,7 @@ def getByName(name):
 
 def getByNameExact(name):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve result
     result = None
     cursor.execute(queries.getCharacterByNameExact(str(name)))
@@ -126,15 +107,7 @@ def getManyByNames(names):
     if not isinstance(names, tuple):
         return "Error: passed value is not a tuple"
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharactersByNames(str(names)))
@@ -150,15 +123,7 @@ def getManyByNames(names):
 
 def getCharactersByGame(title):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharactersByGame(str(title)))
@@ -174,15 +139,7 @@ def getCharactersByGame(title):
 
 def getCharactersByRyuNumber(rn):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharacterByRyu(int(rn)))
@@ -198,15 +155,7 @@ def getCharactersByRyuNumber(rn):
 
 def getNumberOfCharacters():
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve results
     cursor.execute(queries.getNumberOfCharacters)
     for row in cursor.fetchall():
@@ -215,15 +164,7 @@ def getNumberOfCharacters():
 
 def getCharactersCountWithRN(rn):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
-    cursor = mydb.cursor()
-
+    cursor = __connectToDatabase().cursor()
     # Query and retrieve results
     cursor.execute(queries.getCharacterCountWithRN(rn))
     for row in cursor.fetchall():
@@ -232,15 +173,8 @@ def getCharactersCountWithRN(rn):
 
 def removeCharacter(name):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
+    mydb = __connectToDatabase()
     cursor = mydb.cursor()
-
     # Make the changes
     cursor.execute(queries.removeCharacter(name))
     mydb.commit()
@@ -250,15 +184,8 @@ def removeCharacter(name):
 
 def removeFromGame(name, title):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
+    mydb = __connectToDatabase()
     cursor = mydb.cursor()
-
     # Make the changes
     cursor.execute(queries.removeRelation(name, title))
     mydb.commit()
@@ -268,15 +195,8 @@ def removeFromGame(name, title):
 
 def updateCharacterName(oldName, newName):
     # Connect to the db
-    dbCreds = open("db.txt", "r").read().splitlines()
-    mydb = mysql.connector.connect(
-        host        =dbCreds[0],
-        user        =dbCreds[1],
-        password    =dbCreds[2],
-        database    =dbCreds[3]
-    )
+    mydb = __connectToDatabase()
     cursor = mydb.cursor()
-
     # Make changes
     cursor.execute(queries.updateCharacterName(oldName, newName))
     mydb.commit()

@@ -591,7 +591,6 @@ def resetDatabase(detailed = False):
 def main():
     command = ""
     menuStyle = "default"
-    uncommittedChanges = False
     while (command != "Q" and command != "q"):
         print(MENU_COMPACT if menuStyle == "compact" else MENU)
         command = input().strip()
@@ -610,24 +609,15 @@ def main():
             elif command.lower() == "a":
                 addToGame()
             elif command.lower() == "x":
-                if removeFromDatabase():
-                    uncommittedChanges = True
+                removeFromDatabase():
             elif command.lower() == "u":
                 updateData()
             elif command.lower() == "v":
                 menuStyle = toggleView(menuStyle)
             elif command.lower() == "r":
                 resetDatabase(True if command == "R" else False)
-                uncommittedChanges = False
             elif command.lower() == "q":
-                if uncommittedChanges:
-                    confirm = input("You have unsaved changes that have not yet been added to the database.\nClose anyways? (y/n): ")
-                    if confirm[0].lower() == "y":
-                        print("\nThank you for using the Ryu Database! :)")
-                    else:
-                        command = ""
-                else:
-                    print("Thank you for using the Ryu Database! :)")
+                print("Thank you for using the Ryu Database! :)")
             else:
                 print("Command not recognized. Please try again")
     quit()
