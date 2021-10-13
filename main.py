@@ -24,7 +24,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 |                                                |\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
-| (x/X) Remove a character from the db entirely  |\n\
+| (x/X) Remove an item from the database         |\n\
 | (u/U) Update a character or game               |\n\
 |                                                |\n\
 +---MAINTENANCE----------------------------------+\n\
@@ -46,7 +46,7 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 | (n/N) See stats about the database             |\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
-| (x/X) Remove a character from the db entirely  |\n\
+| (x/X) Remove an item from the database         |\n\
 | (u/U) Update a character or game               |\n\
 | (v/V) Toggle view (compact or descriptive)     |\n\
 | (r/R) Reset the database (include all details) |\n\
@@ -76,15 +76,17 @@ def removeIllegalChars(s):
     return s
 
 # Replaces a given line in a file with another line
-def replaceLine(oldLine, newLine, filePath):
+def replaceLine(oldLine, newLine, filePath, end = '\n'):
     with open(filePath, "r+") as f:
         lines = f.readlines()
         for i in range(len(lines)):
             if lines[i].strip('\n') == oldLine:
                 if i < len(lines) - 1:
-                    lines[i] = "%s\n" % newLine
+                    lines[i] = "%s%s" % (newLine, end)
                 else:
                     lines[i] = "%s" % newLine
+                    if end == '':
+                        lines[i-1] = lines[i-1].strip('\n')
         f.seek(0)
         f.truncate()
         f.seek(0)
@@ -262,7 +264,7 @@ def addCharacters(charactersToAdd = []):
             if possibleCharacters:
                 print("Found %d character(s) with similar name:\n" % len(possibleCharacters))
                 for i in range(len(possibleCharacters)):
-                    print("(%d) %s (%s)" % (i, possibleCharacters[i].name, possibleCharacters[i].appears_in[0].title))
+                    print("(%d) %s (%s)" % (i, possibleCharacters[i].name, possibleCharacters[i].appears_in[0].title if len(possibleCharacters[i].appears_in) > 0 else "No games"))
                 whatDo = input("\nWhat would you like to do?\n[num] Use that character name\n[n/N] Use what I wrote\n[anything else] Enter another name\n")
                 # Number is inputted, use that value
                 if whatDo.isnumeric() and int(whatDo) < len(possibleCharacters):
@@ -374,49 +376,77 @@ def addToGame():
         else:
             print("Invalid input. Cancelling action...")
 
-def removeCharacter():
-    # Query character
-    charToRemove = input("Enter the name of the character to remove: ")
-    removeIllegalChars(charToRemove)
-    myChars = game_character.getByName(charToRemove)
-    # Select character to remove
-    print()
-    for i in range(len(myChars)):
-        print("(%d) %s (%s)" % (i, myChars[i].name, myChars[i].appears_in[0].title))
-    else:
-        print("(%d) Cancel" % len(myChars))
-    print()
-    charIndex = input("Which character would you like to remove? (int): ")
-    # Find and remove that character from each game
-    print()
-    if charIndex.isnumeric():
-        charIndex = int(charIndex)
-        if charIndex >= 0 and charIndex <= len(myChars):
-            if charIndex == len(myChars):
-                print("Cancelling the operation...")
-                return
-            else:
-                confirm = input("Are you sure you want to remove '%s' from the database?\n(y/n): " % myChars[charIndex].name)
-                if confirm.lower() == "y":
-                    charToRemove = myChars[charIndex]
-                    for myGame in charToRemove.appears_in:
-                        myGame = myGame.title
-                        with open("%s/%s.txt" % (path, myGame), "r+") as f:
-                            lines = f.readlines()
-                            f.seek(0)
-                            for line in lines:
-                                if line.strip("\n") != charToRemove.name:
-                                    f.write(line)
-                            f.truncate()
-                    print("'%s' removed successfully.\nNOTE: This change will only be noticed when the database is reset." % charToRemove.name)
-                    return True
+def removeFromDatabase():
+    # Remove character
+    def removeCharacter():
+        # Remove from select game
+        def removeFromGame(cName, gTitle):
+            # Update in DB
+            game_character.removeFromGame(cName, gTitle)
+            # Update in local files
+            replaceLine(cName, "", "%s/%s.txt" % (path, gTitle), end = "")
+            print("Removed '%s' from '%s'" % (cName, gTitle))
+
+        # Select character
+        c = removeIllegalChars(input("Enter character name: "))
+        c = resultViewer(game_character.getByName(c), True)
+        if c:
+            # Select where to remove
+            option = input("Where would you like to remove the character?\n\n(g) From one game\n(a) From all games (the entire database)\n(*) Cancel\n\n").lower()
+            print()
+            if option == "g":
+                # Remove from a select game
+                print("Select a game to remove '%s' from:\n" % c.name)
+                g = resultViewer(c.appears_in, True)
+                if g:
+                    confirmDelete = input("You are about to remove '%s'\nfrom the game '%s'\n\nAre you sure you want to proceed? (y/n): " % (c.name, g.title)).lower()
+                    print()
+                    if confirmDelete == "y":
+                        removeFromGame(c.name, g.title)
+                    else:
+                        print("Cancelling...")
                 else:
-                    print("Cancelling the operation...")
+                    print("No game selected. Cancelling...")
+            elif option == "a":
+                # Remove from all games
+                confirmDelete = input("You are about to remove:\n'%s'\nFrom the database. Proceed? (y/n): " % (c.name)).lower()
+                print()
+                if confirmDelete == "y":
+                    for g in c.appears_in:
+                        removeFromGame(c.name, g.title)
+                    game_character.removeCharacter(c.name)
+                else:
+                    print("Cancelling...")
+            else:
+                print("Cancelling...")
         else:
-            print("Number not in range. Cancelling...")
+            print("No character selected. Cancelling...")
+
+    # Remove game
+    def removeGame():
+        g = removeIllegalChars(input("Enter game title: "))
+        g = resultViewer(game.getByTitle(g), True)
+        if g:
+            confirmDelete = input("You are about to remvove the game:\n'%s'\nAre you sure you want to proceed? (y/n): " % g.title).lower()
+            if confirmDelete == "y":
+                # Remove from db
+                game.removeGame(g.title)
+                # Remove from local files
+                if os.path.exists("%s/%s.txt" % (path, g.title)):
+                    os.remove("%s/%s.txt" % (path, g.title))
+                print("'%s' successfully removed")
+        else:
+            print("No game selected. Cancelling...")
+
+    # Select what to remove
+    option = input("What would you like to remove?\n\n(c) Character\n(g) Game\n(*) Cancel\n\n").lower()
+    print()
+    if option == "c":
+        removeCharacter()
+    elif option == "g":
+        removeGame()
     else:
-        print("You have not entered a number. Cancelling...")
-    return False
+        print("Cancelling...")
 
 def updateData():
     # Update Character
@@ -452,7 +482,6 @@ def updateData():
                     print("Changes made successfully.")
                 else:
                     print("Update cancelled.")
-
 
         # Query character
         c = removeIllegalChars(input("Enter character name: "))
@@ -581,7 +610,7 @@ def main():
             elif command.lower() == "a":
                 addToGame()
             elif command.lower() == "x":
-                if removeCharacter():
+                if removeFromDatabase():
                     uncommittedChanges = True
             elif command.lower() == "u":
                 updateData()

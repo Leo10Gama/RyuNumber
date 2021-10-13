@@ -29,6 +29,7 @@ getRelationByCharacter = lambda gc: "SELECT cname, gtitle, ryu_number FROM appea
 getRelationByGame = lambda gt: "SELECT cname, gtitle, ryu_number FROM appears_in INNER JOIN game ON gtitle=title WHERE gtitle='%s'" % gt
 removeCharacterRelations = lambda gc: "DELETE FROM appears_in WHERE cname='%s'" % gc
 removeGameRelations = lambda gt: "DELETE FROM appears_in WHERE gtitle='%s'" % gt
+removeRelation = lambda gc, gt: "DELETE FROM appears_in WHERE cname='%s' AND gtitle='%s'" % (gc, gt)
 
 # Ryu Number queries
 getGameFromCharacter = lambda cname: "SELECT DISTINCT G.title, G.ryu_number FROM appears_in INNER JOIN game_character AS C ON cname=C.name INNER JOIN game AS G ON gtitle=G.title WHERE cname LIKE '%s' AND G.ryu_number=C.ryu_number;" % cname

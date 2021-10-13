@@ -127,6 +127,24 @@ def getGamesByRyuNumber(rn):
     return result   
 
 
+def removeGame(title):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Make changes
+    cursor.execute(queries.removeGame(title))
+    mydb.commit()
+    mydb.close()
+    return True
+
+
 def updateGameTitle(oldTitle, newTitle):
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()

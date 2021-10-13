@@ -248,6 +248,24 @@ def removeCharacter(name):
     return True
 
 
+def removeFromGame(name, title):
+    # Connect to the db
+    dbCreds = open("db.txt", "r").read().splitlines()
+    mydb = mysql.connector.connect(
+        host        =dbCreds[0],
+        user        =dbCreds[1],
+        password    =dbCreds[2],
+        database    =dbCreds[3]
+    )
+    cursor = mydb.cursor()
+
+    # Make the changes
+    cursor.execute(queries.removeRelation(name, title))
+    mydb.commit()
+    mydb.close()
+    return True
+
+
 def updateCharacterName(oldName, newName):
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()
