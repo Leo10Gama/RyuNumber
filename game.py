@@ -35,7 +35,8 @@ def insertGame(title, release_date):
 
 def getByTitle(title):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = []
     cursor.execute(queries.getGameByTitle(str(title)))
@@ -46,7 +47,8 @@ def getByTitle(title):
 
 def getByTitleExact(title):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = None
     cursor.execute(queries.getGameByTitleExact(str(title)))
@@ -60,7 +62,8 @@ def getManyByTitles(titles):
     if not isinstance(titles, tuple):
         return "Error: passed value is not a tuple"
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getGamesByTitles(str(titles)))
@@ -71,7 +74,8 @@ def getManyByTitles(titles):
 
 def getGamesByCharacter(name):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = []
     cursor.execute(queries.getGamesByCharacter(str(name)))
@@ -82,7 +86,8 @@ def getGamesByCharacter(name):
 
 def getGamesByRyuNumber(rn):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = []
     cursor.execute(queries.getGamesByRyu(int(rn)))
@@ -126,7 +131,8 @@ def updateGameReleaseDate(title, release_date):
 
 def getNumberOfGames():
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     cursor.execute(queries.getNumberOfGames)
     for row in cursor.fetchall():
@@ -135,7 +141,8 @@ def getNumberOfGames():
 
 def getGamesCountWithRN(rn):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     cursor.execute(queries.getGameCountWithRN(rn))
     for row in cursor.fetchall():

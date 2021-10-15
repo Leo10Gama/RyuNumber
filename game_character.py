@@ -72,7 +72,8 @@ def insertCharactersToGame(names, title):
 
 def getByName(name):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = []
     cursor.execute(queries.getCharacterByName(str(name)))
@@ -88,7 +89,8 @@ def getByName(name):
 
 def getByNameExact(name):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve result
     result = None
     cursor.execute(queries.getCharacterByNameExact(str(name)))
@@ -107,7 +109,8 @@ def getManyByNames(names):
     if not isinstance(names, tuple):
         return "Error: passed value is not a tuple"
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharactersByNames(str(names)))
@@ -123,7 +126,8 @@ def getManyByNames(names):
 
 def getCharactersByGame(title):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharactersByGame(str(title)))
@@ -139,7 +143,8 @@ def getCharactersByGame(title):
 
 def getCharactersByRyuNumber(rn):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     result = []
     cursor.execute(queries.getCharacterByRyu(int(rn)))
@@ -155,7 +160,8 @@ def getCharactersByRyuNumber(rn):
 
 def getNumberOfCharacters():
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     cursor.execute(queries.getNumberOfCharacters)
     for row in cursor.fetchall():
@@ -164,7 +170,8 @@ def getNumberOfCharacters():
 
 def getCharactersCountWithRN(rn):
     # Connect to the db
-    cursor = __connectToDatabase().cursor()
+    mydb = __connectToDatabase()
+    cursor = mydb.cursor()
     # Query and retrieve results
     cursor.execute(queries.getCharacterCountWithRN(rn))
     for row in cursor.fetchall():

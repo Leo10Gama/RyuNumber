@@ -151,6 +151,13 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
             else: print("This is the last page; cannot go further\n")
     return None
 
+def optionPicker(prompt, choices):
+    print("%s\n" % prompt)
+    for option in choices:
+        print("(%s) %s" % (option, choices[option]))
+    print("(*) Cancel\n")
+    return input().lower()
+
 # QUERY FUNCTIONS
 
 def queryCharacter(exact = False, limiter = -1):
@@ -214,7 +221,7 @@ def getPath(limiter = defaultLimiter):
         print("No character selected. Cancelling...")
 
 def getStats():
-    statsToSee = input("(g) Games\n(c) Characters\n(a) All \n(*) Back\n\nWhich stats would you like to see?\n")
+    statsToSee = optionPicker("Which stats would you like to see?", {"g": "Games", "c": "Characters", "a": "All"})
     print()
     def getGames():
         rn = 1
@@ -232,13 +239,14 @@ def getStats():
             rn += 1
             val = game_character.getCharactersCountWithRN(rn)
         print("\nTotal number of characters in database: %d" % game_character.getNumberOfCharacters())
-    if statsToSee[0].lower() == "g":
+
+    if statsToSee == "g":
         # See games
         getGames()
-    elif statsToSee[0].lower() == "c":
+    elif statsToSee == "c":
         # See characters
         getCharacters()
-    elif statsToSee[0].lower() == "a":
+    elif statsToSee == "a":
         # See all
         getGames()
         print()
@@ -255,26 +263,31 @@ def addCharacters(charactersToAdd = []):
         # Receive input
         c2add = removeIllegalChars(input("Enter character name, or enter '.' to cancel the insert (enter nothing to finish):\n"))
         print()
-        # Query if character already exists
+        # Cancel the insert
         if c2add == ".":
             return []
+        # Actually add a character
         if c2add:
             possibleCharacters = game_character.getByName(c2add)
             # If character exists, prompt to pick one of them or the entered value, or some other value entirely
             if possibleCharacters:
-                print("Found %d character(s) with similar name:\n" % len(possibleCharacters))
-                for i in range(len(possibleCharacters)):
-                    print("(%d) %s (%s)" % (i, possibleCharacters[i].name, possibleCharacters[i].appears_in[0].title if len(possibleCharacters[i].appears_in) > 0 else "No games"))
-                whatDo = input("\nWhat would you like to do?\n[num] Use that character name\n[n/N] Use what I wrote\n[anything else] Enter another name\n")
-                # Number is inputted, use that value
-                if whatDo.isnumeric() and int(whatDo) < len(possibleCharacters):
-                    if possibleCharacters[int(whatDo)].name in charactersToAdd:
+                whatDo = optionPicker("Found %d character(s) with similar name to '%s'. What would you like to do?" % (len(possibleCharacters), c2add), {"e": "Pick an existing character", "n": "Use what I wrote"})
+                chosenCharacter = None
+                while whatDo == "e" or chosenCharacter:
+                    chosenCharacter = resultViewer(possibleCharacters, True)
+                    if not chosenCharacter:
+                        whatDo = optionPicker("Found %d character(s) with similar name to '%s'. What would you like to do?" % (len(possibleCharacters), c2add), {"e": "Pick an existing character", "n": "Use what I wrote"})
+                    else:
+                        break
+                # Use existing character
+                if chosenCharacter:
+                    if chosenCharacter.name in charactersToAdd:
                         print("That character is already in this game!\n")
                     else:
-                        print("Adding '%s'...\n" % possibleCharacters[int(whatDo)].name)
-                        charactersToAdd.append(possibleCharacters[int(whatDo)].name)
+                        print("Adding '%s'...\n" % chosenCharacter.name)
+                        charactersToAdd.append(chosenCharacter.name)
                 # Use the value I inserted
-                elif whatDo.lower() == "n":
+                elif whatDo == "n":
                     if c2add in charactersToAdd:
                         print("That character is already in this game!")
                     else:
@@ -392,7 +405,7 @@ def removeFromDatabase():
         c = resultViewer(game_character.getByName(c), True)
         if c:
             # Select where to remove
-            option = input("Where would you like to remove the character?\n\n(g) From one game\n(a) From all games (the entire database)\n(*) Cancel\n\n").lower()
+            option = optionPicker("Where would you like to remove the character?", {"g": "From one game", "a": "From all games (the entire database)"})
             print()
             if option == "g":
                 # Remove from a select game
@@ -439,7 +452,7 @@ def removeFromDatabase():
             print("No game selected. Cancelling...")
 
     # Select what to remove
-    option = input("What would you like to remove?\n\n(c) Character\n(g) Game\n(*) Cancel\n\n").lower()
+    option = optionPicker("What would you like to remove?", {"c": "Character", "g": "Game"})
     print()
     if option == "c":
         removeCharacter()
@@ -464,6 +477,7 @@ def updateData():
             existing = game_character.getByNameExact(newName)
             if existing:    # Overwriting character
                 confirmUpdate = input("A character with that name already exists:\n\n%s\n\nThis will merge that character with '%s'.\nProceed? (y/n): " % (existing.printSelf(), oldName))
+                print()
                 if confirmUpdate.lower() == "y":
                     updateFiles(oldName, existing.name)
                     c = game_character.getByNameExact(oldName)
@@ -471,11 +485,12 @@ def updateData():
                         game_character.insertCharactersToGame([oldName], g.title)
                     else:
                         game_character.removeCharacter(oldName)
-                    print("Changes made successfully.\n(NOTE: Some Ryu Numbers may not have updated accordingly.\nTo fix this, you may need to reset the database.)")
+                    print("Changes made successfully.\n(NOTE: Some Ryu Numbers may not have updated accordingly.\n To fix this, you may need to reset the database.)")
                 else:
                     print("Update cancelled.")
             else:           # Not overwriting character
                 confirmUpdate = input("You are about to change the following character's name:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (oldName, newName))
+                print()
                 if confirmUpdate.lower() == "y":
                     updateFiles(oldName, newName)
                     game_character.updateCharacterName(oldName, newName)
@@ -492,9 +507,9 @@ def updateData():
         if c:
             # Decide what to update and what to change it to
             # NOTE: Right now, the only attribute characters have is `name`, but more functionality could be possible in the future
-            attribute = input("What would you like to update?\n\n(n) Name\n(*) Cancel\n\n")
+            attribute = optionPicker("What would you like to update?", {"n": "Name"})
             print()
-            if attribute.lower() == "n":    # Update name
+            if attribute == "n":    # Update name
                 updateName(c.name)
             else:
                 print("No valid option selected. Cancelling the operation...")
@@ -550,11 +565,11 @@ def updateData():
         g = resultViewer(results, True)
         if g:
             # Decide what to update and what to change it to
-            attribute = input("What would you like to update?\n\n(t) Title\n(r) Release Date\n(*) Cancel\n\n")
+            attribute = optionPicker("What would you like to update?", {"t": "Title", "r": "Release Date"})
             print()
-            if attribute.lower() == "t":     # Update title
+            if attribute== "t":         # Update title
                 updateTitle(g.title)
-            elif attribute.lower() == "r":   # Update release date
+            elif attribute == "r":      # Update release date
                 updateReleaseDate(g.title)                    
             else:
                 print("No valid option selected. Cancelling the operation...")
@@ -562,7 +577,7 @@ def updateData():
             print("No game selected. Cancelling the operation...")
 
     # Decide what to do
-    action = input("Which would you like to update?\n\n(c) Character\n(g) Game\n(*) Cancel\n\n")
+    action = optionPicker("Which would you like to update?", {"c": "Character", "g": "Game"})
     if action:
         if action[0].lower() == "c":
             updateCharacter()
@@ -581,7 +596,7 @@ def toggleView(currStyle):
 def resetDatabase(detailed = False):
     response = input("This command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
     print()
-    if response.lower() in ["y", "yes", "yea", "ye", "ok", "okay"]:
+    if response.lower() in ["y", "yes", "yea", "ye"]:
         maintenance.reset_db(not detailed, detailed)
     else:
         print("Cancelling...")
@@ -593,30 +608,30 @@ def main():
     menuStyle = "default"
     while (command != "Q" and command != "q"):
         print(MENU_COMPACT if menuStyle == "compact" else MENU)
-        command = input().strip()
+        command = input().strip().lower()
         print()
         if command != "":
-            if command[0].lower() == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            if command[0] == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
                 queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else -1)
-            elif command.lower() == "g":
+            elif command == "g":
                 queryGame(True if command == "G" else False)
-            elif command[0].lower() == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            elif command[0] == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
                 getPath(int(command[1:]) if command[1:] else defaultLimiter)
-            elif command.lower() == "n":
+            elif command == "n":
                 getStats()
-            elif command.lower() == "i":
+            elif command == "i":
                 insertGame()
-            elif command.lower() == "a":
+            elif command == "a":
                 addToGame()
-            elif command.lower() == "x":
-                removeFromDatabase():
-            elif command.lower() == "u":
+            elif command == "x":
+                removeFromDatabase()
+            elif command == "u":
                 updateData()
-            elif command.lower() == "v":
+            elif command == "v":
                 menuStyle = toggleView(menuStyle)
-            elif command.lower() == "r":
+            elif command == "r":
                 resetDatabase(True if command == "R" else False)
-            elif command.lower() == "q":
+            elif command == "q":
                 print("Thank you for using the Ryu Database! :)")
             else:
                 print("Command not recognized. Please try again")

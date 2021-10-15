@@ -3,7 +3,7 @@ Super Mario
 Cappy
 Donkey Kong
 Link
-Samus
+Samus Aran
 Dark Samus
 Yoshi
 Kirby
@@ -116,7 +116,7 @@ Midna
 Ashley
 Jeff (Earthbound)
 Samurai Goroh
-Ghosts (Pac-Man)
+Blinky
 Takamaru
 Waluigi
 Black Knight (Fire Emblem)
@@ -326,3 +326,7 @@ Beedle
 Anna (Fire Emblem)
 Sheldon (Splatoon)
 Tommy Nook
+Blinky
+Inky (Pac-Man)
+Pinky (Pac-Man)
+Clyde (Pac-Man)
