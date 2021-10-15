@@ -12,12 +12,8 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 +---QUERY COMMANDS-------------------------------+\n\
 |                                                |\n\
 | (c/C) Query a character (exactly)              |\n\
-|       [num] Limit visible games                |\n\
-|             Default = 3; All = -1;             |\n\
 | (g/G) Query a game (exactly)                   |\n\
 | (p/P) Get a path from a character to Ryu       |\n\
-|       [num] Limit visible games                |\n\
-|             Default = 3; All = -1;             |\n\
 | (n/N) See stats about the database             |\n\
 |                                                |\n\
 +---ALTER DATABASE COMMANDS----------------------+\n\
@@ -29,7 +25,7 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 |                                                |\n\
 +---MAINTENANCE----------------------------------+\n\
 |                                                |\n\
-| (v/V) Toggle view (compact or descriptive)     |\n\
+| (v/V) Toggle view to be compact or descriptive |\n\
 | (r/R) Reset the database (include all details) |\n\
 | (q/Q) Close the database and quit              |\n\
 |                                                |\n\
@@ -40,21 +36,19 @@ MENU = "\n+------------------RYU DATABASE------------------+\n\
 MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 |         Enter a letter to get started.         |\n\
 |                                                |\n\
-| (c/C)* Query a character (exactly)             |\n\
+| (c/C) Query a character (exactly)              |\n\
 | (g/G) Query a game (exactly)                   |\n\
-| (p/P)* Get a path from a character to Ryu      |\n\
+| (p/P) Get a path from a character to Ryu       |\n\
 | (n/N) See stats about the database             |\n\
 | (i/I) Insert a game and characters into the DB |\n\
 | (a/A) Add characters to an existing game       |\n\
 | (x/X) Remove an item from the database         |\n\
 | (u/U) Update a character or game               |\n\
-| (v/V) Toggle view (compact or descriptive)     |\n\
+| (v/V) Toggle view to be compact or descriptive |\n\
 | (r/R) Reset the database (include all details) |\n\
 | (q/Q) Close the database and quit              |\n\
 |                                                |\n\
 +------------------------------------------------+\n\
-|      * = [num] Limit visible games, where      |\n\
-|            (Default = 3; All = -1;)            |\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
 
@@ -608,30 +602,30 @@ def main():
     menuStyle = "default"
     while (command != "Q" and command != "q"):
         print(MENU_COMPACT if menuStyle == "compact" else MENU)
-        command = input().strip().lower()
+        command = input().strip()
         print()
         if command != "":
-            if command[0] == "c" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
-                queryCharacter(True if command[0] == "C" else False, int(command[1:]) if command[1:] else -1)
-            elif command == "g":
+            if command.lower() == "c":
+                queryCharacter(True if command == "C" else False)
+            elif command.lower() == "g":
                 queryGame(True if command == "G" else False)
-            elif command[0] == "p" and (command[1:].isnumeric() or len(command) == 1 or (command[1] == "-" and command[2:].isnumeric())):
+            elif command.lower() == "p":
                 getPath(int(command[1:]) if command[1:] else defaultLimiter)
-            elif command == "n":
+            elif command.lower() == "n":
                 getStats()
-            elif command == "i":
+            elif command.lower() == "i":
                 insertGame()
-            elif command == "a":
+            elif command.lower() == "a":
                 addToGame()
-            elif command == "x":
+            elif command.lower() == "x":
                 removeFromDatabase()
-            elif command == "u":
+            elif command.lower() == "u":
                 updateData()
-            elif command == "v":
+            elif command.lower() == "v":
                 menuStyle = toggleView(menuStyle)
-            elif command == "r":
+            elif command.lower() == "r":
                 resetDatabase(True if command == "R" else False)
-            elif command == "q":
+            elif command.lower() == "q":
                 print("Thank you for using the Ryu Database! :)")
             else:
                 print("Command not recognized. Please try again")
