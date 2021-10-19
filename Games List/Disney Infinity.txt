@@ -15,7 +15,7 @@ Lightning McQueen
 Tow Mater
 Mike Wazowski
 Mr. Incredible
-Mrs. Incredible
+Elastigirl
 Phineas
 Randy (Monsters Inc.)
 Rapunzel
@@ -39,7 +39,7 @@ Gamora
 Green Goblin
 Groot
 Hawkeye
-Hiro (Big Hero 6)
+Hiro Hamada
 Hulk
 Iron Fist
 Iron Man
@@ -55,7 +55,7 @@ Ronan
 Sam Flynn
 Spider-Man
 Star-Lord
-Stitch
+Stitch (Disney)
 Thor (Marvel)
 Tinker Bell
 Venom
