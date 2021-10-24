@@ -97,7 +97,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
     # NOTE: ensure 1 <= `page` <= `totalPages` holds ALWAYS
     prompt = "(p) Previous page\n(n) Next page\n(#) Select this one\n(*) Close view\n\n" if canSelect else "(p) Previous page\n(n) Next page\n(*) Close view\n\n"
     cmd = "."
-    totalPages = len(results) / resultsPerPage
+    totalPages = int(len(results) / resultsPerPage)
     if len(results) % resultsPerPage != 0: totalPages += 1
     while cmd:
         # Print results
@@ -111,7 +111,10 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         # Print prefix part
         print("<(p) ", end="")
         if page > 2:
-            print("1 ... ", end="")
+            print("1 ", end="")
+        # Print prefix dots (maybe)
+        if page > 3:
+            print("... ", end="")
         # Print current selection
         if page == 1:
             print("{%d} " % page, end="")
@@ -123,10 +126,15 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
             # Next number (if possible)
             if page + 1 <= totalPages:
                 print("%d " % (page + 1), end="")
+        # Print suffix dots (maybe)
+        if page < totalPages - 2:
+            print("... ", end="")
         # Print suffix part
         if (page + 1) <= totalPages - 1:
-            print("... %d " % totalPages, end="")
+            print(" %d " % totalPages, end="")
         print("(n)>\n================================================================\n")
+        print(page)
+        print(totalPages)
         # Prompt next action
         cmd = input(prompt).lower()
         print()
@@ -181,14 +189,21 @@ def queryGame(exact = False):
             print(myGames.printSelf(withRn = True))
         else:
             print("No games by that name could be found")
+            return
     else:               # Querying by generalized title (myGames is a list of game objects)
         myGames = game.getByTitle(gameToQuery)
         if myGames:
             g = resultViewer(myGames, canSelect = True)
             if g:
                 print(g.printSelf(withRn = True))
+            else:
+                return
         else:
             print("No games by that name could be found")
+            return
+    # Prompt to see characters
+    if input("\nSee characters from this game? (y/n) ").lower() == "y":
+        resultViewer(game_character.getCharactersByGame(g.title), limiter=0)
 
 def getPath(limiter = defaultLimiter):
     # Get query

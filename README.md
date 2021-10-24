@@ -1,6 +1,10 @@
 # RyuNumber
 
-"Six degrees of separation" is the idea that you can be linked to any other person in the world through 6 or fewer social links. During the summer of 2021, a [subreddit](https://www.reddit.com/r/ryunumber/) (and eventually an unofficial [twitter account](https://twitter.com/RyuNumber)) were created, relating this concept to the video game character of Ryu from the Street Fighter series. Without much better to do during quarantine, freshly equipped with the knowledge of MySQL, I decided to try turning this concept into a computerized database, allowing characters to be both added and found more easily.
+"Six degrees of separation" is the idea that you can be linked to any other person in the world through 6 or fewer social links. During the summer of 2021, a [subreddit](https://www.reddit.com/r/ryunumber/) (and eventually an unofficial [Twitter account](https://twitter.com/RyuNumber)) were created, relating this concept to the video game character of Ryu from the Street Fighter series. Without much better to do during quarantine, freshly equipped with the knowledge of MySQL, I decided to try turning this concept into a computerized database, allowing characters to be both added and found more easily. The "rules" of a given character's Ryu Number can be found on both the Twitter and Reddit pages. Of note are the primary 4 rules:
+1. Video games only
+2. Commercial works only
+3. No time-limited character access (e.g. "gacha" or Fortnite events)
+4. Identifiably unique individuals (no common species e.g. Goombas or Koopas)
 
 # Contents
 
