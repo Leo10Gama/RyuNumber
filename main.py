@@ -133,8 +133,6 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if (page + 1) <= totalPages - 1:
             print(" %d " % totalPages, end="")
         print("(n)>\n================================================================\n")
-        print(page)
-        print(totalPages)
         # Prompt next action
         cmd = input(prompt).lower()
         print()
@@ -300,7 +298,7 @@ def addCharacters(charactersToAdd = []):
                     if c2add in charactersToAdd:
                         print("That character is already in this game!")
                     else:
-                        print("Adding '%s'..." % c2add)
+                        print("Adding '%s'...\n" % c2add)
                         charactersToAdd.append(c2add)
                 else:
                     print("Cancelling that insert...")
@@ -338,7 +336,7 @@ def insertGame():
             releaseDate = None
             print("Format invalid. Please enter the release date in the proper format!")
         # Get characters
-        charactersToAdd = addCharacters()
+        charactersToAdd = addCharacters([])
         if not charactersToAdd: return
         # Write the file
         print("Creating file for game...", end="")
