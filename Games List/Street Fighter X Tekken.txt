@@ -52,3 +52,5 @@ Ogre (Tekken)
 Mega Man
 Pac-Man
 Toro Inoue
+Jin Kazama
+Cole MacGrath

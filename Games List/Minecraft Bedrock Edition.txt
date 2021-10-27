@@ -488,7 +488,7 @@ Hulk
 Thor (Marvel)
 Nick Fury
 A-Bomb (Marvel)
-Emil Blonsky
+Abomination Emil Blonsky
 Ant-Man
 Arnim Zola
 Black Panther
@@ -515,7 +515,7 @@ Black Widow
 Spider-Man
 Scarlet Spider
 Vulture (Marvel)
-Venom (Marvel)
+Venom
 Silver Sable
 Shocker (Marvel)
 Scorpion (Marvel)
@@ -534,11 +534,11 @@ Hammerhead (Marvel)
 Gwen Stacy
 Green Goblin
 Electro (Marvel)
-Doctor Octopus
+Dr. Otto Octavius
 Chameleon (Marvel)
 Carnage (Marvel)
-Felicia Hardy
-May Parker
+Black Cat Felicia Hardy
+Aunt May Parker
 Miles Morales
 Star-Lord
 Rocket Raccoon
@@ -547,7 +547,7 @@ Yondu
 Ronan the Accuser
 Nebula (Marvel)
 Korath the Pursuer
-The Collector (Marvel)
+The Collector Taneleer Tivan
 Carina (Marvel)
 Adam Warlock
 Aldrif Odinsdottir

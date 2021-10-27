@@ -104,7 +104,10 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         print("======================== RESULT  VIEWER ========================")
         print("\t%d results:\n" % len(results))
         for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
-            print("(%d) %s" % (i + 1, results[i].printSelf(limiter)))
+            if type(results[i]) is game_character.game_character or type(results[i]) is game.game:
+                print("(%d) %s" % (i + 1, results[i].printSelf(limit=limiter, withRn=False)))
+            else:
+                print("(%d) %s" % (i + 1, results[i]))
         else:
             print()
         # Print nav bar
@@ -163,45 +166,51 @@ def optionPicker(prompt, choices):
 def queryCharacter(exact = False, limiter = -1):
     charToQuery = removeIllegalChars(input("Please enter a character's name%s" % (" exactly: " if exact else ": ")))
     print()
-    if exact:       # Querying by exact name (myCharacters is a game_character object)
-        myCharacters = game_character.getByNameExact(charToQuery)
-        if myCharacters:
-            print(myCharacters.printSelf(limiter, withRn = True))
-        else:
-            print("No characters by that name could be found")        
-    else:           # Querying by generalized name (myCharacters is a list of game_character objects)
-        myCharacters = game_character.getByName(charToQuery)  
-        if myCharacters:
-            myChar = resultViewer(myCharacters, canSelect = True)
-            if myChar:
-                print(myChar.printSelf(withRn = True))
-        else:
-            print("No characters by that name could be found")
+    if charToQuery:
+        if exact:       # Querying by exact name (myCharacters is a game_character object)
+            myCharacters = game_character.getByNameExact(charToQuery)
+            if myCharacters:
+                print(myCharacters.printSelf(limiter, withRn = True))
+            else:
+                print("No characters by that name could be found")        
+        else:           # Querying by generalized name (myCharacters is a list of game_character objects)
+            myCharacters = game_character.getByName(charToQuery)  
+            if myCharacters:
+                myChar = resultViewer(myCharacters, canSelect = True)
+                if myChar:
+                    print(myChar.printSelf(withRn = True))
+            else:
+                print("No characters by that name could be found")
+    else:
+        print("Nothing has been entered. Cancelling query...")
 
 def queryGame(exact = False):
     gameToQuery = removeIllegalChars(input("Please enter a game name%s" % (" exactly: " if exact else ": ")))
     print()
-    if exact:           # Querying by exact title (myGames is a game object)
-        myGames = game.getByTitleExact(gameToQuery)
-        if myGames:
-            print(myGames.printSelf(withRn = True))
-        else:
-            print("No games by that name could be found")
-            return
-    else:               # Querying by generalized title (myGames is a list of game objects)
-        myGames = game.getByTitle(gameToQuery)
-        if myGames:
-            g = resultViewer(myGames, canSelect = True)
-            if g:
-                print(g.printSelf(withRn = True))
+    if gameToQuery:
+        if exact:           # Querying by exact title (myGames is a game object)
+            myGames = game.getByTitleExact(gameToQuery)
+            if myGames:
+                print(myGames.printSelf(withRn = True))
             else:
+                print("No games by that name could be found")
                 return
-        else:
-            print("No games by that name could be found")
-            return
-    # Prompt to see characters
-    if input("\nSee characters from this game? (y/n) ").lower() == "y":
-        resultViewer(game_character.getCharactersByGame(g.title), limiter=0)
+        else:               # Querying by generalized title (myGames is a list of game objects)
+            myGames = game.getByTitle(gameToQuery)
+            if myGames:
+                g = resultViewer(myGames, canSelect = True)
+                if g:
+                    print(g.printSelf(withRn = True))
+                else:
+                    return
+            else:
+                print("No games by that name could be found")
+                return
+        # Prompt to see characters
+        if input("\nSee characters from this game? (y/n) ").lower() == "y":
+            resultViewer([c.name for c in game_character.getCharactersByGame(g.title)], resultsPerPage=20, limiter=0)
+    else:
+        print("Nothing has been entered. Cancelling query...")
 
 def getPath(limiter = defaultLimiter):
     # Get query
@@ -214,7 +223,7 @@ def getPath(limiter = defaultLimiter):
     # Get selection
     myChar = resultViewer(characterToQuery, True)
     if myChar:
-        print("Retrieving %s" % myChar.name)
+        print("%s has a Ryu Number of %d\n" % (myChar.name, myChar.ryu_number))
         p = ryu_number.getPathFromCharacter(myChar.name) # Get the path
         if p:       # If the path actually exists
             for elem in p:
@@ -301,7 +310,7 @@ def addCharacters(charactersToAdd = []):
                         print("Adding '%s'...\n" % c2add)
                         charactersToAdd.append(c2add)
                 else:
-                    print("Cancelling that insert...")
+                    print("Cancelling that insert...\n")
             else:
                 whatDo = input("'%s' does not exist in the database yet.\nAdd them anyway? (y/n): " % c2add)
                 if whatDo.lower() in ["y", "ye", "yes", "yea"]:
@@ -454,7 +463,7 @@ def removeFromDatabase():
                 # Remove from local files
                 if os.path.exists("%s/%s.txt" % (path, g.title)):
                     os.remove("%s/%s.txt" % (path, g.title))
-                print("'%s' successfully removed")
+                print("'%s' successfully removed" % g.title)
         else:
             print("No game selected. Cancelling...")
 

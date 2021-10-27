@@ -1,7 +1,7 @@
 2007-10-10
 Scout (Team Fortress)
 Soldier (Team Fortress)
-Pyro (Team Fortress)
+Pyro (Team Fortress 2)
 Demoman (Team Fortress)
 Heavy (Team Fortress)
 Engineer (Team Fortress)

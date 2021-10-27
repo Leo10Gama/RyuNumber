@@ -61,7 +61,7 @@ Black Knight (Shovel Knight)
 Petra
 Garnet (Steven Universe)
 Ragnir
-Raphael
+Raphael (Ninja Turtle)
 Rayman
 Reno (Brawlhalla)
 Sir Roland
@@ -91,3 +91,4 @@ Xull
 Amethyst (Steven Universe)
 Yumiko
 Zariel
+Randy Savage Macho Man

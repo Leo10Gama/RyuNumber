@@ -9,7 +9,7 @@ Charon
 Cleopatra
 Christopher Columbus
 Don Quixote
-Dr. Jekyll
+Dr. Henry Jekyll
 Albert Einstein
 Galileo Galilei
 Ganondorf
@@ -18,7 +18,7 @@ George Washington
 Gilgamesh
 Hercules
 Julius Caesar
-King Arthur
+King Arthur Pendragon
 King Henry VIII
 Leif Erikson
 Leonardo da Vinci
@@ -29,8 +29,8 @@ Super Mario
 Maxwell
 Montezuma
 Wolfgang Amadeus Mozart
-Mr. Hyde
-Mrs. Clause
+Mr. Edward Hyde
+Mrs. Claus
 Napoleon Bonaparte
 Odin
 Princess Peach
@@ -42,3 +42,67 @@ William Shakespeare
 Zelda
 Jabberwock
 Nyan Cat
+Aristotle
+Plato
+Navi
+Medusa
+Horus
+Cronus
+Dracula
+Poseidon
+Zeus
+Anubis
+Ra
+Eros
+Scylla
+Cerberus
+Argus Panoptes
+Ymir
+The Morrígan
+Cthulhu
+Moby Dick
+Minotaur
+Bowser
+Moctezuma II
+Barack Obama
+Michelle Obama
+Humpty Dumpty
+Easter Bunny
+Hatshepsut
+Clio
+Thalia
+Erato
+Euterpe
+Polyhymnia
+Calliope
+Terpsichore
+Urania
+Melpomene
+Pied Piper
+Headless Horseman
+Father Time
+Bölþorn
+Icarus
+Mother Nature
+Mothman
+Quetzalcoatl
+Sandman
+Sphinx
+Spring-heeled Jack
+Tooth Fairy
+Amun-Ra
+Jack Frost
+Jenny Greenteeth
+Peg o Nell
+Peg Prowler
+Jersey Devil
+Yama
+Yanluo Wang
+Lake Champlain Monster
+Loch Ness Monster
+Rocco Botte
+Shawn Chatfield
+Garrett Hunter
+Eric Baudour
+Derrick Acosta
+Satan

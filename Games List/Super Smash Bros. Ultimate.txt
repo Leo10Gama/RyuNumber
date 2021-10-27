@@ -330,3 +330,5 @@ Blinky
 Inky (Pac-Man)
 Pinky (Pac-Man)
 Clyde (Pac-Man)
+Roy Campbell
+Navi

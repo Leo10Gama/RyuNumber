@@ -51,7 +51,7 @@ Hibana
 Leanne
 Segata Sanshiro
 Ryo Hazuki
-Valkyrie
+Valkyrie (Adventure of Valkyrie)
 Natsu
 Aty
 Alisa Ilinichina Amiella
@@ -102,3 +102,4 @@ Miyuki Chan
 Tarosuke
 Otohime
 Tiki (Fire Emblem)
+Mokujin

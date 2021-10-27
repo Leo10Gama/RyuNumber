@@ -11,7 +11,7 @@ Charon
 Cleopatra
 Christopher Columbus
 Don Quixote
-Dr. Jekyll
+Dr. Henry Jekyll
 Albert Einstein
 The Flash
 Galileo Galilei
@@ -21,7 +21,7 @@ Gilgamesh
 Green Lantern
 Hercules
 Julius Caesar
-King Arthur
+King Arthur Pendragon
 King Henry VIII
 Leif Erikson
 Leonardo da Vinci
@@ -30,8 +30,8 @@ Martha Wayne
 Martian Manhunter
 Maxwell
 Wolfgang Amadeus Mozart
-Mr. Hyde
-Mrs. Clause
+Mr. Edward Hyde
+Mrs. Claus
 Napoleon Bonaparte
 Odin
 Poseidon

@@ -13,7 +13,7 @@ Hulk Hogan
 John Cena
 Johnny Cage
 Kane (WWE)
-Macho Man
+Randy Savage Macho Man
 Nikki Bella
 Paige (WWE)
 Raiden (Xavier Woods)
@@ -27,5 +27,6 @@ Stephanie McMahon
 Sting (WWE)
 Stone Cold Steve Austin
 Dwayne the Rock Johnson
-Triple HartTrish Stratus
+Triple H
 The Undertaker
+Trish Stratus
