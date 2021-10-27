@@ -43,9 +43,9 @@ The meat and potatoes of this entire project: figuring out how characters are re
 
 `(n/N) See stats about the database`
 
-View statistics about the characters and games in the database. Alternatively, you could see all stats as well, which includes both the number of characters and games per Ryu number, as well as the total number of games and characters. The only character with a Ryu Number of 0 is Ryu himself. (Note that the below screenshot is from the time of this commit, which is October 15, 2021, and there could have been more characters and games added)
+View statistics about the characters and games in the database. Alternatively, you could see all stats as well, which includes both the number of characters and games per Ryu number, as well as the total number of games and characters. The only character with a Ryu Number of 0 is Ryu himself. (Note that the below screenshot is from the time of this commit, which is October 27, 2021. The true number of characters and games may fluctuate over time)
 
-![image](https://user-images.githubusercontent.com/51037424/137555810-9fac8cd5-87fc-4dfd-b833-ef242b7a0c75.png)
+![image](https://user-images.githubusercontent.com/51037424/139122040-677a629f-e6ee-444a-9d86-b5d1ababd87d.png)
 
 ### Alter Database Commands
 
