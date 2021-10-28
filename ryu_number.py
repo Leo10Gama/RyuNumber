@@ -5,8 +5,8 @@ import mysql.connector
 import queries
 import random
 
-# Will return an array of the pattern Character-Game-Character-Game-... where the last element will always be Ryu
-def getPathFromCharacter(name):
+# Gets one step of the path
+def stepTowardsRyu(item):
     # Connect to the db
     dbCreds = open("db.txt", "r").read().splitlines()
     mydb = mysql.connector.connect(
@@ -16,18 +16,44 @@ def getPathFromCharacter(name):
         database    =dbCreds[3]
     )
     cursor = mydb.cursor()
+    # Check what we're doing
+    if type(item) is game.game:
+        # We're looking for the next character down (RN = this - 1)
+        cursor.execute(queries.getCharacterFromGame(item.title))
+        cs = cursor.fetchall()
+        chars = []
+        for c in cs:
+            chars.append(game_character.getByNameExact(c[0]))
+        return chars
+    elif type(item) is game_character.game_character:
+        # Base case
+        if item.name == "Ryu": return None
+        # We're looking for the next game down (RN = this)
+        cursor.execute(queries.getGameFromCharacter(item.name))
+        gs = cursor.fetchall()
+        games = []
+        for g in gs:
+            games.append(game.getByTitleExact(g[0]))
+        return games
+    else:
+        # Something got borked
+        return None
+
+
+# Will return an array of the pattern Character-Game-Character-Game-... where the last element will always be Ryu
+def getPathFromCharacter(name):
     # Get our first character
     path = []
     try:
-        path.append(game_character.getByNameExact(name))
+        c = game_character.getByNameExact(name)
+        path.append(c)
         if name == "Ryu": return path
+        x = c
         while (path[-1].name != "Ryu"):
-            cursor.execute(queries.getGameFromCharacter(path[-1].name))
-            myGame = random.choice(cursor.fetchall())
-            path.append(game.getByTitleExact(myGame[0]))
-            cursor.execute(queries.getCharacterFromGame(path[-1].title))
-            myCharacter = random.choice(cursor.fetchall())
-            path.append(game_character.getByNameExact(myCharacter[0]))
+            path.append(game.getByTitleExact((random.choice(stepTowardsRyu(x))).title))
+            x = path[-1]
+            path.append(game_character.getByNameExact((random.choice(stepTowardsRyu(x))).name))
+            x = path[-1]
         return path
     except:
         return None

@@ -213,28 +213,56 @@ def queryGame(exact = False):
         print("Nothing has been entered. Cancelling query...")
 
 def getPath(limiter = defaultLimiter):
-    # Get query
-    charToPath = removeIllegalChars(input("Enter the character's name: "))
-    print()
-    characterToQuery = game_character.getByName(charToPath)
-    if not characterToQuery:
-        print("No character by that name could be found in the database.")
-        return
-    # Get selection
-    myChar = resultViewer(characterToQuery, True)
-    if myChar:
-        print("%s has a Ryu Number of %d\n" % (myChar.name, myChar.ryu_number))
-        p = ryu_number.getPathFromCharacter(myChar.name) # Get the path
-        if p:       # If the path actually exists
-            for elem in p:
+    def printPath(path):
+        print("%s has a Ryu Number of %d\n" % (path[0].name, path[0].ryu_number))
+        if path:       # If the path actually exists
+            for elem in path:
                 if isinstance(elem, game.game):
                     print("(↓) %s" % (elem.printSelf(limiter)))
                 else:
                     print("(%d) %s" % (elem.ryu_number, elem.printSelf(limiter)))
         else:
             print("Something went *really* wrong. Like, super wrong. Like, you shouldn't be able to see this text at all. If you are, CONTACT ME PLEASE")
+
+    # Get query
+    charToPath = removeIllegalChars(input("Enter the character's name: "))
+    print()
+    if charToPath:
+        characterToQuery = game_character.getByName(charToPath)
+        if not characterToQuery:
+            print("No character by that name could be found in the database.")
+            return
+        # Get selection
+        myChar = resultViewer(characterToQuery, True)
+        if myChar:
+            # Decide how to get path
+            choice = optionPicker("How would you like to get path?", {"r": "Randomly", "c": "Choose my path"})
+            print()
+            if choice == "r":
+                # Randomly get path
+                p = ryu_number.getPathFromCharacter(myChar.name)
+                printPath(p)
+            elif choice == "c":
+                x = myChar
+                p = []
+                p.append(x)
+                # Choose my path
+                while True:
+                    x = resultViewer(ryu_number.stepTowardsRyu(x), True)
+                    if x:
+                        p.append(x)
+                        if type(x) is game_character.game_character and x.name == "Ryu":
+                            printPath(p)
+                            break
+                    else:
+                        print("Cancelling...")
+                        break
+            else:
+                print("Cancelling...")
+        else:
+            print("No character selected. Cancelling...")
     else:
-        print("No character selected. Cancelling...")
+        print("Nothing entered. Cancelling the operation...")
 
 def getStats():
     statsToSee = optionPicker("Which stats would you like to see?", {"g": "Games", "c": "Characters", "a": "All"})
@@ -370,40 +398,43 @@ def addToGame():
     # Get game to add to
     gameToAddTo = removeIllegalChars(input("Enter game title: "))
     print()
-    # Verify game in DB and cross-check with user
-    gameToAddTo = game.getByTitle(gameToAddTo)
-    if not gameToAddTo:
-        print("That game does not exist in the database! Try inserting the game yourself.")
-    else:
-        gameToAddTo = resultViewer(gameToAddTo, True)
-        if gameToAddTo:
-            gameToAddTo = gameToAddTo.title
-            # Start receiving character input
-            charactersToAdd = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
-            charactersToAdd = addCharacters(charactersToAdd)
-            if not charactersToAdd: return
-            # Write the file
-            print("Writing to file...", end="")
-            currChars = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
-            for c in currChars:
-                if c in charactersToAdd:
-                    charactersToAdd.remove(c)
-            with open("%s/%s.txt" % (path, gameToAddTo), "a") as f:
-                for c in charactersToAdd:
-                    f.write("\n%s" % c)
-            print("Done")
-            # Insert into the database
-            print("Adding to database...", end="")
-            priorityInserts = []
-            if len(charactersToAdd) > 1: priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
-            for x in priorityInserts:
-                if x in charactersToAdd:
-                    charactersToAdd.remove(x)
-            if priorityInserts: game_character.insertCharactersToGame(priorityInserts, gameToAddTo)
-            if charactersToAdd: game_character.insertCharactersToGame(charactersToAdd, gameToAddTo)
-            print("Done")
+    if gameToAddTo:
+        # Verify game in DB and cross-check with user
+        gameToAddTo = game.getByTitle(gameToAddTo)
+        if not gameToAddTo:
+            print("That game does not exist in the database! Try inserting the game yourself.")
         else:
-            print("Invalid input. Cancelling action...")
+            gameToAddTo = resultViewer(gameToAddTo, True)
+            if gameToAddTo:
+                gameToAddTo = gameToAddTo.title
+                # Start receiving character input
+                charactersToAdd = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
+                charactersToAdd = addCharacters(charactersToAdd)
+                if not charactersToAdd: return
+                # Write the file
+                print("Writing to file...", end="")
+                currChars = [x.name for x in game_character.getCharactersByGame(gameToAddTo)]
+                for c in currChars:
+                    if c in charactersToAdd:
+                        charactersToAdd.remove(c)
+                with open("%s/%s.txt" % (path, gameToAddTo), "a") as f:
+                    for c in charactersToAdd:
+                        f.write("\n%s" % c)
+                print("Done")
+                # Insert into the database
+                print("Adding to database...", end="")
+                priorityInserts = []
+                if len(charactersToAdd) > 1: priorityInserts = [x.name for x in game_character.getManyByNames(tuple(charactersToAdd))]
+                for x in priorityInserts:
+                    if x in charactersToAdd:
+                        charactersToAdd.remove(x)
+                if priorityInserts: game_character.insertCharactersToGame(priorityInserts, gameToAddTo)
+                if charactersToAdd: game_character.insertCharactersToGame(charactersToAdd, gameToAddTo)
+                print("Done")
+            else:
+                print("Invalid input. Cancelling action...")
+    else:
+        print("Nothing entered. Cancelling action...")
 
 def removeFromDatabase():
     # Remove character
