@@ -143,7 +143,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if cmd.isnumeric() and canSelect:
             cmd = int(cmd)
             if cmd >= 1 and cmd <= len(results):
-                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].name if isinstance(results[cmd - 1], game_character.game_character) else results[cmd - 1].title if isinstance(results[cmd - 1], game.game) else results[cmd - 1].printSelf(limit = 0, withRn = False)))
+                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].name if isinstance(results[cmd - 1], game_character.game_character) else results[cmd - 1].title if isinstance(results[cmd - 1], game.game) else results[cmd - 1]))
                 return results[cmd - 1]
         if cmd != "p" and cmd != "n": cmd = ""
         if cmd == "p":
@@ -198,7 +198,7 @@ def queryGame(exact = False):
         else:               # Querying by generalized title (myGames is a list of game objects)
             myGames = game.getByTitle(gameToQuery)
             if myGames:
-                g = resultViewer(myGames, canSelect = True)
+                g = resultViewer(myGames, canSelect = True, resultsPerPage=20)
                 if g:
                     print(g.printSelf(withRn = True))
                 else:
@@ -248,7 +248,13 @@ def getPath(limiter = defaultLimiter):
                 p.append(x)
                 # Choose my path
                 while True:
-                    x = resultViewer(ryu_number.stepTowardsRyu(x), True)
+                    x = game.getByTitleExact(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
+                    if x:
+                        p.append(x)
+                    else:
+                        print("Cancelling...")
+                        break
+                    x = game_character.getByNameExact(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
                     if x:
                         p.append(x)
                         if type(x) is game_character.game_character and x.name == "Ryu":

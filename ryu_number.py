@@ -23,7 +23,7 @@ def stepTowardsRyu(item):
         cs = cursor.fetchall()
         chars = []
         for c in cs:
-            chars.append(game_character.getByNameExact(c[0]))
+            chars.append(c[0])
         return chars
     elif type(item) is game_character.game_character:
         # Base case
@@ -33,7 +33,7 @@ def stepTowardsRyu(item):
         gs = cursor.fetchall()
         games = []
         for g in gs:
-            games.append(game.getByTitleExact(g[0]))
+            games.append(g[0])
         return games
     else:
         # Something got borked
@@ -50,9 +50,9 @@ def getPathFromCharacter(name):
         if name == "Ryu": return path
         x = c
         while (path[-1].name != "Ryu"):
-            path.append(game.getByTitleExact((random.choice(stepTowardsRyu(x))).title))
+            path.append(game.getByTitleExact(random.choice(stepTowardsRyu(x))))
             x = path[-1]
-            path.append(game_character.getByNameExact((random.choice(stepTowardsRyu(x))).name))
+            path.append(game_character.getByNameExact(random.choice(stepTowardsRyu(x))))
             x = path[-1]
         return path
     except:
