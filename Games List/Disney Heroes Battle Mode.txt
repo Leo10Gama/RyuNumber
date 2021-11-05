@@ -51,14 +51,14 @@ Angel (Lilo & Stitch)
 Jumba Jookiba
 Pleakley
 Stitch (Disney)
-Lilo (Disney)
+Lilo Pelekai
 Aladdin
 Genie (Disney)
 Jafar
 Jasmine
 Baymax
 Hiro Hamada
-Go Go (Big Hero 6)
+Go Go Tomago
 Honey Lemon (Big Hero 6)
 Wasabi (Big Hero 6)
 Fred (Big Hero 6)
@@ -104,7 +104,7 @@ Queen of Hearts (Disney)
 Madam Mim
 Merlin (Disney)
 Robin Hood (Disney)
-Sheriff of Nottingham
+Sheriff of Nottingham (Disney)
 Anger (Inside Out)
 Disgust (Inside Out)
 Joy (Inside Out)

@@ -27,12 +27,6 @@ class game_character:
             returnStr += "\n\t(Appears in %d game%s)" % (len(self.appears_in), "" if len(self.appears_in) == 1 else "s")
         return returnStr
 
-class game_character_simple:
-    def __init__ (self, name, ryu_number):
-        self.name, self.ryu_number = name, ryu_number
-    def __str__ (self):
-        return "(%d) %s\n" % (self.ryu_number, self.name)
-
 
 def __connectToDatabase():
     dbCreds = open("db.txt", "r").read().splitlines()

@@ -102,7 +102,7 @@ Amakusa Shirō
 Siegfried
 Brunhild
 Hagen
-Attila
+Attila the Hun
 Johann Georg Faust
 Mephistopheles
 Arash
@@ -147,3 +147,4 @@ Xuanzang
 Yan Qing
 Qin Liangyu
 Li Shuwen
+Leonardo da Vinci
