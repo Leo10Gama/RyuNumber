@@ -27,7 +27,7 @@ def updateRelations(debug = False, debug_detailed = False):
         # Character operations
         for cname in results:
             if debug_detailed: print(f"Adjusting {cname}...", end="")
-            cursor.execute(queries.getRelationByCharacter(cname))
+            cursor.execute(queries.getRelationsAndRNByCharacter(cname, rn))
             relations = [g[1] for g in cursor.fetchall()]   # Get games character `cname` appears in
             cursor.execute(queries.removeCharacterRelations(cname))
             for gtitle in relations:
@@ -42,7 +42,7 @@ def updateRelations(debug = False, debug_detailed = False):
         if debug: print(f"Adjusting {len(results)} games with Ryu number {rn}...", end="")
         for gtitle in results:
             if debug_detailed: print(f"Adjusting {gtitle}...", end="")
-            cursor.execute(queries.getRelationByGame(gtitle))
+            cursor.execute(queries.getRelationsAndRNByGame(gtitle, rn))
             relations = [c[0] for c in cursor.fetchall()]   # Get characters that appear in `gtitle`
             cursor.execute(queries.removeGameRelations(gtitle))
             for cname in relations:
