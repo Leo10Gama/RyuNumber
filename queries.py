@@ -4,7 +4,7 @@
 insertCharacter = lambda gc: "INSERT IGNORE INTO game_character (name) VALUES ('%s')" % gc
 getCharacterByName = lambda gc: "SELECT * FROM game_character WHERE name LIKE '%%%s%%' ORDER BY ryu_number ASC, name ASC" % gc
 getCharacterByNameExact = lambda gc: "SELECT * FROM game_character WHERE name='%s'" % gc
-getCharactersByNames = lambda gc: "SELECT * FROM game_character WHERE name IN %s ORDER BY ryu_number ASC" % gc  # NOTE: param must be a tuple
+getCharactersByNames = lambda gc: f"SELECT * FROM game_character WHERE name IN {gc} ORDER BY ryu_number ASC"    # NOTE: param must be a tuple
 getCharactersByGame = lambda gt: "SELECT name, ryu_number FROM game_character, appears_in WHERE appears_in.cname=game_character.name AND appears_in.gtitle='%s'" % gt
 getCharacterByRyu = lambda rn: "SELECT * FROM game_character WHERE ryu_number=%d" % rn
 removeCharacter = lambda gc: "DELETE FROM game_character WHERE name='%s'" % gc
