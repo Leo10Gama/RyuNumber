@@ -37,15 +37,15 @@ Similarly to querying for characters, searches the database for games. Using an 
 
 `(p/P) Get a path from a character to Ryu`
 
-The meat and potatoes of this entire project: figuring out how characters are related to Ryu. After entering the name of a character and selecting them from the result viewer, a path is returned of how that character is linked to Ryu from Street Fighter. See the below example for the path between Son Goku of Dragon Ball (who has a Ryu Number of 3) to Ryu.
+The meat and potatoes of this entire project: figuring out how characters are related to Ryu. After entering the name of a character and selecting them from the result viewer, one can see a path of how that character is linked to Ryu from Street Fighter. These paths can be either chosen randomly, or selected from a list of potential options. If chosen from potential options, results will be provided of games and characters with Ryu numbers one less than the current option, until eventually reaching Ryu. See the below example for the random path between Son Goku of Dragon Ball (who has a Ryu Number of 3) to Ryu.
 
-![image](https://user-images.githubusercontent.com/51037424/137555460-6463b4c5-f111-4e23-b7e8-15321ce8eed6.png)
+![image](https://user-images.githubusercontent.com/51037424/143779769-3fe9439c-856d-4263-b62c-694931c1a09d.png)
 
 `(n/N) See stats about the database`
 
-View statistics about the characters and games in the database. Alternatively, you could see all stats as well, which includes both the number of characters and games per Ryu number, as well as the total number of games and characters. The only character with a Ryu Number of 0 is Ryu himself. (Note that the below screenshot is from the time of this commit, which is October 27, 2021. The true number of characters and games may fluctuate over time)
+View statistics about the characters and games in the database. Alternatively, you could see all stats as well, which includes both the number of characters and games per Ryu number, as well as the total number of games and characters. The only character with a Ryu Number of 0 is Ryu himself. (Note that the below screenshot is from the time of this commit, which is November 28, 2021. The true number of characters and games may fluctuate over time)
 
-![image](https://user-images.githubusercontent.com/51037424/139122040-677a629f-e6ee-444a-9d86-b5d1ababd87d.png)
+![image](https://user-images.githubusercontent.com/51037424/143779826-2ee7a859-a60e-4029-86a6-c116274ba7a8.png)
 
 ### Alter Database Commands
 
@@ -97,13 +97,20 @@ Ends the runtime of the application.
 
 Many of the database functions simply run combinations of SQL queries to affect the database. But how does this database work?
 
-The MySQL database operates with three tables: `game`, `game_character`, and `appears_in`. They each represent a game, a character from a video game, and the relational representation of a character appearing in a game (i.e. Chun-Li appears in Street Fighter II) respectively. The game table has attributes of `title` for the title of the game (which serves as the primary key), and `release_date`, which is the soonest day the game was released. The game character table only has the descriptive attribute of `name`, which is the character's full name (or at least as much of the name is known of the character). In cases where two characters have the same name, that character's series will be put in brackets after their name (i.e. Zero from Mega Man X, Zero from Kingdom Hearts II,and Zero from Sonic Adventure).
+This database is very graph-like in structure. That is, Ryu operates as a root node, linking games and characters together through `appears_in` relations, which act as edges. Each `game` and `game_character` acts as a node on this graph, and many of the operations take advantage of this. 
 
-The game and game character tables also each have Ryu number attributes, which are initialized to 99 by default. Each number indicates the degree by which each character is related to Ryu. Characters with a Ryu number of 1 are characters that Ryu has formally seen, met, or fought. This goes for characters like Chun-Li, Iron Man, or Super Mario. Games with a Ryu number of 1 are those where the lowest possible Ryu number of a character is 0, and the highest possible Ryu number is 1. This goes for games like Street Fighter II or Marvel vs. Capcom. The line of reasoning is that any game with a Ryu number of 1 means every character that appears in that game alone will have a Ryu number of at most 1. It also aids in computing the path between characters and Ryu.
+This Ryu number value is the degree by which a character or game is separated from Ryu. For instance, a character with a Ryu number of 1 is a character that has fought Ryu directly (e.g. Chun-Li in Street Fighter II, or Super Mario in Super Smash Bros.), while a character with a Ryu number of 2 is a character who has fought a character that has fought Ryu (e.g. Kratos fights Heihachi Mishima in PlayStation All-Stars, and Heihachi fights Ryu in Street Fighter X Tekken). The Ryu number for games, however, indicates that every character in that game has a Ryu number of that number **at most** (e.g. Street Fighter II has a Ryu number of 1, since every character in that game can fight Ryu, but Ryu himself has a Ryu number of 0). This helps simplify the path-finding algorithm employed to link characters to Ryu.
 
-In the `Games List` folder, there are text files which each represent games. The file name is the title of the game, and the first line of each game is its release date. After this, every subsequent line is a character that appears in that game. Considering how many games feature crossovers, it is more optimal to store the games as text objects rather than having text objects for every character.
+Let's use the example of Zagreus (from the game Hades) to explain the path-finding algorithm. To find a link from him to Ryu, the first query that runs is to find games that this character appears in, that also have the same Ryu number as them. In Zagreus' case (as of right now), the only option is through his debut game "Hades". Once selected, the next query that runs will return all characters who appear in Hades, whose Ryu numbers are **one fewer** than that of the game. If the command were retrieving a random path, a character from this list would be selected at random. However, assuming we can choose, let's arbitrarily select Hades himself, whose Ryu number is 2. The last two steps will then repeat, querying game followed by character, until we reach a character with a Ryu number of 0. This is Ryu himself, and at this point, we return the list of all the characters and games we've come across.
 
-All relations are presumed to be defined with the precondition that Ryu, with a Ryu number of 0, exists in the database always. Given how the code is implemented, this should always be the case. When being inserted, it is akin to using breadth-first search, with Ryu being the central node, and edges representing `appears_in`.
+When a new game or character is added, their Ryu number defaults to 99. When it is linked with a character or game whose Ryu number is less than this, SQL triggers update its value accordingly. However, since SQL triggers are not recursive, it is not always guaranteed that an updated Ryu number will be accurate to what it truly is. The "reset database" command is my response to this, which uses a BFS-style algorithm to sequentially update each Ryu number from 0 to whatever the current linked maximum is.
+
+All input data is currently stored in .txt files under the "Games List" folder, following this convention:
+- The file's name is the title of the game;
+- The first line of the file is the game's release date; and
+- Every subsequent line in the file indicates a character that appears in the game.
+
+Games are inserted by reading these files and parsing the data in this fashion, which ensures it is entered properly. However, for best results, it is recommended to use the terminal's "insert game" functionality, which lets the user ensure that the character they are refering to exists or does not exist in the database.
 
 # Using It For Yourself
 
