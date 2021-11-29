@@ -20,35 +20,33 @@ def updateRelations(debug = False, debug_detailed = False):
     # Start by getting Ryu, the boy, the absolute unit of a lad
     rn = 0
     cursor.execute(queries.getCharacterByRyu(rn))
-    results = [c[0] for c in cursor.fetchall()]
+    results = [str(c[0]) for c in cursor.fetchall()]
     # Continue iterating as long as there are results to iterate over
     while results:
-        if debug: print(f"Adjusting {len(results)} characters with Ryu number {rn}...", end="")
+        if debug or debug_detailed: print(f"Adjusting {len(results)} characters with Ryu number {rn}...")
         # Character operations
         for cname in results:
-            if debug_detailed: print(f"Adjusting {cname}...", end="")
+            if debug_detailed: print(f"\tAdjusting {cname}...")
             cursor.execute(queries.getRelationsAndRNByCharacter(cname, rn))
-            relations = [g[1] for g in cursor.fetchall()]   # Get games character `cname` appears in
+            relations = [str(g[1]) for g in cursor.fetchall()]   # Get games character `cname` appears in
             cursor.execute(queries.removeCharacterRelations(cname))
             for gtitle in relations:
                 cursor.execute(queries.insertRelation(cname, gtitle))
-            if debug_detailed: print("Done")
-        if debug: print("Done")
+        if debug or debug_detailed: print("\tDone")
         # Get next games
         rn += 1
         cursor.execute(queries.getGamesByRyu(rn))
         results = [g[0] for g in cursor.fetchall()]
         # Game operations
-        if debug: print(f"Adjusting {len(results)} games with Ryu number {rn}...", end="")
+        if debug or debug_detailed: print(f"Adjusting {len(results)} games with Ryu number {rn}...")
         for gtitle in results:
-            if debug_detailed: print(f"Adjusting {gtitle}...", end="")
+            if debug_detailed: print(f"\tAdjusting {gtitle}...")
             cursor.execute(queries.getRelationsAndRNByGame(gtitle, rn))
-            relations = [c[0] for c in cursor.fetchall()]   # Get characters that appear in `gtitle`
+            relations = [str(c[0]) for c in cursor.fetchall()]   # Get characters that appear in `gtitle`
             cursor.execute(queries.removeGameRelations(gtitle))
             for cname in relations:
                 cursor.execute(queries.insertRelation(cname, gtitle))
-            if debug_detailed: print("Done")
-        if debug: print("Done")
+        if debug or debug_detailed: print("\tDone")
         # Get next characters
         cursor.execute(queries.getCharacterByRyu(rn))
         results = [c[0] for c in cursor.fetchall()]
@@ -69,6 +67,8 @@ def reset_db(debug = False, debug_detailed = False):
     cursor = mydb.cursor()
     # ... and now drop the db
     cursor.execute("DROP SCHEMA IF EXISTS ryu_number")
+    mydb.commit()
+    mydb.close()
     # Now refill the whole db
     init.main(debug, debug_detailed)
     fill_db.main(debug, debug_detailed)

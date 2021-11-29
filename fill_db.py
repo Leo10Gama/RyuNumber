@@ -33,11 +33,10 @@ def main(debug = False, debug_detailed = False):
         for c in data:
             cursor.execute(queries.insertCharacter(c))
             cursor.execute(queries.insertRelation(c, filename))
-        mydb.commit()
-
 
     if debug or debug_detailed: print("Raw data inserted successfully.")
     
+    mydb.commit()
     mydb.close()
 
     maintenance.updateRelations(debug, debug_detailed)
