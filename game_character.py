@@ -93,7 +93,9 @@ def getByNameExact(name):
     # Get games character is in as well
     if result:
         cursor.execute(queries.getGamesByCharacter(str(result.name)))
-        for row in cursor.fetchall():
+        mygames = cursor.fetchall()
+        print(result.name)
+        for row in mygames:
             result.appears_in.append(game.game(row[0], row[1], row[2]))
     return result
 

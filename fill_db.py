@@ -34,7 +34,6 @@ def main(debug = False, debug_detailed = False):
             cursor.execute(queries.insertCharacter(c))
             cursor.execute(queries.insertRelation(c, filename))
 
-
     if debug or debug_detailed: print("Raw data inserted successfully.")
     
     mydb.commit()

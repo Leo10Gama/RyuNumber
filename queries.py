@@ -24,11 +24,11 @@ updateGameReleaseDate = lambda title, newRDate: "UPDATE game SET release_date='%
 getNumberOfGames = "SELECT COUNT(*) FROM game"
 
 # Relation queries
-insertRelation = lambda cname, gtitle: "INSERT IGNORE INTO appears_in (cname, gtitle) VALUES ('%s', '%s')" % (cname, gtitle)
+insertRelation = lambda cname, gtitle: f"INSERT IGNORE INTO appears_in (cname, gtitle) VALUES ('{cname}', '{gtitle}')"
 getRelationsByCharacter = lambda gc: "SELECT * FROM appears_in WHERE cname='%s'" % gc
 getRelationsByGame = lambda gt: "SELECT * FROM appears_in WHERE gtitle='%s'" % gt
-getRelationsAndRNByCharacter = lambda gc, rn: "SELECT AI.cname, AI.gtitle, G.ryu_number FROM appears_in AS AI JOIN game AS G ON G.title=AI.gtitle WHERE cname='%s' AND G.ryu_number>%d+1" % (gc, rn)
-getRelationsAndRNByGame = lambda gt, rn: "SELECT AI.cname, AI.gtitle, C.ryu_number FROM appears_in AS AI JOIN game_character AS C ON C.name=AI.cname WHERE gtitle='%s' AND C.ryu_number>=%d+1" % (gt, rn)
+getRelationsAndRNByCharacter = lambda gc, rn: "SELECT AI.cname, AI.gtitle, G.ryu_number FROM appears_in AS AI JOIN game AS G ON G.title=AI.gtitle WHERE cname='%s' AND G.ryu_number>=%d" % (gc, rn)
+getRelationsAndRNByGame = lambda gt, rn: "SELECT AI.cname, AI.gtitle, C.ryu_number FROM appears_in AS AI JOIN game_character AS C ON C.name=AI.cname WHERE gtitle='%s' AND C.ryu_number>=%d-1" % (gt, rn)
 removeCharacterRelations = lambda gc: "DELETE FROM appears_in WHERE cname='%s'" % gc
 removeGameRelations = lambda gt: "DELETE FROM appears_in WHERE gtitle='%s'" % gt
 removeRelation = lambda gc, gt: "DELETE FROM appears_in WHERE cname='%s' AND gtitle='%s'" % (gc, gt)
