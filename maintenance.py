@@ -23,32 +23,30 @@ def updateRelations(debug = False, debug_detailed = False):
     results = [c[0] for c in cursor.fetchall()]
     # Continue iterating as long as there are results to iterate over
     while results:
-        if debug: print(f"Adjusting {len(results)} characters with Ryu number {rn}...", end="")
+        if debug or debug_detailed: print(f"Adjusting {len(results)} characters with Ryu number {rn}...", end="")
         # Character operations
         for cname in results:
-            if debug_detailed: print(f"Adjusting {cname}...", end="")
+            if debug_detailed: print(f"\tAdjusting {cname}...")
             cursor.execute(queries.getRelationsAndRNByCharacter(cname, rn))
             relations = [g[1] for g in cursor.fetchall()]   # Get games character `cname` appears in
             cursor.execute(queries.removeCharacterRelations(cname))
             for gtitle in relations:
                 cursor.execute(queries.insertRelation(cname, gtitle))
-            if debug_detailed: print("Done")
-        if debug: print("Done")
+        if debug or debug_detailed: print("Done")
         # Get next games
         rn += 1
         cursor.execute(queries.getGamesByRyu(rn))
         results = [g[0] for g in cursor.fetchall()]
         # Game operations
-        if debug: print(f"Adjusting {len(results)} games with Ryu number {rn}...", end="")
+        if debug or debug_detailed: print(f"Adjusting {len(results)} games with Ryu number {rn}...", end="")
         for gtitle in results:
-            if debug_detailed: print(f"Adjusting {gtitle}...", end="")
+            if debug_detailed: print(f"\tAdjusting {gtitle}...")
             cursor.execute(queries.getRelationsAndRNByGame(gtitle, rn))
             relations = [c[0] for c in cursor.fetchall()]   # Get characters that appear in `gtitle`
             cursor.execute(queries.removeGameRelations(gtitle))
             for cname in relations:
                 cursor.execute(queries.insertRelation(cname, gtitle))
-            if debug_detailed: print("Done")
-        if debug: print("Done")
+        if debug or debug_detailed: print("Done")
         # Get next characters
         cursor.execute(queries.getCharacterByRyu(rn))
         results = [c[0] for c in cursor.fetchall()]

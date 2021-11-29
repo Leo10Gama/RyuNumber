@@ -647,7 +647,7 @@ def toggleView(currStyle):
     return currStyle
 
 def resetDatabase(detailed = False):
-    response = input("This command will take *a while* to execute.\nAre you sure you want to reset the database? (y/n): ")
+    response = input("This command may take some time to execute.\nAre you sure you want to reset the database? (y/n): ")
     print()
     if response.lower() in ["y", "yes", "yea", "ye"]:
         maintenance.reset_db(not detailed, detailed)
