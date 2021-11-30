@@ -1,5 +1,4 @@
 2010-05-14
-Alan Wake
 Alice Wake
 Odin Anderson
 Tor Anderson
@@ -32,3 +31,4 @@ Sam Lake
 Marko Saaresto
 Olli Tukiainen
 Markus Kaarlonen
+Alan Wake
