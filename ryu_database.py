@@ -1,23 +1,8 @@
 from game import game
 from game_character import game_character
 from typing import List, Tuple
-import mysql.connector
+from ryu_connector import RyuConnector
 import queries
-
-class RyuConnector:
-    def __init__(self, credentials="db.txt"):
-        self.dbCreds = open("db.txt", "r").read().splitlines()
-    def __enter__(self):
-        self.mydb = mysql.connector.connect(
-            host        =self.dbCreds[0],
-            user        =self.dbCreds[1],
-            password    =self.dbCreds[2],
-            database    =self.dbCreds[3]
-        )
-        return self.mydb.cursor()
-    def __exit__(self, type, value, traceback):
-        self.mydb.commit()
-        self.mydb.close()
 
 default_error = lambda e: f"Error: {e}" # The default error message, which simply prints the passed Exception
 
@@ -65,7 +50,7 @@ def removeCharacterFromGame(name, title):
         return False
 
 # RETRIEVE
-def getByName(name):
+def getCharacterByName(name):
     result = None
     try:
         with RyuConnector() as rdb:
@@ -78,13 +63,13 @@ def getByName(name):
                 rdb.execute(queries.getGamesByCharacter(str(result.name)))
                 mygames = rdb.fetchall()
                 for row in mygames:
-                    result.appears_in.append(game(row[0], row[1], row[2]))
+                    result.appears_in.append(row[0])
             return result
     except Exception as e:
         print(default_error(e))
         return None
 
-def getLikeName(name):
+def getCharactersLikeName(name):
     result = []
     try:
         with RyuConnector() as rdb:
@@ -96,13 +81,13 @@ def getLikeName(name):
             for c in result:
                 rdb.execute(queries.getGamesByCharacter(str(c.name)))
                 for row in rdb.fetchall():
-                    c.appears_in.append(game(row[0], row[1], row[2]))
+                    c.appears_in.append(row[0])
             return result
     except Exception as e:
         print(default_error(e))
         return []
 
-def getByNames(names: Tuple[str]):
+def getCharactersByNames(names: Tuple[str]):
     result = []
     try:
         with RyuConnector() as rdb:
@@ -114,7 +99,7 @@ def getByNames(names: Tuple[str]):
             for c in result:
                 rdb.execute(queries.getGamesByCharacter(c.name))
                 for row in rdb.fetchall():
-                    c.appears_in.append(game(row[0], row[1], row[2]))
+                    c.appears_in.append(row[0])
             return result
     except Exception as e:
         print(default_error(e))
@@ -132,7 +117,7 @@ def getCharactersByGame(title):
             for c in result:
                 rdb.execute(queries.getGamesByCharacter(c.name))
                 for row in rdb.fetchall():
-                    c.appears_in.append(game(row[0], row[1], row[2]))
+                    c.appears_in.append(row[0])
             return result
     except Exception as e:
         print(default_error(e))
@@ -150,7 +135,7 @@ def getCharactersByRyuNumber(rn):
             for c in result:
                 rdb.execute(queries.getGamesByCharacter(c.name))
                 for row in rdb.fetchall():
-                    c.appears_in.append(game(row[0], row[1], row[2]))
+                    c.appears_in.append(row[0])
             return result
     except Exception as e:
         print(default_error(e))
@@ -210,7 +195,7 @@ def removeGame(title):
         return False
 
 # RETRIEVE
-def getByTitle(title):
+def getGameByTitle(title):
     try:
         with RyuConnector() as rdb:
             rdb.execute(queries.getGameByTitle(title))
@@ -221,7 +206,7 @@ def getByTitle(title):
         print(default_error(e))
         return None
 
-def getLikeTitle(title):
+def getGamesLikeTitle(title):
     result = []
     try:
         with RyuConnector() as rdb:
@@ -233,7 +218,7 @@ def getLikeTitle(title):
         print(default_error(e))
         return []
 
-def getByTitles(titles: Tuple[str]):
+def getGamesByTitles(titles: Tuple[str]):
     result = []
     try:
         with RyuConnector() as rdb:

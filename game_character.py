@@ -1,3 +1,7 @@
+from typing import Tuple
+from ryu_connector import RyuConnector
+import queries
+
 class game_character:
     def __init__ (self, name, ryu_number, appears_in = []):
         self.name, self.ryu_number = name, ryu_number
@@ -22,3 +26,16 @@ class game_character:
         elif limit == 0:
             returnStr += "\n\t(Appears in %d game%s)" % (len(self.appears_in), "" if len(self.appears_in) == 1 else "s")
         return returnStr
+
+def tupleToCharacter(t: Tuple[str, int]):
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.getGamesByCharacter(t[0]))
+            gamesList = rdb.fetchall()
+            ai = []
+            for g in gamesList:
+                ai.append(g[0])
+            return game_character(t[0], t[1], ai)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return None

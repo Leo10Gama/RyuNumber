@@ -1,3 +1,5 @@
+from typing import Tuple
+
 class game:
     def __init__ (self, title, ryu_number, release_date):
         self.title, self.ryu_number, self.release_date = title, ryu_number, release_date
@@ -6,3 +8,6 @@ class game:
     def printSelf(self, limit = -1, withRn = False):
         if withRn: return str(self) + " [%d]" % self.ryu_number
         else: return str(self)
+
+def tupleToGame(t: Tuple[str, int, str]):
+    return game(t[0], t[1], t[2])

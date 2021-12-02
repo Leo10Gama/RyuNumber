@@ -1,9 +1,11 @@
+import file_manager as fm
 import game
 import game_character
 import maintenance
 import os
-import ryu_number
 import ryu_database as rdb
+import ryu_number
+
 
 ### BEGIN CONSTANTS ###
 
@@ -69,23 +71,6 @@ def removeIllegalChars(s):
         for c in illegalCharacters:
             s = s.replace(c, "")
     return s
-
-# Replaces a given line in a file with another line
-def replaceLine(oldLine, newLine, filePath, end = '\n'):
-    with open(filePath, "r+") as f:
-        lines = f.readlines()
-        for i in range(len(lines)):
-            if lines[i].strip('\n') == oldLine:
-                if i < len(lines) - 1:
-                    lines[i] = "%s%s" % (newLine, end)
-                else:
-                    lines[i] = "%s" % newLine
-                    if end == '':
-                        lines[i-1] = lines[i-1].strip('\n')
-        f.seek(0)
-        f.truncate()
-        f.seek(0)
-        f.writelines(lines)
 
 ### END CONSTANTS ###
 
@@ -169,13 +154,13 @@ def queryCharacter(exact = False, limiter = -1):
     print()
     if charToQuery:
         if exact:       # Querying by exact name (myCharacters is a game_character object)
-            myCharacters = rdb.getByName(charToQuery)
+            myCharacters = rdb.getCharacterByName(charToQuery)
             if myCharacters:
                 print(myCharacters.printSelf(limiter, withRn = True))
             else:
                 print("No characters by that name could be found")        
         else:           # Querying by generalized name (myCharacters is a list of game_character objects)
-            myCharacters = rdb.getLikeName(charToQuery)  
+            myCharacters = rdb.getCharactersLikeName(charToQuery)  
             if myCharacters:
                 myChar = resultViewer(myCharacters, canSelect = True)
                 if myChar:
@@ -191,14 +176,14 @@ def queryGame(exact = False):
     if gameToQuery:
         g = None
         if exact:           # Querying by exact title (myGames is a game object)
-            g = rdb.getByTitle(gameToQuery)
+            g = rdb.getGameByTitle(gameToQuery)
             if g:
                 print(g.printSelf(withRn = True))
             else:
                 print("No games by that name could be found")
                 return
         else:               # Querying by generalized title (myGames is a list of game objects)
-            myGames = rdb.getLikeTitle(gameToQuery)
+            myGames = rdb.getGamesLikeTitle(gameToQuery)
             if myGames:
                 g = resultViewer(myGames, canSelect = True, resultsPerPage=20)
                 if g:
@@ -230,7 +215,7 @@ def getPath(limiter = defaultLimiter):
     charToPath = removeIllegalChars(input("Enter the character's name: "))
     print()
     if charToPath:
-        characterToQuery = rdb.getLikeName(charToPath)
+        characterToQuery = rdb.getCharactersLikeName(charToPath)
         if not characterToQuery:
             print("No character by that name could be found in the database.")
             return
@@ -250,13 +235,13 @@ def getPath(limiter = defaultLimiter):
                 p.append(x)
                 # Choose my path
                 while True:
-                    x = rdb.getByTitle(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
+                    x = rdb.getGameByTitle(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
                     if x:
                         p.append(x)
                     else:
                         print("Cancelling...")
                         break
-                    x = rdb.getByName(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
+                    x = rdb.getCharacterByName(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
                     if x:
                         p.append(x)
                         if type(x) is game_character.game_character and x.name == "Ryu":
@@ -320,7 +305,7 @@ def addCharacters(charactersToAdd = []):
             return []
         # Actually add a character
         if c2add:
-            possibleCharacters = rdb.getLikeName(c2add)
+            possibleCharacters = rdb.getCharactersLikeName(c2add)
             # If character exists, prompt to pick one of them or the entered value, or some other value entirely
             if possibleCharacters:
                 whatDo = optionPicker("Found %d character(s) with similar name to '%s'. What would you like to do?" % (len(possibleCharacters), c2add), {"e": "Pick an existing character", "n": "Use what I wrote"})
@@ -367,17 +352,21 @@ def insertGame():
     # Parse it with characters that can be used in text file names
     newGame = removeIllegalChars(input("Enter the game's name: "))
     print()
-    if rdb.getByTitle(newGame):
+    if rdb.getGameByTitle(newGame):
         print("That game already exists in the database!")
+        return
     else:
         # Get release date
         releaseDate = None
         while not releaseDate:
-            releaseDate = input("Enter the game's release date (YYYY-MM-DD): ")
+            releaseDate = input("Enter the game's release date (YYYY-MM-DD) (or q to cancel): ")
             print()
             # Verify format
             if validDate(releaseDate):
                 break
+            if releaseDate.lower == "q": 
+                print("Cancelling insertion...")
+                return
             releaseDate = None
             print("Format invalid. Please enter the release date in the proper format!")
         # Get characters
@@ -385,16 +374,15 @@ def insertGame():
         if not charactersToAdd: return
         # Write the file
         print("Creating file for game...", end="")
-        with open("%s/%s.txt" % (path, newGame), "w") as f:
-            f.write("%s" % releaseDate)
-            for c in charactersToAdd:
-                f.write("\n%s" % c)
-        print("Done")
+        if fm.writeGameFile(newGame, releaseDate, charactersToAdd): print("Done")
+        else:
+            print(f"\nAn error occurred during file creation.\nPlease check the {path} folder or try again later.\n")
+            return
         # Insert into the database
         print("Adding to database...", end="")
         rdb.insertGame(newGame, releaseDate)
-        priorityInserts = []
-        if len(charactersToAdd) > 1: priorityInserts = [x.name for x in rdb.getManyByNames(tuple(charactersToAdd))]
+        priorityInserts = []    # Characters who already exist in the db should get priority (aides in the dynamic calculation of RN)
+        if len(charactersToAdd) > 1: priorityInserts = [x.name for x in rdb.getCharactersByNames(tuple(charactersToAdd))]
         for x in priorityInserts:
             if x in charactersToAdd:
                 charactersToAdd.remove(x)
@@ -408,7 +396,7 @@ def addToGame():
     print()
     if gameToAddTo:
         # Verify game in DB and cross-check with user
-        gameToAddTo = rdb.getLikeTitle(gameToAddTo)
+        gameToAddTo = rdb.getGamesLikeTitle(gameToAddTo)
         if not gameToAddTo:
             print("That game does not exist in the database! Try inserting the game yourself.")
         else:
@@ -425,14 +413,14 @@ def addToGame():
                 for c in currChars:
                     if c in charactersToAdd:
                         charactersToAdd.remove(c)
-                with open("%s/%s.txt" % (path, gameToAddTo), "a") as f:
-                    for c in charactersToAdd:
-                        f.write("\n%s" % c)
-                print("Done")
+                if fm.appendGameFile(gameToAddTo, charactersToAdd): print("Done")
+                else:
+                    print(f"\nAn error occurred during file insertion.\nPlease check {gameToAddTo}.txt in {path} or try again later.")
+                    return
                 # Insert into the database
                 print("Adding to database...", end="")
                 priorityInserts = []
-                if len(charactersToAdd) > 1: priorityInserts = [x.name for x in rdb.getByNames(tuple(charactersToAdd))]
+                if len(charactersToAdd) > 1: priorityInserts = [x.name for x in rdb.getCharactersByNames(tuple(charactersToAdd))]
                 for x in priorityInserts:
                     if x in charactersToAdd:
                         charactersToAdd.remove(x)
@@ -449,15 +437,15 @@ def removeFromDatabase():
     def removeCharacter():
         # Remove from select game
         def removeFromGame(cName, gTitle):
-            # Update in DB
-            rdb.removeCharacterFromGame(cName, gTitle)
-            # Update in local files
-            replaceLine(cName, "", "%s/%s.txt" % (path, gTitle), end = "")
-            print("Removed '%s' from '%s'" % (cName, gTitle))
+            if fm.removeCharacterFromGame(cName, gTitle):   # Remove from local files
+                rdb.removeCharacterFromGame(cName, gTitle)  # Remove from db
+                print("Removed '%s' from '%s'" % (cName, gTitle))
+            else:
+                print(f"An error occurred during file removal.\nPlease check {path}/{gTitle} and try again.")
 
         # Select character
         c = removeIllegalChars(input("Enter character name: "))
-        c = resultViewer(rdb.getLikeName(c), True)
+        c = resultViewer(rdb.getCharactersLikeName(c), True)
         if c:
             # Select where to remove
             option = optionPicker("Where would you like to remove the character?", {"g": "From one game", "a": "From all games (the entire database)"})
@@ -467,10 +455,10 @@ def removeFromDatabase():
                 print("Select a game to remove '%s' from:\n" % c.name)
                 g = resultViewer(c.appears_in, True)
                 if g:
-                    confirmDelete = input("You are about to remove '%s'\nfrom the game '%s'\n\nAre you sure you want to proceed? (y/n): " % (c.name, g.title)).lower()
+                    confirmDelete = input("You are about to remove '%s'\nfrom the game '%s'\n\nAre you sure you want to proceed? (y/n): " % (c.name, g)).lower()
                     print()
                     if confirmDelete == "y":
-                        removeFromGame(c.name, g.title)
+                        removeFromGame(c.name, g)
                     else:
                         print("Cancelling...")
                 else:
@@ -481,7 +469,7 @@ def removeFromDatabase():
                 print()
                 if confirmDelete == "y":
                     for g in c.appears_in:
-                        removeFromGame(c.name, g.title)
+                        removeFromGame(c.name, g)
                     rdb.removeCharacter(c.name)
                 else:
                     print("Cancelling...")
@@ -493,16 +481,15 @@ def removeFromDatabase():
     # Remove game
     def removeGame():
         g = removeIllegalChars(input("Enter game title: "))
-        g = resultViewer(rdb.getLikeTitle(g), True)
+        g = resultViewer(rdb.getGamesLikeTitle(g), True)
         if g:
             confirmDelete = input("You are about to remvove the game:\n'%s'\nAre you sure you want to proceed? (y/n): " % g.title).lower()
             if confirmDelete == "y":
-                # Remove from db
-                rdb.removeGame(g.title)
-                # Remove from local files
-                if os.path.exists("%s/%s.txt" % (path, g.title)):
-                    os.remove("%s/%s.txt" % (path, g.title))
-                print("'%s' successfully removed" % g.title)
+                if fm.removeGame(g.title):  # Remove from local files
+                    rdb.removeGame(g.title) # Remove from db
+                    print("'%s' successfully removed" % g.title)
+                else:
+                    print(f"An error occurred during file removal.\nPlease check {path}/{g.title} and try again later.")
         else:
             print("No game selected. Cancelling...")
 
@@ -523,21 +510,22 @@ def updateData():
         def updateName(oldName):
             # This function acts as a helper, since its code is duplicated otherwise
             def updateFiles(oldName, newName):
-                c = rdb.getByName(oldName)
-                for g in c.appears_in:
-                    replaceLine(oldName, newName, "%s/%s.txt" % (path, g.title))
+                c = rdb.getCharacterByName(oldName)
+                if not fm.updateCharacterName(c, newName):
+                    print(f"An error occurred during file updating.\nPlease check {path} and try again later.")
+                    return
 
             newName = removeIllegalChars(input("Enter new name: "))
             print()
-            existing = rdb.getByName(newName)
+            existing = rdb.getCharacterByName(newName)
             if existing:    # Overwriting character
                 confirmUpdate = input("A character with that name already exists:\n\n%s\n\nThis will merge that character with '%s'.\nProceed? (y/n): " % (existing.printSelf(), oldName))
                 print()
                 if confirmUpdate.lower() == "y":
                     updateFiles(oldName, existing.name)
-                    c = rdb.getByName(oldName)
+                    c = rdb.getCharacterByName(oldName)
                     for g in c.appears_in:
-                        rdb.insertCharactersToGame([oldName], g.title)
+                        rdb.insertCharactersToGame([oldName], g)
                     else:
                         rdb.removeCharacter(oldName)
                     print("Changes made successfully.\n(NOTE: Some Ryu Numbers may not have updated accordingly.\n To fix this, you may need to reset the database.)")
@@ -556,7 +544,7 @@ def updateData():
         # Query character
         c = removeIllegalChars(input("Enter character name: "))
         print()
-        results = rdb.getLikeName(c)
+        results = rdb.getCharactersLikeName(c)
         # Select character
         c = resultViewer(results, True)
         if c:
@@ -577,16 +565,16 @@ def updateData():
         def updateTitle(oldTitle):
             newTitle = removeIllegalChars(input("Enter new title: "))
             print()
-            if rdb.getByTitle(newTitle):
+            if rdb.getGameByTitle(newTitle):
                 print("A game with that name already exists! Cancelling the action...")
             else:
                 confirmUpdate = input("You are about to change the following game's title:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (oldTitle, newTitle))
                 if confirmUpdate.lower() == "y":
-                    # Update file name
-                    os.rename("%s/%s.txt" % (path, oldTitle), "%s/%s.txt" % (path, newTitle))
-                    # Update database
-                    rdb.updateGameTitle(oldTitle, newTitle)
-                    print("Changes made successfully.")
+                    if fm.updateGameTitle(oldTitle, newTitle):  # Update in local files
+                        rdb.updateGameTitle(oldTitle, newTitle) # Update in db
+                        print("Changes made successfully.")         
+                    else:
+                        print(f"An error occurred during file operations.\nPlease check {path} and try again later.")          
                 else:
                     print("Update cancelled.")
 
@@ -597,16 +585,11 @@ def updateData():
             if validDate(newRDate):
                 confirmUpdate = input("You are about to change the release date for:\n\n%s\n\nTo the following:\n\n%s\n\t↓\n%s\n\nConfirm update? (y/n): " % (gameTitle, g.release_date, newRDate))
                 if confirmUpdate.lower() == "y":
-                    # Update file (line 1 of text file)
-                    f = open("%s/%s.txt" % (path, gameTitle), "r")
-                    lines = f.readlines()
-                    lines[0] = "%s\n" % newRDate
-                    f = open("%s/%s.txt" % (path, gameTitle), "w")
-                    f.writelines(lines)
-                    f.close()
-                    # Update database
-                    rdb.updateGameReleaseDate(gameTitle, newRDate)
-                    print("Changes made successfully.")
+                    if fm.updateGameReleaseDate(gameTitle, newRDate):   # Update in local files
+                        rdb.updateGameReleaseDate(gameTitle, newRDate)  # Update in db
+                        print("Changes made successfully.")
+                    else:
+                        print(f"An error occurred during file operations.\nPlease check {path} and try again later.")
                 else:
                     print("Update cancelled.")
             else:
@@ -615,7 +598,7 @@ def updateData():
         # Query game
         g = removeIllegalChars(input("Enter game title: "))
         print()
-        results = rdb.getLikeTitle(g)
+        results = rdb.getGamesLikeTitle(g)
         # Select game
         g = resultViewer(results, True)
         if g:
