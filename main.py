@@ -2,10 +2,8 @@ import file_manager as fm
 import game
 import game_character
 import maintenance
-import os
 import ryu_database as rdb
 import ryu_number
-
 
 ### BEGIN CONSTANTS ###
 
@@ -632,10 +630,16 @@ def toggleView(currStyle):
     return currStyle
 
 def resetDatabase(detailed = False):
-    response = input("This command may take some time to execute.\nAre you sure you want to reset the database? (y/n): ")
-    print()
-    if response.lower() in ["y", "yes", "yea", "ye"]:
-        maintenance.reset_db(not detailed, detailed)
+    response = optionPicker("How would you like to reset the database?", {"h": "Hard reset (Reinsert everything)", "s": "Soft reset (Only reinsert relations)"})
+    if response == "h":
+        response = input("This command may take some time to execute.\nAre you sure you want to reset the database? (y/n): ")
+        print()
+        if response.lower() in ["y", "yes", "yea", "ye"]:
+            maintenance.reset_db(not detailed, detailed)
+        else:
+            print("Cancelling...")
+    elif response == "s":
+        maintenance.updateRelations(not detailed, detailed)
     else:
         print("Cancelling...")
 

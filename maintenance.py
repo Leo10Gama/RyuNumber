@@ -3,7 +3,6 @@ import init
 from ryu_connector import RyuConnector
 import queries
 
-# THIS IS A VERY TIME-COSTLY METHOD SO ONLY USE IT IF ABSOLUTELY NECESSARY
 def updateRelations(debug = False, debug_detailed = False):
     with RyuConnector() as rdb:
         # Start by getting Ryu, the boy, the absolute unit of a lad

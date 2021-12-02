@@ -1,6 +1,7 @@
+from typing import List, Tuple
+
 from game import game
 from game_character import game_character
-from typing import List, Tuple
 from ryu_connector import RyuConnector
 import queries
 

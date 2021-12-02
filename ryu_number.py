@@ -1,8 +1,9 @@
+from random import choice
+
 from game import game, tupleToGame
 from game_character import game_character, tupleToCharacter
 from ryu_connector import RyuConnector
 import queries
-from random import choice
 
 # Gets one step of the path
 def stepTowardsRyu(item):

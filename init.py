@@ -1,5 +1,6 @@
 # NOTE: This script should only be run ONCE to initialize the database
 import mysql.connector
+
 from ryu_connector import RyuConnector
 
 def main(debug = False, debug_detailed = False):

@@ -1,4 +1,5 @@
 from typing import Tuple
+
 from ryu_connector import RyuConnector
 import queries
 
