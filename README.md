@@ -6,6 +6,8 @@
 3. No time-limited character access (e.g. "gacha" or Fortnite events)
 4. Identifiably unique individuals (no common species e.g. Goombas or Koopas)
 
+This is similar in concept to [Bacon numbers](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon) (which link actors to Kevin Bacon by way of appearances in film) or [Erdős numbers](https://en.wikipedia.org/wiki/Erd%C5%91s_number) (which link mathematicians and researchers to Paul Erdős by way of collaborating on scientific papers).
+
 # Contents
 
 - [Functionality](#functionality)
