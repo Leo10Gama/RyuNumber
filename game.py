@@ -1,8 +1,11 @@
 from typing import Tuple
 
-class game:
+from node import Node
+
+class game(Node):
     def __init__ (self, title, ryu_number, release_date):
-        self.title, self.ryu_number, self.release_date = title, ryu_number, release_date
+        super().__init__(title, ryu_number)
+        self.title, self.release_date = self.primary_key, release_date
     def __str__ (self):
         return "%s (%s)" % (self.title, self.release_date)
     def printSelf(self, limit = -1, withRn = False):

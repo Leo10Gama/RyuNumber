@@ -1,4 +1,5 @@
 import file_manager as fm
+from node import Node
 import game
 import game_character
 import maintenance
@@ -84,42 +85,38 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
     totalPages = int(len(results) / resultsPerPage)
     if len(results) % resultsPerPage != 0: totalPages += 1
     while cmd:
-        # Print results
-        print("======================== RESULT  VIEWER ========================")
+        print("======================== RESULT  VIEWER ========================")   # Header
+        # Print all results
         print("\t%d results:\n" % len(results))
         for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
-            if type(results[i]) is game_character.game_character or type(results[i]) is game.game:
+            if issubclass(type(results[i]), Node):  # Use the Node's specific print function
                 print("(%d) %s" % (i + 1, results[i].printSelf(limit=limiter, withRn=False)))
-            else:
+            else:                                   # Just print the item normally
                 print("(%d) %s" % (i + 1, results[i]))
         else:
             print()
-        # Print nav bar
+        # NAV BAR AT THE BOTTOM
         # Print prefix part
         print("<(p) ", end="")
         if page > 2:
             print("1 ", end="")
-        # Print prefix dots (maybe)
-        if page > 3:
+        if page > 3:    # Print prefix dots (maybe)
             print("... ", end="")
         # Print current selection
-        if page == 1:
+        if page == 1:   
             print("{%d} " % page, end="")
             if page + 1 <= totalPages:
                 print("%d " % (page + 1), end="")
         else:
-            # Previous and current number
-            print("%d {%d} " % (page - 1, page), end="")
-            # Next number (if possible)
-            if page + 1 <= totalPages:
+            print("%d {%d} " % (page - 1, page), end="")    # Previous and current number
+            if page + 1 <= totalPages:  # Next number (if possible)
                 print("%d " % (page + 1), end="")
-        # Print suffix dots (maybe)
-        if page < totalPages - 2:
+        if page < totalPages - 2:   # Print suffix dots (maybe)
             print("... ", end="")
         # Print suffix part
         if (page + 1) <= totalPages - 1:
             print(" %d " % totalPages, end="")
-        print("(n)>\n================================================================\n")
+        print("(n)>\n================================================================\n")   # Footer
         # Prompt next action
         cmd = input(prompt).lower()
         print()
@@ -127,7 +124,7 @@ def resultViewer(results, canSelect = False, page = 1, resultsPerPage = 10, limi
         if cmd.isnumeric() and canSelect:
             cmd = int(cmd)
             if cmd >= 1 and cmd <= len(results):
-                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].name if isinstance(results[cmd - 1], game_character.game_character) else results[cmd - 1].title if isinstance(results[cmd - 1], game.game) else results[cmd - 1]))
+                print("Selected option (%d): %s\n" % (cmd, results[cmd - 1].primary_key if isinstance(results[cmd - 1], Node) else results[cmd - 1]))
                 return results[cmd - 1]
         if cmd != "p" and cmd != "n": cmd = ""
         if cmd == "p":

@@ -1,11 +1,13 @@
 from typing import Tuple
 
+from node import Node
 from ryu_connector import RyuConnector
 import queries
 
-class game_character:
+class game_character(Node):
     def __init__ (self, name, ryu_number, appears_in = []):
-        self.name, self.ryu_number = name, ryu_number
+        super().__init__(name, ryu_number)
+        self.name = self.primary_key
         if appears_in:
             self.appears_in = appears_in
         else:

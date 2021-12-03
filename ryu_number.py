@@ -1,12 +1,14 @@
 from random import choice
+from typing import List, Optional
 
 from game import game, tupleToGame
 from game_character import game_character, tupleToCharacter
+from node import Node
 from ryu_connector import RyuConnector
 import queries
 
 # Gets one step of the path
-def stepTowardsRyu(item):
+def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
     with RyuConnector() as rdb:
         if type(item) is game:
             # We're looking for the next character down (RN = this - 1)
@@ -32,9 +34,9 @@ def stepTowardsRyu(item):
 
 
 # Will return an array of the pattern Character-Game-Character-Game-... where the last element will always be Ryu
-def getPathFromCharacter(name):
+def getPathFromCharacter(name: str) -> List[Node]:
     # Get our first character
-    path = []
+    path: List[Node] = []
     try:
         with RyuConnector() as rdb:
             rdb.execute(queries.getCharacterByName(name))
