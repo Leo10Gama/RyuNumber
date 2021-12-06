@@ -1,40 +1,271 @@
-# THIS FILE SHOULD BE USED EXCLUSIVELY FOR STORING QUERIES
+"""Module for storing query strings for interacting with the database.
 
-# Character queries
-insertCharacter = lambda gc: "INSERT IGNORE INTO game_character (name) VALUES ('%s')" % gc
-getCharacterLikeName = lambda gc: "SELECT * FROM game_character WHERE name LIKE '%%%s%%' ORDER BY ryu_number ASC, name ASC" % gc
-getCharacterByName = lambda gc: "SELECT * FROM game_character WHERE name='%s'" % gc
-getCharactersByNames = lambda gc: f"SELECT * FROM game_character WHERE name IN {gc} ORDER BY ryu_number ASC"    # NOTE: param must be a tuple
-getCharactersByGame = lambda gt: "SELECT name, ryu_number FROM game_character, appears_in WHERE appears_in.cname=game_character.name AND appears_in.gtitle='%s'" % gt
-getCharacterByRyu = lambda rn: "SELECT * FROM game_character WHERE ryu_number=%d" % rn
-removeCharacter = lambda gc: "DELETE FROM game_character WHERE name='%s'" % gc
-updateCharacterName = lambda oldName, newName: "UPDATE game_character SET name='%s' WHERE name='%s'" % (newName, oldName)
-getNumCharacters = "SELECT COUNT(*) FROM game_character"
+All methods within the class return a string that, when executed as an
+SQL query, perform the task specified by the method signature and
+docstring.
 
-# Game queries
-insertGame = lambda game_title, release_date: "INSERT IGNORE INTO game (title, release_date) VALUES ('%s', '%s')" % (game_title, release_date)
-getGameLikeTitle = lambda gt: "SELECT * FROM game WHERE title LIKE '%%%s%%' ORDER BY release_date ASC, ryu_number ASC" % gt
-getGameByTitle = lambda gt: "SELECT * FROM game WHERE title='%s'" % gt
-getGamesByTitles = lambda gt: "SELECT * FROM game WHERE title IN %s ORDER BY ryu_number ASC" % gt   # NOTE: param must be a tuple
-getGamesByCharacter = lambda gc: "SELECT title, ryu_number, release_date FROM appears_in, game WHERE appears_in.cname='%s' AND appears_in.gtitle=game.title ORDER BY release_date ASC" % gc
-getGamesByRyu = lambda rn: "SELECT * FROM game WHERE ryu_number=%d" % rn
-removeGame = lambda gt: "DELETE FROM game WHERE title='%s'" % gt
-updateGameTitle = lambda old, newTitle: "UPDATE game SET title='%s' WHERE title='%s'" % (newTitle, old)
-updateGameReleaseDate = lambda title, newRDate: "UPDATE game SET release_date='%s' WHERE title='%s'" % (newRDate, title)
-getNumGames = "SELECT COUNT(*) FROM game"
+All method parameters will relate either directly to a field in the
+database, or be self-explanatory. For those that are not self-
+explanatory, refer to them below:
 
-# Relation queries
-insertRelation = lambda cname, gtitle: f"INSERT IGNORE INTO appears_in (cname, gtitle) VALUES ('{cname}', '{gtitle}')"
-getRelationsByCharacter = lambda gc: "SELECT * FROM appears_in WHERE cname='%s'" % gc
-getRelationsByGame = lambda gt: "SELECT * FROM appears_in WHERE gtitle='%s'" % gt
-getRelationsAndRNByCharacter = lambda gc, rn: "SELECT AI.cname, AI.gtitle, G.ryu_number FROM appears_in AS AI JOIN game AS G ON G.title=AI.gtitle WHERE cname='%s' AND G.ryu_number>=%d" % (gc, rn)
-getRelationsAndRNByGame = lambda gt, rn: "SELECT AI.cname, AI.gtitle, C.ryu_number FROM appears_in AS AI JOIN game_character AS C ON C.name=AI.cname WHERE gtitle='%s' AND C.ryu_number>=%d-1" % (gt, rn)
-removeCharacterRelations = lambda gc: "DELETE FROM appears_in WHERE cname='%s'" % gc
-removeGameRelations = lambda gt: "DELETE FROM appears_in WHERE gtitle='%s'" % gt
-removeRelation = lambda gc, gt: "DELETE FROM appears_in WHERE cname='%s' AND gtitle='%s'" % (gc, gt)
+cname -- The `name` field of either the `game_character` table, or the
+         `cname` field of the `appears_in` table.
+gtitle -- The `title` field of either the `game` table, or the `gtitle`
+          field of the `appears_in` table.
+rn -- The `ryu_number` of either the `game` or `game_character` table.
 
-# Ryu Number queries
-getGameFromCharacter = lambda cname: "SELECT DISTINCT G.title, G.ryu_number FROM appears_in INNER JOIN game_character AS C ON cname=C.name INNER JOIN game AS G ON gtitle=G.title WHERE cname LIKE '%s' AND G.ryu_number=C.ryu_number;" % cname
-getCharacterFromGame = lambda gtitle: "SELECT DISTINCT C.name, C.ryu_number FROM appears_in INNER JOIN game_character AS C ON cname=C.name INNER JOIN game AS G ON gtitle=G.title WHERE gtitle LIKE '%s' AND C.ryu_number=G.ryu_number-1;" % gtitle
-getNumCharactersWithRN = lambda rn: "SELECT COUNT(*) FROM game_character WHERE ryu_number=%d" % rn
-getNumGamesWithRN = lambda rn: "SELECT COUNT(*) FROM game WHERE ryu_number=%d" % rn
+Each method takes the form of <action><object>[specifications], where
+<action> includes (insert, get, remove, update), <object> includes
+(Character, Game, Relation, etc.), and specifications are things like 
+(ByName, ByGame, ByRyu, etc.).
+"""
+
+from typing import Tuple
+
+
+#===================#
+# CHARACTER QUERIES #
+#===================#
+def insertCharacter(cname: str) -> str: 
+    """Return a query to insert a character into the database."""
+    return (f"INSERT IGNORE INTO game_character (name) "
+            f"VALUES ('{cname}');"
+    )
+
+def getCharacterLikeName(cname: str) -> str: 
+    """Return a query to get a character whose name resembles the passed arg."""
+    return (f"SELECT * "
+            f"FROM game_character "
+            f"WHERE name LIKE '%{cname}%' "
+            f"ORDER BY ryu_number ASC, name ASC;"
+    )
+
+def getCharacterByName(cname: str) -> str: 
+    """Return a query to retrieve a character in the database."""
+    return (f"SELECT * "
+            f"FROM game_character "
+            f"WHERE name='{cname}';"
+    )
+
+def getCharactersByNames(cnames: Tuple) -> str: 
+    """Return a query to retrieve multiple characters in the database."""
+    return (f"SELECT * "
+            f"FROM game_character "
+            f"WHERE name IN {cnames} "
+            f"ORDER BY ryu_number ASC;"
+    )
+
+def getCharactersByGame(gtitle: str) -> str: 
+    """Return a query to retrieve all characters who appear in the given game."""
+    return (f"SELECT name, ryu_number "
+            f"FROM game_character, appears_in "
+            f"WHERE appears_in.cname=game_character.name AND appears_in.gtitle='{gtitle}';"
+    )
+
+def getCharacterByRyu(rn: int) -> str: 
+    """Return a query to get all characters who have the given Ryu Number."""
+    return (f"SELECT * "
+            f"FROM game_character "
+            f"WHERE ryu_number={rn};"
+    )
+
+def removeCharacter(cname: str) -> str: 
+    """Return a query to remove a given character from the database."""
+    return (f"DELETE FROM game_character "
+            f"WHERE name='{cname}';"
+    )
+
+def updateCharacterName(old_name: str, new_name: str) -> str: 
+    """Return a query to update a given character's name."""
+    return (f"UPDATE game_character "
+            f"SET name='{new_name}' "
+            f"WHERE name='{old_name}';"
+    )
+
+def getNumCharacters() -> str:
+    """Return a query to retrieve the count of all characters in the database."""
+    return f"SELECT COUNT(*) FROM game_character;"
+
+
+#==============#
+# GAME QUERIES #
+#==============#
+def insertGame(gtitle: str, release_date: str="0000-00-00") -> str: 
+    """Return a query to insert a game into the database."""
+    return (f"INSERT IGNORE INTO game (title, release_date) "
+            f"VALUES ('{gtitle}', '{release_date}');"
+    )
+
+def getGameLikeTitle(gtitle: str) -> str: 
+    """Return a query to get games whose titles are similar to the passed arg."""
+    return (f"SELECT * "
+            f"FROM game "
+            f"WHERE title LIKE '%{gtitle}%' "
+            f"ORDER BY release_date ASC, ryu_number ASC;"
+    )
+
+def getGameByTitle(gtitle: str) -> str: 
+    """Return a query to get a specific game from the database."""
+    return (f"SELECT * "
+            f"FROM game "
+            f"WHERE title='{gtitle}';"
+    )
+
+def getGamesByTitles(gtitles: Tuple) -> str: 
+    """Return a query to get games from a given tuple of titles."""
+    return (f"SELECT * "
+            f"FROM game "
+            f"WHERE title IN {gtitles} "
+            f"ORDER BY ryu_number ASC;"
+    )
+
+def getGamesByCharacter(cname: str) -> str: 
+    """Return a query to get all the games a given character appears in."""
+    return (f"SELECT title, ryu_number, release_date "
+            f"FROM appears_in, game "
+            f"WHERE appears_in.cname='{cname}' AND appears_in.gtitle=game.title "
+            f"ORDER BY release_date ASC;"
+    )
+
+def getGamesByRyu(rn: int) -> str: 
+    """Return a query to get all games with a given Ryu Number."""
+    return (f"SELECT * "
+            f"FROM game "
+            f"WHERE ryu_number={rn};"
+    )
+
+def removeGame(gtitle: str) -> str: 
+    """Return a query to remove a given game from the database."""
+    return (f"DELETE FROM game "
+            f"WHERE title='{gtitle}';"
+    )
+
+def updateGameTitle(old_title: str, new_title: str) -> str: 
+    """Return a query to update the title of a given game."""
+    return (f"UPDATE game "
+            f"SET title='{new_title}' "
+            f"WHERE title='{old_title}';"
+    )
+
+def updateGameReleaseDate(gtitle: str, new_rdate: str) -> str: 
+    """Return a query to update the release date of a given game."""
+    return (f"UPDATE game "
+            f"SET release_date='{new_rdate}' "
+            f"WHERE title='{gtitle}';"
+    )
+
+def getNumGames() -> str:
+    """Return a query to retrieve the count of all games in the database."""
+    return "SELECT COUNT(*) FROM game;"
+
+
+#==================#
+# RELATION QUERIES #
+#==================#
+def insertRelation(cname: str, gtitle: str) -> str: 
+    """Return a query to insert an `appears_in` relation to the database."""
+    return (f"INSERT IGNORE INTO appears_in (cname, gtitle) "
+            f"VALUES ('{cname}', '{gtitle}');"
+    )
+
+def getRelationsByCharacter(cname: str) -> str: 
+    """Return a query to get all relations for a given character."""
+    return (f"SELECT * "
+            f"FROM appears_in "
+            f"WHERE cname='{cname}';"
+    )
+
+def getRelationsByGame(gtitle: str) -> str: 
+    """Return a query to get all relations for a given game."""
+    return (f"SELECT * "
+            f"FROM appears_in "
+            f"WHERE gtitle='{gtitle}';"
+    )
+
+def getRelationsAndRNByCharacter(cname: str, rn: int) -> str: 
+    """Return a query to get the relation and Ryu Number of a character.
+    
+    The query retrieves the character's name, as well as the title and Ryu
+    Number of all games that the character appears in with a Ryu Number 
+    greater than or equal to the passed value.
+    """
+    return (f"SELECT AI.cname, AI.gtitle, G.ryu_number "
+            f"FROM appears_in AS AI "
+            f"JOIN game AS G ON G.title=AI.gtitle "
+            f"WHERE cname='{cname}' AND G.ryu_number>={rn};"
+    )
+
+def getRelationsAndRNByGame(gtitle: str, rn: int) -> str: 
+    """Return a query to get the relation and Ryu Number of a game.
+    
+    The query retrieves the game's title, as well as the name and Ryu
+    Number of all characters who appear in that game and have a Ryu Number 
+    greater than or equal to the passed value minus one.
+    """
+    return (f"SELECT AI.cname, AI.gtitle, C.ryu_number "
+            f"FROM appears_in AS AI "
+            f"JOIN game_character AS C ON C.name=AI.cname "
+            f"WHERE gtitle='{gtitle}' AND C.ryu_number>={rn}-1;"
+    )
+
+def removeCharacterRelations(cname: str) -> str: 
+    """Return a query to remove all of a character's relations."""
+    return (f"DELETE FROM appears_in "
+            f"WHERE cname='{cname}';"
+    )
+
+def removeGameRelations(gtitle: str) -> str: 
+    """Return a query to remove all of a game's relations."""
+    return (f"DELETE FROM appears_in "
+            f"WHERE gtitle='{gtitle}';"
+    )
+
+def removeRelation(cname: str, gtitle: str) -> str: 
+    """Return a query to remove a specific relation."""
+    return (f"DELETE FROM appears_in "
+            f"WHERE cname='{cname}' AND gtitle='{gtitle}';"
+    )
+
+
+#====================#
+# RYU NUMBER QUERIES #
+#====================#
+def getGameFromCharacter(cname: str) -> str: 
+    """Return a query to get games with equal Ryu Number to a character.
+    
+    The query will retrieve the title and Ryu Number of a game whose Ryu 
+    Number is exactly equal to the Ryu Number of the character whose name is
+    passed. This is used primarily for path-finding towards Ryu.
+    """
+    return (f"SELECT DISTINCT G.title, G.ryu_number "
+            f"FROM appears_in "
+            f"INNER JOIN game_character AS C ON cname=C.name "
+            f"INNER JOIN game AS G ON gtitle=G.title "
+            f"WHERE cname LIKE '{cname}' AND G.ryu_number=C.ryu_number;"
+    )
+
+def getCharacterFromGame(gtitle: str) -> str: 
+    """Return a query to get characters with lower Ryu Number to a game.
+    
+    The query will retrieve the name and Ryu Number of a character whose Ryu
+    Number is exactly one less than the Ryu Number of the game whose title
+    is passed. This is used primarily for path-finding towards Ryu.
+    """
+    return (f"SELECT DISTINCT C.name, C.ryu_number "
+            f"FROM appears_in "
+            f"INNER JOIN game_character AS C ON cname=C.name "
+            f"INNER JOIN game AS G ON gtitle=G.title "
+            f"WHERE gtitle LIKE '{gtitle}' AND C.ryu_number=G.ryu_number-1;"
+    )
+
+def getNumCharactersWithRN(rn: int) -> str: 
+    """Return a query to get the count of characters with a given Ryu Number."""
+    return (f"SELECT COUNT(*) FROM game_character "
+            f"WHERE ryu_number={rn};"
+    )
+
+def getNumGamesWithRN(rn: int) -> str: 
+    """Return a query to get the count of games with a given Ryu Number."""
+    return (f"SELECT COUNT(*) FROM game "
+            f"WHERE ryu_number={rn};"
+    )
