@@ -1,9 +1,9 @@
 # NOTE: This script should only be run ONCE to initialize the database
 import mysql.connector
 
-from ryu_connector import RyuConnector
+from classes.ryu_connector import RyuConnector
 
-def main(debug = False, debug_detailed = False):
+def initialize_db(debug = False, debug_detailed = False):
     if debug or debug_detailed: print("Establishing connection...")
     # Create database if not exists
     dbCreds = open("db.txt", "r").read().splitlines()
@@ -80,4 +80,4 @@ def main(debug = False, debug_detailed = False):
         if debug or debug_detailed: print("Database initialized.")
 
 if __name__ == "__main__":
-    main()
+    initialize_db()

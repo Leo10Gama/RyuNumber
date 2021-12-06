@@ -1,7 +1,7 @@
-import fill_db
-import init
-from ryu_connector import RyuConnector
-import queries
+from classes import file_manager as fm
+from init import initialize_db
+from classes.ryu_connector import RyuConnector
+from methods import queries
 
 def updateRelations(debug = False, debug_detailed = False):
     with RyuConnector() as rdb:
@@ -40,9 +40,32 @@ def updateRelations(debug = False, debug_detailed = False):
             results = [c[0] for c in rdb.fetchall()]
         if debug or debug_detailed: print("Done")
 
+def fill_db(debug = False, debug_detailed = False): # NOTE: Code runs under the implication that init.py has been run
+    with RyuConnector() as rdb:
+        # Start reading files and adding data
+        if debug or debug_detailed: print("Reading files...")
+        for filename in fm.getGameFiles():
+            # Every file is added s.t. it is saved as [Game Name].txt and the first line is the game's release date
+            if debug_detailed: print(f"\tReading {filename}...")
+            data = fm.parseFile(filename)
+            rdb.execute(queries.insertGame(data["game"][0], data["game"][1]))
+            rdb.execute(queries.getCharactersByNames(tuple(data["game_characters"])))
+            priorityInserts = [c[0] for c in rdb.fetchall()]     # Names of characters who already exist in db (to insert FIRST)
+            for x in priorityInserts:
+                if x in data["game_characters"]:
+                    data["game_characters"].remove(x)
+            for c in priorityInserts:
+                rdb.execute(queries.insertRelation(c, data["game"][0]))
+            for c in data["game_characters"]:
+                rdb.execute(queries.insertCharacter(c))
+                rdb.execute(queries.insertRelation(c, data["game"][0]))
+        if debug or debug_detailed: print("Raw data inserted successfully.")
+    
+    updateRelations(debug, debug_detailed)
+
 def reset_db(debug = False, debug_detailed = False):
     with RyuConnector() as rdb:
         rdb.execute("DROP SCHEMA IF EXISTS ryu_number")
     # Now refill the whole db
-    init.main(debug, debug_detailed)
-    fill_db.main(debug, debug_detailed)
+    initialize_db(debug, debug_detailed)
+    fill_db(debug, debug_detailed)

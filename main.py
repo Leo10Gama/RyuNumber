@@ -1,10 +1,7 @@
-import file_manager as fm
-from node import Node
-import game
-import game_character
-import maintenance
-import ryu_database as rdb
-import ryu_number
+from classes import file_manager as fm
+from classes.nodes import Node, game, game_character
+import methods.maintenance as maintenance
+from methods import ryu_database as rdb
 
 ### BEGIN CONSTANTS ###
 
@@ -54,8 +51,8 @@ MENU_COMPACT = "\n+------------------RYU DATABASE------------------+\n\
 |   (Note: brackets in desc. = capital letter)   |\n\
 +------------------------------------------------+\n"
 
+PATH = "Games List"
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
-path = "Games List"
 defaultLimiter = 3
 
 # Returns whether a string `date` follows the format (####-##-##)
@@ -195,11 +192,11 @@ def queryGame(exact = False):
         print("Nothing has been entered. Cancelling query...")
 
 def getPath(limiter = defaultLimiter):
-    def printPath(path):
-        print("%s has a Ryu Number of %d\n" % (path[0].name, path[0].ryu_number))
-        if path:       # If the path actually exists
-            for elem in path:
-                if isinstance(elem, game.game):
+    def printPath(p):
+        print("%s has a Ryu Number of %d\n" % (p[0].name, p[0].ryu_number))
+        if p:           # If the path actually exists
+            for elem in p:
+                if isinstance(elem, game):
                     print("(↓) %s" % (elem.printSelf(limiter)))
                 else:
                     print("(%d) %s" % (elem.ryu_number, elem.printSelf(limiter)))
@@ -222,7 +219,7 @@ def getPath(limiter = defaultLimiter):
             print()
             if choice == "r":
                 # Randomly get path
-                p = ryu_number.getPathFromCharacter(myChar.name)
+                p = rdb.getPathFromCharacter(myChar.name)
                 printPath(p)
             elif choice == "c":
                 x = myChar
@@ -230,16 +227,16 @@ def getPath(limiter = defaultLimiter):
                 p.append(x)
                 # Choose my path
                 while True:
-                    x = rdb.getGameByTitle(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
+                    x = rdb.getGameByTitle(resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20))
                     if x:
                         p.append(x)
                     else:
                         print("Cancelling...")
                         break
-                    x = rdb.getCharacterByName(resultViewer(ryu_number.stepTowardsRyu(x), True, resultsPerPage=20))
+                    x = rdb.getCharacterByName(resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20))
                     if x:
                         p.append(x)
-                        if type(x) is game_character.game_character and x.name == "Ryu":
+                        if type(x) is game_character and x.name == "Ryu":
                             printPath(p)
                             break
                     else:
@@ -371,7 +368,7 @@ def insertGame():
         print("Creating file for game...", end="")
         if fm.writeGameFile(newGame, releaseDate, charactersToAdd): print("Done")
         else:
-            print(f"\nAn error occurred during file creation.\nPlease check the {path} folder or try again later.\n")
+            print(f"\nAn error occurred during file creation.\nPlease check the {PATH} folder or try again later.\n")
             return
         # Insert into the database
         print("Adding to database...", end="")
@@ -410,7 +407,7 @@ def addToGame():
                         charactersToAdd.remove(c)
                 if fm.appendGameFile(gameToAddTo, charactersToAdd): print("Done")
                 else:
-                    print(f"\nAn error occurred during file insertion.\nPlease check {gameToAddTo}.txt in {path} or try again later.")
+                    print(f"\nAn error occurred during file insertion.\nPlease check {gameToAddTo}.txt in {PATH} or try again later.")
                     return
                 # Insert into the database
                 print("Adding to database...", end="")
@@ -436,7 +433,7 @@ def removeFromDatabase():
                 rdb.removeCharacterFromGame(cName, gTitle)  # Remove from db
                 print("Removed '%s' from '%s'" % (cName, gTitle))
             else:
-                print(f"An error occurred during file removal.\nPlease check {path}/{gTitle} and try again.")
+                print(f"An error occurred during file removal.\nPlease check {PATH}/{gTitle} and try again.")
 
         # Select character
         c = removeIllegalChars(input("Enter character name: "))
@@ -484,7 +481,7 @@ def removeFromDatabase():
                     rdb.removeGame(g.title) # Remove from db
                     print("'%s' successfully removed" % g.title)
                 else:
-                    print(f"An error occurred during file removal.\nPlease check {path}/{g.title} and try again later.")
+                    print(f"An error occurred during file removal.\nPlease check {PATH}/{g.title} and try again later.")
         else:
             print("No game selected. Cancelling...")
 
@@ -507,7 +504,7 @@ def updateData():
             def updateFiles(oldName, newName):
                 c = rdb.getCharacterByName(oldName)
                 if not fm.updateCharacterName(c, newName):
-                    print(f"An error occurred during file updating.\nPlease check {path} and try again later.")
+                    print(f"An error occurred during file updating.\nPlease check {PATH} and try again later.")
                     return
 
             newName = removeIllegalChars(input("Enter new name: "))
@@ -569,7 +566,7 @@ def updateData():
                         rdb.updateGameTitle(oldTitle, newTitle) # Update in db
                         print("Changes made successfully.")         
                     else:
-                        print(f"An error occurred during file operations.\nPlease check {path} and try again later.")          
+                        print(f"An error occurred during file operations.\nPlease check {PATH} and try again later.")          
                 else:
                     print("Update cancelled.")
 
@@ -584,7 +581,7 @@ def updateData():
                         rdb.updateGameReleaseDate(gameTitle, newRDate)  # Update in db
                         print("Changes made successfully.")
                     else:
-                        print(f"An error occurred during file operations.\nPlease check {path} and try again later.")
+                        print(f"An error occurred during file operations.\nPlease check {PATH} and try again later.")
                 else:
                     print("Update cancelled.")
             else:

@@ -1,8 +1,8 @@
 import os
 from typing import Dict, List
 
-from game_character import game_character
-from main import path
+from classes.nodes import game_character
+from main import PATH
 
 ERROR_MESSAGES = {
     "default":      lambda e: f"ERROR: {e}",
@@ -31,7 +31,7 @@ def replaceLine(oldLine, newLine, filePath, end = '\n'):
 def parseFile(filename) -> Dict[str, tuple]:
     # Every file is added s.t. it is saved as [Game Name].txt and the first line is the game's release date
     try:
-        data = open("%s/%s" % (path, filename), "r").read().splitlines()
+        data = open("%s/%s" % (PATH, filename), "r").read().splitlines()
         returnVal = {}
         filename = filename[:-4]
         returnVal["game"] = (filename, data.pop(0))
@@ -47,11 +47,11 @@ def parseFile(filename) -> Dict[str, tuple]:
         return None
 
 def getGameFiles():
-    return os.listdir(path)
+    return os.listdir(PATH)
 
 def writeGameFile(gtitle: str, release_date: str, characters: List[str]):
     try:
-        with open("%s/%s.txt" % (path, gtitle), "w") as f:
+        with open("%s/%s.txt" % (PATH, gtitle), "w") as f:
             f.write("%s" % release_date)
             for c in characters:
                 f.write("\n%s" % c)
@@ -65,7 +65,7 @@ def writeGameFile(gtitle: str, release_date: str, characters: List[str]):
 
 def appendGameFile(gtitle: str, characters: List[str]):
     try:
-        with open("%s/%s.txt" % (path, gtitle), "a") as f:
+        with open("%s/%s.txt" % (PATH, gtitle), "a") as f:
             for c in characters:
                 f.write("\n%s" % c)
         return True
@@ -78,7 +78,7 @@ def appendGameFile(gtitle: str, characters: List[str]):
 
 def removeCharacterFromGame(cname: str, gtitle: str):
     try:
-        replaceLine(cname, "", "%s/%s.txt" % (path, gtitle), end = "")
+        replaceLine(cname, "", "%s/%s.txt" % (PATH, gtitle), end = "")
         return True
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
@@ -89,8 +89,8 @@ def removeCharacterFromGame(cname: str, gtitle: str):
 
 def removeGame(gtitle: str):
     try:
-        if os.path.exists("%s/%s.txt" % (path, gtitle)):
-            os.remove("%s/%s.txt" % (path, gtitle))
+        if os.path.exists("%s/%s.txt" % (PATH, gtitle)):
+            os.remove("%s/%s.txt" % (PATH, gtitle))
             return True
         else:
             raise OSError()
@@ -104,7 +104,7 @@ def removeGame(gtitle: str):
 def updateCharacterName(c: game_character, new_name: str):
     try:
         for gtitle in c.appears_in:
-            replaceLine(c.name, new_name, "%s/%s.txt" % (path, gtitle))
+            replaceLine(c.name, new_name, "%s/%s.txt" % (PATH, gtitle))
         return True
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
@@ -115,7 +115,7 @@ def updateCharacterName(c: game_character, new_name: str):
 
 def updateGameTitle(old_title: str, new_title: str):
     try:
-        os.rename("%s/%s.txt" % (path, old_title), "%s/%s.txt" % (path, new_title))
+        os.rename("%s/%s.txt" % (PATH, old_title), "%s/%s.txt" % (PATH, new_title))
         return True
     except OSError:
         print(ERROR_MESSAGES["os_nopath"](old_title))
@@ -127,10 +127,10 @@ def updateGameTitle(old_title: str, new_title: str):
 def updateGameReleaseDate(gtitle: str, new_release_date: str):
     try:
         lines = []
-        with open("%s/%s.txt" % (path, gtitle), "r") as f:
+        with open("%s/%s.txt" % (PATH, gtitle), "r") as f:
             lines = f.readlines()
             lines[0] = "%s\n" % new_release_date    # The release date is the first line of the text file
-        with open("%s/%s.txt" % (path, gtitle), "w") as f:
+        with open("%s/%s.txt" % (PATH, gtitle), "w") as f:
             f.writelines(lines)
         return True
     except OSError:
