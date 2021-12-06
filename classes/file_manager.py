@@ -1,8 +1,16 @@
+"""Encapsulation of operations to occur on local files.
+
+All methods within this module serve the purpose of interacting with
+local files, allowing changes made to the database to be accurately
+reflected in local text files.
+"""
+
 import os
-from typing import Dict, List
+from typing import Dict, Optional, List
 
 from classes.nodes import game_character
 from main import PATH
+
 
 ERROR_MESSAGES = {
     "default":      lambda e: f"ERROR: {e}",
@@ -11,25 +19,63 @@ ERROR_MESSAGES = {
     "os_nopath":    lambda f: f"Path to {f} does not exist"
 }
 
-# Replaces a given line in a file with another line
-def replaceLine(oldLine, newLine, filePath, end = '\n'):
-    with open(filePath, "r+") as f:
-        lines = f.readlines()
-        for i in range(len(lines)):
-            if lines[i].strip('\n') == oldLine:
-                if i < len(lines) - 1:
-                    lines[i] = "%s%s" % (newLine, end)
-                else:
-                    lines[i] = "%s" % newLine
-                    if end == '':
-                        lines[i-1] = lines[i-1].strip('\n')
-        f.seek(0)
-        f.truncate()
-        f.seek(0)
-        f.writelines(lines)
 
-def parseFile(filename) -> Dict[str, tuple]:
-    # Every file is added s.t. it is saved as [Game Name].txt and the first line is the game's release date
+def replaceLine(oldLine: str, newLine: str, filePath: str, end: str='\n') -> bool:
+    """Replace a given line in a file with another line.
+    
+    Parameters
+    ----------
+    oldLine: str
+        The line that can be found in the file, that will be replaced. This
+        does not include the newline character found at the end of each line.
+    newLine: str
+        The new line to insert to the file in place of the oldLine.
+    filePath: str
+        The path by which to find the file, including the extension and leading
+        folders.
+    end: str
+        What to insert at the end of the line. Default is a newline character.
+        Altering this to not produce a new line may cause unintended side-
+        effects.
+    
+    Return
+    ------
+    bool
+        Whether or not the file was successfully altered.
+    """
+    try:
+        with open(filePath, "r+") as f:
+            lines = f.readlines()
+            for i in range(len(lines)):
+                if lines[i].strip('\n') == oldLine:
+                    if i < len(lines) - 1:
+                        lines[i] = "%s%s" % (newLine, end)
+                    else:
+                        lines[i] = "%s" % newLine
+                        if end == '':
+                            lines[i-1] = lines[i-1].strip('\n')
+            f.seek(0)
+            f.truncate()
+            f.seek(0)
+            f.writelines(lines)
+        return True
+    except Exception as e:
+        print(ERROR_MESSAGES["default"](e))
+        return False
+
+def parseFile(filename: str) -> Optional[Dict[str, tuple]]:
+    """Parse a game's text file and return its dictionary representation.
+    
+    Since every file is saved in an identical format, parsing each file is
+    repetitive and can be done in a similar fashion for each text file.
+
+    Return
+    ------
+    Dict[str, tuple] | None
+        A dictionary representation of the game. Specifically, with keys "game"
+        and "game_characters", which relate to a tuple (title, release_date)
+        and list of names respectively. If any errors occur, None is returned.
+    """
     try:
         data = open("%s/%s" % (PATH, filename), "r").read().splitlines()
         returnVal = {}
@@ -46,10 +92,19 @@ def parseFile(filename) -> Dict[str, tuple]:
         print(ERROR_MESSAGES["default"](e))
         return None
 
-def getGameFiles():
+def getGameFiles() -> List[str]:
+    """Return an array containing the names of all files in `main.PATH`."""
     return os.listdir(PATH)
 
-def writeGameFile(gtitle: str, release_date: str, characters: List[str]):
+def writeGameFile(gtitle: str, release_date: str, characters: List[str]) -> bool:
+    """Create a file for a game according to the database format.
+    
+    The file is created such that the filename is `gtitle`.txt, the first
+    line is the game's release date, and each subsequent line is a character
+    name, which can be found in the `characters` list. 
+
+    Returns whether or not the file was created successfully.
+    """
     try:
         with open("%s/%s.txt" % (PATH, gtitle), "w") as f:
             f.write("%s" % release_date)
@@ -63,7 +118,18 @@ def writeGameFile(gtitle: str, release_date: str, characters: List[str]):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def appendGameFile(gtitle: str, characters: List[str]):
+def appendGameFile(gtitle: str, characters: List[str]) -> bool:
+    """Add characters to the end of a game's text file.
+    
+    The title of the game is passed, and any additional characters are
+    passed in the `characters` list. This method does not check for
+    duplicate entries, so it is up to the caller to ensure this method does
+    not allow for duplicate entries, which may lead to unintended side-
+    effects.
+
+    Returns whether or not the characters were appended to the file
+    successfully.
+    """
     try:
         with open("%s/%s.txt" % (PATH, gtitle), "a") as f:
             for c in characters:
@@ -76,7 +142,11 @@ def appendGameFile(gtitle: str, characters: List[str]):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def removeCharacterFromGame(cname: str, gtitle: str):
+def removeCharacterFromGame(cname: str, gtitle: str) -> bool:
+    """Remove a character's name from a game's text file.
+    
+    Returns whether or not the character's name was removed successfully.
+    """
     try:
         replaceLine(cname, "", "%s/%s.txt" % (PATH, gtitle), end = "")
         return True
@@ -87,7 +157,11 @@ def removeCharacterFromGame(cname: str, gtitle: str):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def removeGame(gtitle: str):
+def removeGame(gtitle: str) -> bool:
+    """Remove a game's text file from the local files.
+    
+    Returns whether or not the file was removed successfully.
+    """
     try:
         if os.path.exists("%s/%s.txt" % (PATH, gtitle)):
             os.remove("%s/%s.txt" % (PATH, gtitle))
@@ -101,7 +175,11 @@ def removeGame(gtitle: str):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def updateCharacterName(c: game_character, new_name: str):
+def updateCharacterName(c: game_character, new_name: str) -> bool:
+    """Update a character's name in all games for which they appear.
+    
+    Returns whether or not the character's name was updated in all games.
+    """
     try:
         for gtitle in c.appears_in:
             replaceLine(c.name, new_name, "%s/%s.txt" % (PATH, gtitle))
@@ -113,7 +191,11 @@ def updateCharacterName(c: game_character, new_name: str):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def updateGameTitle(old_title: str, new_title: str):
+def updateGameTitle(old_title: str, new_title: str) -> bool:
+    """Update the title of a game's text file locally.
+    
+    Returns whether or not the game's title was updated successfully.
+    """
     try:
         os.rename("%s/%s.txt" % (PATH, old_title), "%s/%s.txt" % (PATH, new_title))
         return True
@@ -124,9 +206,14 @@ def updateGameTitle(old_title: str, new_title: str):
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def updateGameReleaseDate(gtitle: str, new_release_date: str):
+def updateGameReleaseDate(gtitle: str, new_release_date: str) -> bool:
+    """Update the release date of a game's local text file.
+    
+    Returns whether or not the game's release date was updated
+    successfully.
+    """
     try:
-        lines = []
+        lines: List[str] = []
         with open("%s/%s.txt" % (PATH, gtitle), "r") as f:
             lines = f.readlines()
             lines[0] = "%s\n" % new_release_date    # The release date is the first line of the text file
