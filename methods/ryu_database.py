@@ -28,6 +28,11 @@ ERROR_MESSAGES = {
 }
 
 
+def sanitizeInput(data: str) -> str:
+    """Return the data after being prepped for SQL insertion."""
+    return data.replace("'", "''")
+
+
 #============================#
 # CHARACTER DATABASE METHODS #
 #============================#
@@ -40,6 +45,7 @@ def insertCharacter(name: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            name = sanitizeInput(name)
             rdb.execute(queries.insertCharacter(name))
             return True
     except Exception as e:
@@ -54,6 +60,8 @@ def insertCharactersToGame(names: List[str], title: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
+            names = [sanitizeInput(n) for n in names]
             for n in names:
                 rdb.execute(queries.insertCharacter(n))
                 rdb.execute(queries.insertRelation(n, title))
@@ -71,6 +79,7 @@ def removeCharacter(name: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            name = sanitizeInput(name)
             rdb.execute(queries.removeCharacter(name))
             return True
     except Exception as e:
@@ -85,6 +94,8 @@ def removeCharacterFromGame(name: str, title: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            name = sanitizeInput(name)
+            title = sanitizeInput(title)
             rdb.execute(queries.removeRelation(name, title))
             return True
     except Exception as e:
@@ -98,12 +109,14 @@ def getCharacterByName(name: str) -> Optional[game_character]:
     try:
         with RyuConnector() as rdb:
             # Get the character
+            name = sanitizeInput(name)
             rdb.execute(queries.getCharacterByName(name))
             for row in rdb.fetchall():
                 result = game_character(row[0], row[1])
             # Get games character is in as well
             if result:
-                rdb.execute(queries.getGamesByCharacter(str(result.name)))
+                name = sanitizeInput(result.name)
+                rdb.execute(queries.getGamesByCharacter(name))
                 mygames = rdb.fetchall()
                 for row in mygames:
                     result.appears_in.append(row[0])
@@ -122,12 +135,14 @@ def getCharactersLikeName(name: str) -> Optional[List[game_character]]:
     try:
         with RyuConnector() as rdb:
             # Get the character(s)
+            name = sanitizeInput(name)
             rdb.execute(queries.getCharacterLikeName(name))
             for row in rdb.fetchall():
                 result.append(game_character(row[0], row[1]))
             # Get games character is in as well
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(str(c.name)))
+                name = sanitizeInput(c.name)
+                rdb.execute(queries.getGamesByCharacter(name))
                 for row in rdb.fetchall():
                     c.appears_in.append(row[0])
             return result
@@ -145,12 +160,14 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[game_character]]:
     try:
         with RyuConnector() as rdb:
             # Get the characters
+            names = tuple(sanitizeInput(n) for n in names)
             rdb.execute(queries.getCharactersByNames(names))
             for row in rdb.fetchall():
                 result.append(game_character(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
+                name = sanitizeInput(c.name)
+                rdb.execute(queries.getGamesByCharacter(name))
                 for row in rdb.fetchall():
                     c.appears_in.append(row[0])
             return result
@@ -168,12 +185,14 @@ def getCharactersByGame(title: str) -> Optional[List[game_character]]:
     try:
         with RyuConnector() as rdb:
             # Get the characters
+            title = sanitizeInput(title)
             rdb.execute(queries.getCharactersByGame(title))
             for row in rdb.fetchall():
                 result.append(game_character(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
+                name = sanitizeInput(c.name)
+                rdb.execute(queries.getGamesByCharacter(name))
                 for row in rdb.fetchall():
                     c.appears_in.append(row[0])
             return result
@@ -196,7 +215,8 @@ def getCharactersByRyuNumber(rn: int) -> Optional[List[game_character]]:
                 result.append(game_character(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
+                name = sanitizeInput(c.name)
+                rdb.execute(queries.getGamesByCharacter(name))
                 for row in rdb.fetchall():
                     c.appears_in.append(row[0])
             return result
@@ -235,6 +255,8 @@ def updateCharacterName(oldName: str, newName: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            oldName = sanitizeInput(oldName)
+            newName = sanitizeInput(newName)
             rdb.execute(queries.updateCharacterName(oldName, newName))
             return True
     except Exception as e:
@@ -254,6 +276,7 @@ def insertGame(title: str, release_date: str="0000-00-00") -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
             rdb.execute(queries.insertGame(title, release_date))
             return True
     except Exception as e:
@@ -269,6 +292,7 @@ def removeGame(title: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
             rdb.execute(queries.removeGame(title))
             return True
     except Exception as e:
@@ -280,6 +304,7 @@ def getGameByTitle(title: str) -> Optional[game]:
     """Get a game from the database using its title."""
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
             rdb.execute(queries.getGameByTitle(title))
             for row in rdb:
                 return game(row[0], row[1], row[2])
@@ -297,6 +322,7 @@ def getGamesLikeTitle(title: str) -> Optional[List[game]]:
     result: List[game] = []
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
             rdb.execute(queries.getGameLikeTitle(title))
             for row in rdb.fetchall():
                 result.append(game(row[0], row[1], row[2]))
@@ -314,6 +340,7 @@ def getGamesByTitles(titles: Tuple[str]) -> Optional[List[game]]:
     result: List[game] = []
     try:
         with RyuConnector() as rdb:
+            titles = tuple(sanitizeInput(t) for t in titles)
             rdb.execute(queries.getGamesByTitles(titles))
             for row in rdb.fetchall():
                 result.append(game(row[0], row[1], row[2]))
@@ -331,6 +358,7 @@ def getGamesByCharacter(name: str) -> Optional[List[game]]:
     result: List[game] = []
     try:
         with RyuConnector() as rdb:
+            name = sanitizeInput(name)
             rdb.execute(queries.getGamesByCharacter(name))
             for row in rdb.fetchall():
                 result.append(game(row[0], row[1], row[2]))
@@ -387,6 +415,8 @@ def updateGameTitle(oldTitle: str, newTitle: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            oldTitle = sanitizeInput(oldTitle)
+            newTitle = sanitizeInput(newTitle)
             rdb.execute(queries.updateGameTitle(oldTitle, newTitle))
             return True
     except Exception as e:
@@ -401,6 +431,7 @@ def updateGameReleaseDate(title: str, release_date: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
+            title = sanitizeInput(title)
             rdb.execute(queries.updateGameReleaseDate(title, release_date))
             return True
     except Exception as e:
@@ -422,7 +453,7 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
     with RyuConnector() as rdb:
         if type(item) is game:
             # We're looking for the next character down (RN = this - 1)
-            rdb.execute(queries.getCharacterFromGame(item.title))
+            rdb.execute(queries.getCharacterFromGame(sanitizeInput(item.primary_key)))
             cs = rdb.fetchall()
             chars = []
             for c in cs:
@@ -430,9 +461,9 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
             return chars
         elif type(item) is game_character:
             # Base case
-            if item.name == "Ryu": return None
+            if item.primary_key == "Ryu": return None
             # We're looking for the next game down (RN = this)
-            rdb.execute(queries.getGameFromCharacter(item.name))
+            rdb.execute(queries.getGameFromCharacter(sanitizeInput(item.primary_key)))
             gs = rdb.fetchall()
             games = []
             for g in gs:
@@ -442,29 +473,33 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
             # Something got borked
             return None
 
-# Will return an array of the pattern Character-Game-Character-Game-... where the last element will always be Ryu
 def getPathFromCharacter(name: str) -> Optional[List[Node]]:
     """Get a list of characters and games, including the passed one, to Ryu.
     
     The method repeatedly calls the above `stepTowardsRyu()`, looping the
     given character with games they appear in, and the characters in that
     game, until Ryu (whose Ryu Number is 0) is reached.
+
+    The returned list is in alternating form of the pattern Character-Game-
+    Character-Game-...-Ryu. The length of the list is dependent on the Ryu
+    Number of the character queried. For a queried character with a Ryu
+    Number of `n`, the list will be of size `2n+1`.
     """
     # Get our first character
     path: List[Node] = []
     try:
         with RyuConnector() as rdb:
-            rdb.execute(queries.getCharacterByName(name))
+            rdb.execute(queries.getCharacterByName(sanitizeInput(name)))
             c = tupleToCharacter(rdb.fetchone())
             path.append(c)
             if name == "Ryu": return path
             x = c
             while (path[-1].ryu_number != 0):
-                rdb.execute(queries.getGameByTitle(choice(stepTowardsRyu(x))))
+                rdb.execute(queries.getGameByTitle(sanitizeInput(choice(stepTowardsRyu(x)))))
                 g = rdb.fetchone()
                 path.append(tupleToGame(g))
                 x = path[-1]
-                rdb.execute(queries.getCharacterByName(choice(stepTowardsRyu(x))))
+                rdb.execute(queries.getCharacterByName(sanitizeInput(choice(stepTowardsRyu(x)))))
                 c = rdb.fetchone()
                 path.append(tupleToCharacter(c))
                 x = path[-1]

@@ -49,7 +49,7 @@ Alph (Pikmin)
 Lucario
 R.O.B.
 Toon Link
-Wolf ODonnell
+Wolf O'Donnell
 Villager (Animal Crossing)
 Mega Man
 Rush (Mega Man)
@@ -126,7 +126,7 @@ Yuri Kozukata
 Sukapon
 Arcade Bunny
 Klaptrap
-Kappn
+Kapp'n
 Spring Man (ARMS)
 Ghirahim
 Phosphora
@@ -208,7 +208,7 @@ Mòrag
 Brighid
 Zeke
 Pandoria
-Frankensteins Monster
+Frankenstein's Monster
 Flea Man
 Medusa (Castlevania)
 Werewolf
@@ -320,7 +320,7 @@ Booker (Animal Crossing)
 Gravity Man
 Wii Balance Board
 Zangief
-Capn Cuttlefish
+Cap'n Cuttlefish
 Funky Kong
 Beedle
 Anna (Fire Emblem)

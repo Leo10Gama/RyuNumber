@@ -75,7 +75,7 @@ MENU_COMPACT = (f"\n+------------------RYU DATABASE------------------+\n"
 
 PATH = "Games List"
 
-illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "'", "<", ">", "|", "'", "`", "%"]
+illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "<", ">", "|", "`", "%"]
 defaultLimiter = 3
 
 T = TypeVar('T')
