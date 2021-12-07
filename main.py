@@ -426,7 +426,7 @@ def addCharacters(charactersToAdd: List[str]=[]) -> List[str]:
             while whatDo == "e" or chosenCharacter:
                 chosenCharacter = resultViewer(possibleCharacters, True)
                 if not chosenCharacter:
-                    whatDo = optionPicker("Found {len(possibleCharacters)} character(s) with similar name to '{c2add}'. What would you like to do?", {"e": "Pick an existing character", "n": "Use what I wrote"})
+                    whatDo = optionPicker(f"Found {len(possibleCharacters)} character(s) with similar name to '{c2add}'. What would you like to do?", {"e": "Pick an existing character", "n": "Use what I wrote"})
                 else:
                     break
             # Existing character picked or not?

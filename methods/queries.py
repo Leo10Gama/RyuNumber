@@ -23,6 +23,11 @@ Each method takes the form of <action><object>[specifications], where
 from typing import Tuple
 
 
+ALL_GAME_CHARACTER = "name, ryu_number"
+ALL_GAME = "title, ryu_number, release_date"
+ALL_APPEARS_IN = "cname, gtitle"
+
+
 #===================#
 # CHARACTER QUERIES #
 #===================#
@@ -33,38 +38,58 @@ def insertCharacter(cname: str) -> str:
     )
 
 def getCharacterLikeName(cname: str) -> str: 
-    """Return a query to get a character whose name resembles the passed arg."""
-    return (f"SELECT * "
+    """Return a query to get a character whose name resembles the passed arg.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name LIKE '%{cname}%' "
             f"ORDER BY ryu_number ASC, name ASC;"
     )
 
 def getCharacterByName(cname: str) -> str: 
-    """Return a query to retrieve a character in the database."""
-    return (f"SELECT * "
+    """Return a query to retrieve a character in the database.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name='{cname}';"
     )
 
 def getCharactersByNames(cnames: Tuple) -> str: 
-    """Return a query to retrieve multiple characters in the database."""
-    return (f"SELECT * "
+    """Return a query to retrieve multiple characters in the database.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name IN {cnames} "
             f"ORDER BY ryu_number ASC;"
     )
 
 def getCharactersByGame(gtitle: str) -> str: 
-    """Return a query to retrieve all characters who appear in the given game."""
-    return (f"SELECT name, ryu_number "
+    """Return a query to retrieve all characters who appear in the given game.
+
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character, appears_in "
             f"WHERE appears_in.cname=game_character.name AND appears_in.gtitle='{gtitle}';"
     )
 
 def getCharacterByRyu(rn: int) -> str: 
-    """Return a query to get all characters who have the given Ryu Number."""
-    return (f"SELECT * "
+    """Return a query to get all characters who have the given Ryu Number.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE ryu_number={rn};"
     )
@@ -83,7 +108,10 @@ def updateCharacterName(old_name: str, new_name: str) -> str:
     )
 
 def getNumCharacters() -> str:
-    """Return a query to retrieve the count of all characters in the database."""
+    """Return a query to retrieve the count of all characters in the database.
+    
+    The resulting tuple is of the form: `(COUNT(*): int,)`
+    """
     return f"SELECT COUNT(*) FROM game_character;"
 
 
@@ -97,39 +125,54 @@ def insertGame(gtitle: str, release_date: str="0000-00-00") -> str:
     )
 
 def getGameLikeTitle(gtitle: str) -> str: 
-    """Return a query to get games whose titles are similar to the passed arg."""
-    return (f"SELECT * "
+    """Return a query to get games whose titles are similar to the passed arg.
+    
+    The resulting tuple gets fields from, and in order of `ALL_GAME`.
+    """
+    return (f"SELECT {ALL_GAME} "
             f"FROM game "
             f"WHERE title LIKE '%{gtitle}%' "
             f"ORDER BY release_date ASC, ryu_number ASC;"
     )
 
 def getGameByTitle(gtitle: str) -> str: 
-    """Return a query to get a specific game from the database."""
-    return (f"SELECT * "
+    """Return a query to get a specific game from the database.
+
+    The resulting tuple gets fields from, and in order of `ALL_GAME`.
+    """
+    return (f"SELECT {ALL_GAME} "
             f"FROM game "
             f"WHERE title='{gtitle}';"
     )
 
 def getGamesByTitles(gtitles: Tuple) -> str: 
-    """Return a query to get games from a given tuple of titles."""
-    return (f"SELECT * "
+    """Return a query to get games from a given tuple of titles.
+    
+    The resulting tuple gets fields from, and in order of `ALL_GAME`.
+    """
+    return (f"SELECT {ALL_GAME} "
             f"FROM game "
             f"WHERE title IN {gtitles} "
             f"ORDER BY ryu_number ASC;"
     )
 
 def getGamesByCharacter(cname: str) -> str: 
-    """Return a query to get all the games a given character appears in."""
-    return (f"SELECT title, ryu_number, release_date "
+    """Return a query to get all the games a given character appears in.
+    
+    The resulting tuple gets fields from, and in order of `ALL_GAME`.
+    """
+    return (f"SELECT {ALL_GAME} "
             f"FROM appears_in, game "
             f"WHERE appears_in.cname='{cname}' AND appears_in.gtitle=game.title "
             f"ORDER BY release_date ASC;"
     )
 
 def getGamesByRyu(rn: int) -> str: 
-    """Return a query to get all games with a given Ryu Number."""
-    return (f"SELECT * "
+    """Return a query to get all games with a given Ryu Number.
+    
+    The resulting tuple gets fields from, and in order of `ALL_GAME`.
+    """
+    return (f"SELECT {ALL_GAME} "
             f"FROM game "
             f"WHERE ryu_number={rn};"
     )
@@ -155,7 +198,10 @@ def updateGameReleaseDate(gtitle: str, new_rdate: str) -> str:
     )
 
 def getNumGames() -> str:
-    """Return a query to retrieve the count of all games in the database."""
+    """Return a query to retrieve the count of all games in the database.
+    
+    The resulting tuple is of the form: `(COUNT(*): int,)`
+    """
     return "SELECT COUNT(*) FROM game;"
 
 
@@ -169,15 +215,23 @@ def insertRelation(cname: str, gtitle: str) -> str:
     )
 
 def getRelationsByCharacter(cname: str) -> str: 
-    """Return a query to get all relations for a given character."""
-    return (f"SELECT * "
+    """Return a query to get all relations for a given character.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_APPEARS_IN`.
+    """
+    return (f"SELECT {ALL_APPEARS_IN} "
             f"FROM appears_in "
             f"WHERE cname='{cname}';"
     )
 
 def getRelationsByGame(gtitle: str) -> str: 
-    """Return a query to get all relations for a given game."""
-    return (f"SELECT * "
+    """Return a query to get all relations for a given game.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_APPEARS_IN`.
+    """
+    return (f"SELECT {ALL_APPEARS_IN} "
             f"FROM appears_in "
             f"WHERE gtitle='{gtitle}';"
     )
@@ -188,6 +242,9 @@ def getRelationsAndRNByCharacter(cname: str, rn: int) -> str:
     The query retrieves the character's name, as well as the title and Ryu
     Number of all games that the character appears in with a Ryu Number 
     greater than or equal to the passed value.
+
+    The resulting tuple takes the following form for appears_in as AI and
+    game as G: `(AI.cname: str, AI.gtitle: str, G.ryu_number: int)`
     """
     return (f"SELECT AI.cname, AI.gtitle, G.ryu_number "
             f"FROM appears_in AS AI "
@@ -201,6 +258,9 @@ def getRelationsAndRNByGame(gtitle: str, rn: int) -> str:
     The query retrieves the game's title, as well as the name and Ryu
     Number of all characters who appear in that game and have a Ryu Number 
     greater than or equal to the passed value minus one.
+
+    The resulting tuple takes the following form for appears_in as AI and
+    game_character as C: `(AI.cname: str, AI.gtitle: str, C.ryu_number: int)`
     """
     return (f"SELECT AI.cname, AI.gtitle, C.ryu_number "
             f"FROM appears_in AS AI "
@@ -236,6 +296,9 @@ def getGameFromCharacter(cname: str) -> str:
     The query will retrieve the title and Ryu Number of a game whose Ryu 
     Number is exactly equal to the Ryu Number of the character whose name is
     passed. This is used primarily for path-finding towards Ryu.
+
+    The resulting query takes the following form for game as G:
+    `(G.title: str, G.ryu_number: int)`
     """
     return (f"SELECT DISTINCT G.title, G.ryu_number "
             f"FROM appears_in "
@@ -250,6 +313,9 @@ def getCharacterFromGame(gtitle: str) -> str:
     The query will retrieve the name and Ryu Number of a character whose Ryu
     Number is exactly one less than the Ryu Number of the game whose title
     is passed. This is used primarily for path-finding towards Ryu.
+
+    The resulting query takes the following form for game_character as C:
+    `(C.name: str, C.ryu_number: int)`
     """
     return (f"SELECT DISTINCT C.name, C.ryu_number "
             f"FROM appears_in "
@@ -259,13 +325,19 @@ def getCharacterFromGame(gtitle: str) -> str:
     )
 
 def getNumCharactersWithRN(rn: int) -> str: 
-    """Return a query to get the count of characters with a given Ryu Number."""
+    """Return a query to get the count of characters with a given Ryu Number.
+    
+    The resulting query takes the form: `(COUNT(*): int)`
+    """
     return (f"SELECT COUNT(*) FROM game_character "
             f"WHERE ryu_number={rn};"
     )
 
 def getNumGamesWithRN(rn: int) -> str: 
-    """Return a query to get the count of games with a given Ryu Number."""
+    """Return a query to get the count of games with a given Ryu Number.
+    
+    The resulting query takes the form: `(COUNT(*): int)`
+    """
     return (f"SELECT COUNT(*) FROM game "
             f"WHERE ryu_number={rn};"
     )

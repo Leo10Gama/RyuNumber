@@ -49,9 +49,9 @@ def replaceLine(oldLine: str, newLine: str, filePath: str, end: str='\n') -> boo
             for i in range(len(lines)):
                 if lines[i].strip('\n') == oldLine:
                     if i < len(lines) - 1:
-                        lines[i] = "%s%s" % (newLine, end)
+                        lines[i] = f"{newLine}{end}"
                     else:
-                        lines[i] = "%s" % newLine
+                        lines[i] = f"{newLine}"
                         if end == '':
                             lines[i-1] = lines[i-1].strip('\n')
             f.seek(0)
