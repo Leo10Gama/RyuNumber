@@ -14,10 +14,8 @@ game(Node)
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, List, Tuple
+from typing import List
 
-from classes.ryu_connector import RyuConnector
-from methods import queries
 
 class Node(ABC):
     """An abstract representation of a node in the Ryu database.
@@ -158,36 +156,3 @@ class game(Node):
         """
         if withRn: return str(self) + " [%d]" % self.ryu_number
         else: return str(self)
-
-
-def tupleToCharacter(t: Tuple[str, int]) -> Optional[game_character]:
-    """Return a game_character object directly related to a tuple.
-    
-    The anticipated tuple input is the result of a query for a character.
-    That is, it is expected to be (name, ryu_number). If the passed tuple is
-    invalid or errors occur during connection, nothing is returned.
-    """
-    try:
-        with RyuConnector() as rdb:
-            rdb.execute(queries.getGamesByCharacter(t[0]))
-            gamesList = rdb.fetchall()
-            ai = []
-            for g in gamesList:
-                ai.append(g[0])
-            return game_character(t[0], t[1], ai)
-    except Exception as e:
-        print(f"ERROR: {e}")
-        return None
-
-def tupleToGame(t: Tuple[str, int, str]) -> Optional[game]:
-    """Return a game object directly related to a tuple.
-    
-    The anticipated tuple input is the result of a query for a game.
-    That is, it is expected to be (title, ryu_number, release_date). If the
-    passed tuple is invalid, nothing is returned.
-    """
-    try:
-        return game(t[0], t[1], t[2])
-    except Exception as e:
-        print(f"ERROR: {e}")
-        return None

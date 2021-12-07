@@ -18,7 +18,7 @@ Number methods.
 from typing import Optional, List, Tuple
 from random import choice
 
-from classes.nodes import Node, game, game_character, tupleToGame, tupleToCharacter
+from classes.nodes import Node, game, game_character
 from classes.ryu_connector import RyuConnector
 from methods import queries
 
@@ -32,6 +32,37 @@ def sanitizeInput(data: str) -> str:
     """Return the data after being prepped for SQL insertion."""
     return data.replace("'", "''")
 
+def tupleToCharacter(t: Tuple[str, int]) -> Optional[game_character]:
+    """Return a game_character object directly related to a tuple.
+    
+    The anticipated tuple input is the result of a query for a character.
+    That is, it is expected to be (name, ryu_number). If the passed tuple is
+    invalid or errors occur during connection, nothing is returned.
+    """
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.getGamesByCharacter(sanitizeInput(t[0])))
+            gamesList = rdb.fetchall()
+            ai = []
+            for g in gamesList:
+                ai.append(g[0])
+            return game_character(t[0], t[1], ai)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return None
+
+def tupleToGame(t: Tuple[str, int, str]) -> Optional[game]:
+    """Return a game object directly related to a tuple.
+    
+    The anticipated tuple input is the result of a query for a game.
+    That is, it is expected to be (title, ryu_number, release_date). If the
+    passed tuple is invalid, nothing is returned.
+    """
+    try:
+        return game(t[0], t[1], t[2])
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return None
 
 #============================#
 # CHARACTER DATABASE METHODS #
@@ -455,7 +486,7 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
             # We're looking for the next character down (RN = this - 1)
             rdb.execute(queries.getCharacterFromGame(sanitizeInput(item.primary_key)))
             cs = rdb.fetchall()
-            chars = []
+            chars: List[str] = []
             for c in cs:
                 chars.append(c[0])
             return chars
@@ -465,7 +496,7 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
             # We're looking for the next game down (RN = this)
             rdb.execute(queries.getGameFromCharacter(sanitizeInput(item.primary_key)))
             gs = rdb.fetchall()
-            games = []
+            games: List[str] = []
             for g in gs:
                 games.append(g[0])
             return games
@@ -490,16 +521,16 @@ def getPathFromCharacter(name: str) -> Optional[List[Node]]:
     try:
         with RyuConnector() as rdb:
             rdb.execute(queries.getCharacterByName(sanitizeInput(name)))
-            c = tupleToCharacter(rdb.fetchone())
+            c: game_character = tupleToCharacter(rdb.fetchone())
             path.append(c)
             if name == "Ryu": return path
-            x = c
+            x: Node = c
             while (path[-1].ryu_number != 0):
-                rdb.execute(queries.getGameByTitle(sanitizeInput(choice(stepTowardsRyu(x)))))
+                rdb.execute(queries.getGameByTitle(choice(stepTowardsRyu(x))))
                 g = rdb.fetchone()
                 path.append(tupleToGame(g))
                 x = path[-1]
-                rdb.execute(queries.getCharacterByName(sanitizeInput(choice(stepTowardsRyu(x)))))
+                rdb.execute(queries.getCharacterByName(choice(stepTowardsRyu(x))))
                 c = rdb.fetchone()
                 path.append(tupleToCharacter(c))
                 x = path[-1]
