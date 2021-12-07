@@ -1,11 +1,18 @@
-# NOTE: This script should only be run ONCE to initialize the database
+"""Initialize the entirety of the database.
+
+This module encompasses the creation process of the Ryu Database by
+creating all necessary tables and triggers. It should only need to be
+run once upon creation, and will only ever be run again during a hard-
+reset, where the entire database is dropped and reinserted.
+"""
+
 import mysql.connector
 
 from classes.ryu_connector import RyuConnector
 
 def initialize_db(debug = False, debug_detailed = False):
-    if debug or debug_detailed: print("Establishing connection...")
-    # Create database if not exists
+    # Connect and create db
+    if debug or debug_detailed: print(f"Establishing connection...", end="")
     dbCreds = open("db.txt", "r").read().splitlines()
 
     db1 = mysql.connector.connect(
@@ -14,70 +21,100 @@ def initialize_db(debug = False, debug_detailed = False):
         password    =dbCreds[2]
     )
     cursor = db1.cursor()
-    if debug or debug_detailed: print("Creating database...")
-    cursor.execute("CREATE DATABASE IF NOT EXISTS ryu_number;")
+    if debug or debug_detailed: print(f"Done")
+    if debug or debug_detailed: print(f"Creating database...", end="")
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS ryu_number;")
     db1.commit()
     db1.close()
+    if debug or debug_detailed: print(f"Done")
     # Connect to the db we just created
     with RyuConnector() as rdb:
-        # Create 'character' table
-        characterTable = "CREATE TABLE IF NOT EXISTS game_character (\
-            name VARCHAR(64) NOT NULL, \
-            ryu_number INTEGER DEFAULT 99, \
-            PRIMARY KEY (name));"
+        # Create tables
+        if debug or debug_detailed: print(f"Creating tables...", end="")
+        # Create 'game_character' table
+        characterTable = (f"CREATE TABLE IF NOT EXISTS game_character ("
+                            f"name        VARCHAR(64) NOT NULL, "
+                            f"ryu_number  INTEGER     DEFAULT 99, "
+                            f"PRIMARY KEY (name));"
+        )
         rdb.execute(characterTable)
         # Create 'game' table
-        gameTable = "CREATE TABLE IF NOT EXISTS game (\
-            title VARCHAR(64) NOT NULL, \
-            ryu_number INTEGER DEFAULT 99, \
-            release_date DATE, \
-            PRIMARY KEY (title));"
+        gameTable = (f"CREATE TABLE IF NOT EXISTS game ("
+                        f"title         VARCHAR(64) NOT NULL, "
+                        f"ryu_number    INTEGER     DEFAULT 99, "
+                        f"release_date  DATE, "
+                        f"PRIMARY KEY (title));"
+        )
         rdb.execute(gameTable)
         # Create 'appears_in' relation table
-        appearsInTable = "CREATE TABLE IF NOT EXISTS appears_in (\
-            cname VARCHAR(64) NOT NULL, \
-            gtitle VARCHAR(64) NOT NULL, \
-            PRIMARY KEY (cname, gtitle), \
-            FOREIGN KEY (cname) REFERENCES game_character(name) \
-                ON UPDATE CASCADE \
-                ON DELETE CASCADE, \
-            FOREIGN KEY (gtitle) REFERENCES game(title) \
-                ON UPDATE CASCADE \
-                ON DELETE CASCADE);"
+        appearsInTable = (f"CREATE TABLE IF NOT EXISTS appears_in ("
+                            f"cname     VARCHAR(64) NOT NULL, "
+                            f"gtitle    VARCHAR(64) NOT NULL, "
+                            f"PRIMARY KEY (cname, gtitle), "
+                            f"FOREIGN KEY (cname) REFERENCES game_character(name) "
+                                f"ON UPDATE CASCADE "
+                                f"ON DELETE CASCADE, "
+                            f"FOREIGN KEY (gtitle) REFERENCES game(title) "
+                                f"ON UPDATE CASCADE "
+                                f"ON DELETE CASCADE);"
+        )
         rdb.execute(appearsInTable)
+        if debug or debug_detailed: print(f"Done")
 
-        if debug or debug_detailed: print("Creating triggers...")
         # Create the triggers to automatically set the Ryu Numbers
-        dropAI = "DROP TRIGGER IF EXISTS update_ai;"
-        dropAI2 = "DROP TRIGGER IF EXISTS insert_ai;"
-        insertAI = "CREATE TRIGGER insert_ai AFTER INSERT ON appears_in FOR EACH ROW BEGIN \
-            IF (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) > (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) THEN \
-                UPDATE game AS G \
-                SET ryu_number=(SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname)+1 \
-                WHERE G.title=NEW.gtitle; \
-            ELSEIF (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) > (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) THEN \
-                UPDATE game_character AS C \
-                SET ryu_number=(SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) \
-                WHERE C.name=NEW.cname; \
-            END IF; END;"
-        updateAI = "CREATE TRIGGER update_ai AFTER UPDATE ON appears_in FOR EACH ROW BEGIN \
-            IF (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) > (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) THEN \
-                UPDATE game AS G \
-                SET ryu_number=(SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname)+1 \
-                WHERE G.title=NEW.gtitle; \
-            ELSEIF (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) > (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) THEN \
-                UPDATE game_character AS C \
-                SET ryu_number=(SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) \
-                WHERE C.name=NEW.cname; \
-            END IF; END;"
+        if debug or debug_detailed: print(f"Creating triggers...", end="")
+        dropAI = f"DROP TRIGGER IF EXISTS update_ai;"
+        dropAI2 = f"DROP TRIGGER IF EXISTS insert_ai;"
+        insertAI = (f"CREATE TRIGGER insert_ai AFTER INSERT ON appears_in "
+                    f"FOR EACH ROW "
+                    f"BEGIN "
+                        f"IF (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) > (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) THEN "
+                            f"UPDATE game AS G "
+                            f"SET ryu_number=("
+                                f"SELECT ryu_number "
+                                f"FROM game_character AS C "
+                                f"WHERE C.name=NEW.cname)+1 "
+                            f"WHERE G.title=NEW.gtitle; "
+                        f"ELSEIF (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) > (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) THEN "
+                            f"UPDATE game_character AS C "
+                            f"SET ryu_number=("
+                                f"SELECT ryu_number "
+                                f"FROM game AS G "
+                                f"WHERE G.title=NEW.gtitle) "
+                            f"WHERE C.name=NEW.cname; "
+                        f"END IF; "
+                    f"END;"
+        )
+        updateAI = (f"CREATE TRIGGER update_ai AFTER UPDATE ON appears_in "
+                    f"FOR EACH ROW "
+                    f"BEGIN "
+                        f"IF (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) > (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) THEN "
+                            f"UPDATE game AS G "
+                            f"SET ryu_number=("
+                                f"SELECT ryu_number "
+                                f"FROM game_character AS C "
+                                f"WHERE C.name=NEW.cname)+1 "
+                            f"WHERE G.title=NEW.gtitle; "
+                        f"ELSEIF (SELECT ryu_number FROM game_character AS C WHERE C.name=NEW.cname) > (SELECT ryu_number FROM game AS G WHERE G.title=NEW.gtitle) THEN "
+                            f"UPDATE game_character AS C "
+                            f"SET ryu_number=("
+                                f"SELECT ryu_number "
+                                f"FROM game AS G "
+                                f"WHERE G.title=NEW.gtitle) "
+                            f"WHERE C.name=NEW.cname; "
+                        f"END IF; "
+                    f"END;"
+        )
         rdb.execute(dropAI)
         rdb.execute(dropAI2)
         rdb.execute(insertAI)
         rdb.execute(updateAI)
+        if debug or debug_detailed: print(f"Done")
 
         # Add the legendary RYU himself
-        rdb.execute("INSERT IGNORE INTO game_character (name, ryu_number) VALUES ('Ryu', 0)")    
-        if debug or debug_detailed: print("Database initialized.")
+        rdb.execute(f"INSERT IGNORE INTO game_character (name, ryu_number) VALUES ('Ryu', 0)") 
+
+    if debug or debug_detailed: print(f"Database successfully initialized.")
 
 if __name__ == "__main__":
     initialize_db()
