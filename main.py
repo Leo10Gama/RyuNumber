@@ -15,7 +15,7 @@ from enum import Enum, auto
 from typing import Dict, List, Optional, TypeVar
 
 from classes import file_manager as fm
-from classes.nodes import Node, game, game_character
+from classes.nodes import Node, Game, GameCharacter
 import methods.maintenance as maintenance
 from methods import ryu_database as rdb
 
@@ -113,7 +113,7 @@ def resultViewer(results: List[T], canSelect: bool=False, page: int=1, resultsPe
         How many results to show on a single page. (Default is 10)
     limiter: int
         How many additional lines certain objects take up in the viewer. This
-        primarily affects the `appears_in` field of game_character objects.
+        primarily affects the `appears_in` field of GameCharacter objects.
         (Default is 1)
 
     Returns
@@ -236,18 +236,18 @@ def queryCharacter(exact: bool=False, limiter: int=-1) -> None:
         print("Nothing has been entered. Cancelling query...")
         return
     # Check whether or not to get by exact
-    if exact:       # Querying by exact name (myCharacters is a game_character object)
-        myCharacters: Optional[game_character] = rdb.getCharacterByName(charToQuery)
+    if exact:       # Querying by exact name (myCharacters is a GameCharacter object)
+        myCharacters: Optional[GameCharacter] = rdb.getCharacterByName(charToQuery)
         if not myCharacters:    # No character found
             print("No characters by that name could be found")
             return
         print(myCharacters.printSelf(limiter, withRn=True))                
-    else:           # Querying by generalized name (myCharacters is a list of game_character objects)
-        myCharacters: Optional[List[game_character]] = rdb.getCharactersLikeName(charToQuery)  
+    else:           # Querying by generalized name (myCharacters is a list of GameCharacter objects)
+        myCharacters: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(charToQuery)  
         if not myCharacters:    # No character found
             print("No characters by that name could be found")
             return
-        myChar: Optional[game_character] = resultViewer(myCharacters, canSelect=True)
+        myChar: Optional[GameCharacter] = resultViewer(myCharacters, canSelect=True)
         if myChar:      # We have a character selected, print them
             print(myChar.printSelf(withRn=True))
 
@@ -268,19 +268,19 @@ def queryGame(exact=False) -> None:
         print("Nothing has been entered. Cancelling query...")
         return
     # Check whether to get exact or not
-    g: Optional[game]
-    if exact:           # Querying by exact title (myGames is a game object)
+    g: Optional[Game]
+    if exact:           # Querying by exact title (myGames is a Game object)
         g = rdb.getGameByTitle(gameToQuery)
         if not g:       # No game exists
             print("No games by that name could be found")
             return
         print(g.printSelf(withRn = True))            
-    else:               # Querying by generalized title (myGames is a list of game objects)
-        myGames: Optional[List[game]] = rdb.getGamesLikeTitle(gameToQuery)
+    else:               # Querying by generalized title (myGames is a list of Game objects)
+        myGames: Optional[List[Game]] = rdb.getGamesLikeTitle(gameToQuery)
         if not myGames: # No games exist
             print("No games by that name could be found")
             return
-        g: game = resultViewer(myGames, canSelect=True, resultsPerPage=20)
+        g: Game = resultViewer(myGames, canSelect=True, resultsPerPage=20)
         if not g:       # No game selected
             return
         print(g.printSelf(withRn=True))            
@@ -302,7 +302,7 @@ def getPath(limiter: int=defaultLimiter) -> None:
             return
         print(f"{p[0].primary_key} has a Ryu Number of {p[0].ryu_number}\n")
         for elem in p:
-            if isinstance(elem, game):
+            if isinstance(elem, Game):
                 print("(↓) %s" % (elem.printSelf(limiter)))
             else:
                 print("(%d) %s" % (elem.ryu_number, elem.printSelf(limiter)))
@@ -345,7 +345,7 @@ def getPath(limiter: int=defaultLimiter) -> None:
             x = rdb.getCharacterByName(resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20))
             if x:
                 p.append(x)
-                if type(x) is game_character and x.primary_key == "Ryu":
+                if type(x) is GameCharacter and x.primary_key == "Ryu":
                     printPath(p)
                     break
             else:
@@ -417,11 +417,11 @@ def addCharacters(charactersToAdd: List[str]=[]) -> List[str]:
         if not c2add:
             c2add = "owo"
             continue
-        possibleCharacters: Optional[List[game_character]] = rdb.getCharactersLikeName(c2add)
+        possibleCharacters: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(c2add)
         # If character exists, prompt to pick one of them or the entered value, or some other value entirely
         if possibleCharacters:
             whatDo = optionPicker(f"Found {len(possibleCharacters)} character(s) with similar name to '{c2add}'. What would you like to do?", {"e": "Pick an existing character", "n": "Use what I wrote"})
-            chosenCharacter: Optional[game_character] = None
+            chosenCharacter: Optional[GameCharacter] = None
             # Using an existing character
             while whatDo == "e" or chosenCharacter:
                 chosenCharacter = resultViewer(possibleCharacters, True)
@@ -517,11 +517,11 @@ def addToGame() -> None:
         print("Nothing entered. Cancelling action...")
         return
     # Verify game in DB and cross-check with user
-    games: Optional[List[game]] = rdb.getGamesLikeTitle(gameTitle)
+    games: Optional[List[Game]] = rdb.getGamesLikeTitle(gameTitle)
     if not games:
         print("That game does not exist in the database! Try inserting the game yourself.")
         return
-    gameToAddTo: Optional[game] = resultViewer(games, True)
+    gameToAddTo: Optional[Game] = resultViewer(games, True)
     # Make sure a character is selected
     if not gameToAddTo:
         print("Invalid input. Cancelling action...")    
@@ -571,7 +571,7 @@ def removeFromDatabase() -> None:
 
         # Select character
         cname: str = removeIllegalChars(input("Enter character name: "))
-        c: Optional[game_character] = resultViewer(rdb.getCharactersLikeName(cname), True)
+        c: Optional[GameCharacter] = resultViewer(rdb.getCharactersLikeName(cname), True)
         # Ensure a character has been selected
         if not c:
             print("No character selected. Cancelling...")
@@ -609,7 +609,7 @@ def removeFromDatabase() -> None:
     def removeGame() -> None:
         """Remove a game from the database and local files."""
         gtitle: str = removeIllegalChars(input("Enter game title: "))
-        g: Optional[game] = resultViewer(rdb.getGamesLikeTitle(gtitle), True)
+        g: Optional[Game] = resultViewer(rdb.getGamesLikeTitle(gtitle), True)
         # Make sure an option is actually selected
         if not g:
             print("No game selected. Cancelling...")
@@ -649,12 +649,12 @@ def updateData() -> None:
             """Select and update a character's name."""
             newName: str = removeIllegalChars(input("Enter new name: "))
             print()
-            existing: Optional[game_character] = rdb.getCharacterByName(newName)
+            existing: Optional[GameCharacter] = rdb.getCharacterByName(newName)
             if existing:    # Overwriting character
                 confirmUpdate: str = input("A character with that name already exists:\n\n%s\n\nThis will merge that character with '%s'.\nProceed? (y/n): " % (existing.printSelf(), oldName))
                 print()
                 if confirmUpdate.lower() == "y":
-                    c: Optional[game_character] = rdb.getCharacterByName(oldName)
+                    c: Optional[GameCharacter] = rdb.getCharacterByName(oldName)
                     fm.updateCharacterName(c, existing.name)
                     for g in c.appears_in:
                         rdb.insertCharactersToGame([existing.name], g)
@@ -676,9 +676,9 @@ def updateData() -> None:
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
-        results: Optional[List[game_character]] = rdb.getCharactersLikeName(cname)
+        results: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(cname)
         # Select character
-        c: Optional[game_character] = resultViewer(results, True)
+        c: Optional[GameCharacter] = resultViewer(results, True)
         if not c:
             print("No character selected. Cancelling the operation...")
             return
@@ -729,9 +729,9 @@ def updateData() -> None:
         # Query game
         gtitle: str = removeIllegalChars(input("Enter game title: "))
         print()
-        results: Optional[List[game]] = rdb.getGamesLikeTitle(gtitle)
+        results: Optional[List[Game]] = rdb.getGamesLikeTitle(gtitle)
         # Select game
-        g: Optional[game] = resultViewer(results, True)
+        g: Optional[Game] = resultViewer(results, True)
         if not g:
             print("No game selected. Cancelling the operation...")
             return

@@ -8,7 +8,7 @@ reflected in local text files.
 import os
 from typing import Dict, Optional, List
 
-from classes.nodes import game_character
+from classes.nodes import GameCharacter
 from main import PATH
 
 
@@ -73,7 +73,7 @@ def parseFile(filename: str) -> Optional[Dict[str, tuple]]:
     ------
     Dict[str, tuple] | None
         A dictionary representation of the game. Specifically, with keys "game"
-        and "game_characters", which relate to a tuple (title, release_date)
+        and "GameCharacters", which relate to a tuple (title, release_date)
         and list of names respectively. If any errors occur, None is returned.
     """
     try:
@@ -175,7 +175,7 @@ def removeGame(gtitle: str) -> bool:
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def updateCharacterName(c: game_character, new_name: str) -> bool:
+def updateCharacterName(c: GameCharacter, new_name: str) -> bool:
     """Update a character's name in all games for which they appear.
     
     Returns whether or not the character's name was updated in all games.

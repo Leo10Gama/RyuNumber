@@ -18,7 +18,7 @@ Number methods.
 from typing import Optional, List, Tuple
 from random import choice
 
-from classes.nodes import Node, game, game_character
+from classes.nodes import Node, Game, GameCharacter
 from classes.ryu_connector import RyuConnector
 from methods import queries
 
@@ -32,8 +32,8 @@ def sanitizeInput(data: str) -> str:
     """Return the data after being prepped for SQL insertion."""
     return data.replace("'", "''")
 
-def tupleToCharacter(t: Tuple[str, int]) -> Optional[game_character]:
-    """Return a game_character object directly related to a tuple.
+def tupleToCharacter(t: Tuple[str, int]) -> Optional[GameCharacter]:
+    """Return a GameCharacter object directly related to a tuple.
     
     The anticipated tuple input is the result of a query for a character.
     That is, it is expected to be (name, ryu_number). If the passed tuple is
@@ -46,20 +46,20 @@ def tupleToCharacter(t: Tuple[str, int]) -> Optional[game_character]:
             ai = []
             for g in gamesList:
                 ai.append(g[0])
-            return game_character(t[0], t[1], ai)
+            return GameCharacter(t[0], t[1], ai)
     except Exception as e:
         print(f"ERROR: {e}")
         return None
 
-def tupleToGame(t: Tuple[str, int, str]) -> Optional[game]:
-    """Return a game object directly related to a tuple.
+def tupleToGame(t: Tuple[str, int, str]) -> Optional[Game]:
+    """Return a Game object directly related to a tuple.
     
     The anticipated tuple input is the result of a query for a game.
     That is, it is expected to be (title, ryu_number, release_date). If the
     passed tuple is invalid, nothing is returned.
     """
     try:
-        return game(t[0], t[1], t[2])
+        return Game(t[0], t[1], t[2])
     except Exception as e:
         print(f"ERROR: {e}")
         return None
@@ -84,7 +84,7 @@ def insertCharacter(name: str) -> bool:
         return False
 
 def insertCharactersToGame(names: List[str], title: str) -> bool:
-    """Insert a list of characters into a game.
+    """Insert a list of characters into a Game.
     
     The method will return a boolean value as to whether or not all
     characters have been successfully inserted.
@@ -118,7 +118,7 @@ def removeCharacter(name: str) -> bool:
         return False
 
 def removeCharacterFromGame(name: str, title: str) -> bool:
-    """Remove a character's appears_in relation from a given game.
+    """Remove a character's appears_in relation from a given Game.
     
     The method will return a boolean value as to whether or not the
     relation has been successfully removed.
@@ -134,16 +134,16 @@ def removeCharacterFromGame(name: str, title: str) -> bool:
         return False
 
 # RETRIEVE
-def getCharacterByName(name: str) -> Optional[game_character]:
+def getCharacterByName(name: str) -> Optional[GameCharacter]:
     """Get a character from the database using their name."""
-    result: Optional[game_character] = None
+    result: Optional[GameCharacter] = None
     try:
         with RyuConnector() as rdb:
             # Get the character
             name = sanitizeInput(name)
             rdb.execute(queries.getCharacterByName(name))
             for row in rdb.fetchall():
-                result = game_character(row[0], row[1])
+                result = GameCharacter(row[0], row[1])
             # Get games character is in as well
             if result:
                 name = sanitizeInput(result.name)
@@ -156,20 +156,20 @@ def getCharacterByName(name: str) -> Optional[game_character]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersLikeName(name: str) -> Optional[List[game_character]]:
+def getCharactersLikeName(name: str) -> Optional[List[GameCharacter]]:
     """Get characters from the database whose names are similar to the arg.
     
     Returns an empty array if no characters can be found, but returns None 
     if any sorts of errors occur.
     """
-    result: List[game_character] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the character(s)
             name = sanitizeInput(name)
             rdb.execute(queries.getCharacterLikeName(name))
             for row in rdb.fetchall():
-                result.append(game_character(row[0], row[1]))
+                result.append(GameCharacter(row[0], row[1]))
             # Get games character is in as well
             for c in result:
                 name = sanitizeInput(c.name)
@@ -181,20 +181,20 @@ def getCharactersLikeName(name: str) -> Optional[List[game_character]]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByNames(names: Tuple[str]) -> Optional[List[game_character]]:
+def getCharactersByNames(names: Tuple[str]) -> Optional[List[GameCharacter]]:
     """Get characters from the database whose names are in the passed tuple.
     
     Returns an empty array if no characters can be found, but returns None
     if any sorts of errors occur.
     """
-    result: List[game_character] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the characters
             names = tuple(sanitizeInput(n) for n in names)
             rdb.execute(queries.getCharactersByNames(names))
             for row in rdb.fetchall():
-                result.append(game_character(row[0], row[1]))
+                result.append(GameCharacter(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
                 name = sanitizeInput(c.name)
@@ -206,20 +206,20 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[game_character]]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByGame(title: str) -> Optional[List[game_character]]:
-    """Get a list of all characters who appear in a given game.
+def getCharactersByGame(title: str) -> Optional[List[GameCharacter]]:
+    """Get a list of all characters who appear in a given Game.
     
     Returns an empty array if no characters exist in the game, or if the
     game doesn't exist, and returns None if errors occur.
     """
-    result: List[game_character] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the characters
             title = sanitizeInput(title)
             rdb.execute(queries.getCharactersByGame(title))
             for row in rdb.fetchall():
-                result.append(game_character(row[0], row[1]))
+                result.append(GameCharacter(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
                 name = sanitizeInput(c.name)
@@ -231,19 +231,19 @@ def getCharactersByGame(title: str) -> Optional[List[game_character]]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByRyuNumber(rn: int) -> Optional[List[game_character]]:
+def getCharactersByRyuNumber(rn: int) -> Optional[List[GameCharacter]]:
     """Get a list of all characters who have a given Ryu Number.
     
     Returns an empty array if no characters can be found, but returns None
     if any sorts of errors occur.
     """
-    result: List[game_character] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the characters
             rdb.execute(queries.getCharacterByRyu(int(rn)))
             for row in rdb.fetchall():
-                result.append(game_character(row[0], row[1]))
+                result.append(GameCharacter(row[0], row[1]))
             # Get the games that the characters are in as well
             for c in result:
                 name = sanitizeInput(c.name)
@@ -300,7 +300,7 @@ def updateCharacterName(oldName: str, newName: str) -> bool:
 #=======================#
 # INSERT
 def insertGame(title: str, release_date: str="0000-00-00") -> bool:
-    """Insert a game to the database.
+    """Insert a Game to the database.
     
     The method will return a boolean value as to whether or not the
     game has been successfully inserted.
@@ -316,7 +316,7 @@ def insertGame(title: str, release_date: str="0000-00-00") -> bool:
 
 # REMOVE
 def removeGame(title: str) -> bool:
-    """Remove a game from the database
+    """Remove a Game from the database
     
     The method will return a boolean value as to whether or not the
     game has been successfully removed.
@@ -331,85 +331,85 @@ def removeGame(title: str) -> bool:
         return False
 
 # RETRIEVE
-def getGameByTitle(title: str) -> Optional[game]:
-    """Get a game from the database using its title."""
+def getGameByTitle(title: str) -> Optional[Game]:
+    """Get a Game from the database using its title."""
     try:
         with RyuConnector() as rdb:
             title = sanitizeInput(title)
             rdb.execute(queries.getGameByTitle(title))
             for row in rdb:
-                return game(row[0], row[1], row[2])
+                return Game(row[0], row[1], row[2])
             return None
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getGamesLikeTitle(title: str) -> Optional[List[game]]:
+def getGamesLikeTitle(title: str) -> Optional[List[Game]]:
     """Get games from the database whose titles are similar to the arg.
     
     Returns an empty array if no games can be found, but returns None if any
     sorts of errors occur.
     """
-    result: List[game] = []
+    result: List[Game] = []
     try:
         with RyuConnector() as rdb:
             title = sanitizeInput(title)
             rdb.execute(queries.getGameLikeTitle(title))
             for row in rdb.fetchall():
-                result.append(game(row[0], row[1], row[2]))
+                result.append(Game(row[0], row[1], row[2]))
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getGamesByTitles(titles: Tuple[str]) -> Optional[List[game]]:
+def getGamesByTitles(titles: Tuple[str]) -> Optional[List[Game]]:
     """Get games from the database whose titles are in the passed tuple.
     
     Returns an empty array if no games can be found, but returns None if any
     sorts of errors occur.
     """
-    result: List[game] = []
+    result: List[Game] = []
     try:
         with RyuConnector() as rdb:
             titles = tuple(sanitizeInput(t) for t in titles)
             rdb.execute(queries.getGamesByTitles(titles))
             for row in rdb.fetchall():
-                result.append(game(row[0], row[1], row[2]))
+                result.append(Game(row[0], row[1], row[2]))
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getGamesByCharacter(name: str) -> Optional[List[game]]:
+def getGamesByCharacter(name: str) -> Optional[List[Game]]:
     """Get a list of all the games a given character appears in.
     
     Returns an empty array if the character does not exist in any games, and
     returns None if errors occur.
     """
-    result: List[game] = []
+    result: List[Game] = []
     try:
         with RyuConnector() as rdb:
             name = sanitizeInput(name)
             rdb.execute(queries.getGamesByCharacter(name))
             for row in rdb.fetchall():
-                result.append(game(row[0], row[1], row[2]))
+                result.append(Game(row[0], row[1], row[2]))
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getGamesByRyuNumber(rn: int) -> Optional[List[game]]:
+def getGamesByRyuNumber(rn: int) -> Optional[List[Game]]:
     """Get a list of all games that have a given Ryu Number.
     
     Returns an empty array if no games can be found, but returns None if any
     sorts of errors occur.
     """
-    result: List[game] = []
+    result: List[Game] = []
     try:
         with RyuConnector() as rdb:
             rdb.execute(queries.getGamesByRyu(rn))
             for row in rdb.fetchall():
-                result.append(game(row[0], row[1], row[2]))
+                result.append(Game(row[0], row[1], row[2]))
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -439,7 +439,7 @@ def getNumGamesWithRN(rn: int) -> int:
 
 # UPDATE
 def updateGameTitle(oldTitle: str, newTitle: str) -> bool:
-    """Update the title of a game in the database.
+    """Update the title of a Game in the database.
     
     The method will return a boolean value as to whether or not the
     game's title has been successfully updated.
@@ -455,7 +455,7 @@ def updateGameTitle(oldTitle: str, newTitle: str) -> bool:
         return False
 
 def updateGameReleaseDate(title: str, release_date: str) -> bool:
-    """Update the release date of a game in the database.
+    """Update the release date of a Game in the database.
     
     The method will return a boolean value as to whether or not the
     game's release date has been successfully updated.
@@ -476,13 +476,13 @@ def updateGameReleaseDate(title: str, release_date: str) -> bool:
 def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
     """Get one step of a path towards Ryu.
     
-    If the passed item is a game, then a list of all characters with a Ryu 
+    If the passed item is a Game, then a list of all characters with a Ryu 
     Number exactly one less than the game's is returned (if possible).
     If the passed item is a character, then a list of all games with a Ryu 
     Number exactly equal to the character's is returned (if possible).
     """
     with RyuConnector() as rdb:
-        if type(item) is game:
+        if type(item) is Game:
             # We're looking for the next character down (RN = this - 1)
             rdb.execute(queries.getCharacterFromGame(sanitizeInput(item.primary_key)))
             cs = rdb.fetchall()
@@ -490,7 +490,7 @@ def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
             for c in cs:
                 chars.append(c[0])
             return chars
-        elif type(item) is game_character:
+        elif type(item) is GameCharacter:
             # Base case
             if item.primary_key == "Ryu": return None
             # We're looking for the next game down (RN = this)
@@ -521,7 +521,7 @@ def getPathFromCharacter(name: str) -> Optional[List[Node]]:
     try:
         with RyuConnector() as rdb:
             rdb.execute(queries.getCharacterByName(sanitizeInput(name)))
-            c: game_character = tupleToCharacter(rdb.fetchone())
+            c: GameCharacter = tupleToCharacter(rdb.fetchone())
             path.append(c)
             if name == "Ryu": return path
             x: Node = c

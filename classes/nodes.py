@@ -57,7 +57,7 @@ class Node(ABC):
         pass
 
 
-class game_character(Node):
+class GameCharacter(Node):
     """A class meant to represent a character table in the database.
     
     The character object has related attributes for all fields it has in the
@@ -116,7 +116,7 @@ class game_character(Node):
         return returnStr
 
 
-class game(Node):
+class Game(Node):
     """A class meant to represent the game table in the database.
     
     The game object has related attributes for all fields it has in the
