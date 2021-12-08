@@ -27,6 +27,7 @@ from typing import Tuple
 ALL_GAME_CHARACTER = "name, ryu_number"
 ALL_GAME = "title, ryu_number, release_date"
 ALL_APPEARS_IN = "cname, gtitle"
+ALL_ALIAS = "cname, aname"
 
 def sanitizeInput(data: str) -> str:
     """Return the data after being prepped for SQL insertion.

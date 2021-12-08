@@ -21,3 +21,4 @@ Aang
 Toph Beifong
 Korra
 CatDog
+Garfield

@@ -39,6 +39,7 @@ MENU = (f"\n+------------------RYU DATABASE------------------+\n"
           f"|                                                |\n"
           f"| (i/I) Insert a game and characters into the DB |\n"
           f"| (a/A) Add characters to an existing game       |\n"
+          f"| (l/L) Add an alias to an existing character    |\n"
           f"| (x/X) Remove an item from the database         |\n"
           f"| (u/U) Update a character or game               |\n"
           f"|                                                |\n"
@@ -62,6 +63,7 @@ MENU_COMPACT = (f"\n+------------------RYU DATABASE------------------+\n"
                   f"| (n/N) See stats about the database             |\n"
                   f"| (i/I) Insert a game and characters into the DB |\n"
                   f"| (a/A) Add characters to an existing game       |\n"
+                  f"| (l/L) Add an alias to an existing character    |\n"
                   f"| (x/X) Remove an item from the database         |\n"
                   f"| (u/U) Update a character or game               |\n"
                   f"| (v/V) Toggle view to be compact or descriptive |\n"
@@ -74,6 +76,7 @@ MENU_COMPACT = (f"\n+------------------RYU DATABASE------------------+\n"
 )
 
 GAMES_PATH = "data/games"
+TABLES_PATH = "data/tables"
 
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "<", ">", "|", "`", "%"]
 defaultLimiter = 3
@@ -397,7 +400,7 @@ def getStats() -> None:
 
 # ALTER DATABASE FUNCTIONS
 
-def addCharacters(charactersToAdd: List[str]=[]) -> List[str]:
+def addCharacters(charactersToAdd: List[str]=None) -> List[str]:
     """Retrieve a list of character names.
     
     An already-started character list charactersToAdd is available as a
@@ -405,6 +408,7 @@ def addCharacters(charactersToAdd: List[str]=[]) -> List[str]:
     in the given game.
     """
 
+    if charactersToAdd is None: charactersToAdd = []
     c2add: Optional[List[str]] = None
     while not c2add:
         # Receive input
@@ -484,7 +488,7 @@ def insertGame() -> None:
         releaseDate = None
         print("Format invalid. Please enter the release date in the proper format!")
     # Get characters
-    charactersToAdd: List[str] = addCharacters([])
+    charactersToAdd: List[str] = addCharacters()
     if not charactersToAdd: return
     # Write the file
     print("Creating file for game...", end="")
@@ -551,6 +555,39 @@ def addToGame() -> None:
     if priorityInserts: rdb.insertCharactersToGame(priorityInserts, gameTitle)
     if charactersToAdd: rdb.insertCharactersToGame(charactersToAdd, gameTitle)
     print("Done")            
+
+def addAlias() -> None:
+    """Give an existing character a new alias."""
+    # Get the character to give an alias to
+    cname: str = removeIllegalChars(input("Enter character's name: "))
+    print()
+    if not cname:
+        print("Nothing has been entered. Cancelling...")
+        return
+    myChars: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(cname)
+    if not myChars:
+        print("No characters by that name could be found. Cancelling the operation...")
+        return
+    c: Optional[GameCharacter] = resultViewer(myChars, canSelect=True)
+    if not c:
+        print("No character selected. Cancelling...")
+        return
+    # Get their new alias
+    alias: str = removeIllegalChars(input(f"Enter a new alias for '{c.name}': "))
+    if not alias:
+        print("Nothing entered. Cancelling...")
+        return
+    # Ensure new alias doesn't conflict with existing characters/aliases
+    if rdb.getCharacterByName(alias) is not None:
+        print("A character by that name already exists!")
+        return
+    # Perform the operations
+    option = input(f"You are about to add the alias '{alias}'\n to the character '{c.name}'.\nProceed? (y/n): ").lower()
+    if option != "y":
+        print("Cancelling...")
+        return
+    # TODO: Add table to database
+    # TODO: Write alias to local files
 
 def removeFromDatabase() -> None:
     """Remove an item from the database.
@@ -813,6 +850,8 @@ def main() -> None:
                 insertGame()
             elif command.lower() == "a":
                 addToGame()
+            elif command.lower() == "l":
+                addAlias()
             elif command.lower() == "x":
                 removeFromDatabase()
             elif command.lower() == "u":

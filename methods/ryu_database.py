@@ -240,7 +240,7 @@ def getNumCharacters() -> Optional[int]:
     """Get the total number of characters in the database."""
     try:
         with RyuConnector() as rdb:
-            rdb.execute(queries.getNumCharacters)
+            rdb.execute(queries.getNumCharacters())
             for row in rdb.fetchall():
                 return int(row[0])
     except Exception as e:
@@ -392,7 +392,7 @@ def getNumGames() -> Optional[int]:
     """Get the total number of games in the database."""
     try:
         with RyuConnector() as rdb:
-            rdb.execute(queries.getNumGames)
+            rdb.execute(queries.getNumGames())
             for row in rdb.fetchall():
                 return int(row[0])
     except Exception as e:

@@ -75,13 +75,17 @@ class GameCharacter(Node):
         A list of the titles of games that the character appears in. This is 
         meant to illustrate the `appears_in` table in the database.
     """
-    def __init__ (self, name: str, ryu_number: int, appears_in: List[str]=[]) -> None:
+    def __init__ (self, name: str, ryu_number: int, appears_in: List[str]=None, aliases: List[str]=None) -> None:
         super().__init__(name, ryu_number)
         self.name = self.primary_key
-        if appears_in:
+        if appears_in is not None:
             self.appears_in = appears_in
         else:
             self.appears_in = []
+        if aliases is not None:
+            self.aliases = aliases
+        else:
+            self.aliases = []
 
     def __str__ (self) -> str:
         returnStr = "(%d) %s\n" % (self.ryu_number, self.name)

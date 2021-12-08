@@ -59,6 +59,17 @@ def initialize_db(debug = False, debug_detailed = False):
                                 f"ON DELETE CASCADE);"
         )
         rdb.execute(appearsInTable)
+        # Create 'alias' relation table
+        aliasTable = (f"CREATE TABLE IF NOT EXISTS alias ("
+                        f"cname     VARCHAR(64) NOT NULL, "
+                        f"aname     VARCHAR(64) NOT NULL, "
+                        f"PRIMARY KEY (cname, aname), "
+                        f"FOREIGN KEY (cname) REFERENCES game_character(name) "
+                            f"ON UPDATE CASCADE "
+                            f"ON DELETE CASCADE);"
+        )
+        rdb.execute(aliasTable)
+
         if debug or debug_detailed: print(f"Done")
 
         # Create the triggers to automatically set the Ryu Numbers
