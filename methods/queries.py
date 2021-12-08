@@ -27,6 +27,13 @@ ALL_GAME_CHARACTER = "name, ryu_number"
 ALL_GAME = "title, ryu_number, release_date"
 ALL_APPEARS_IN = "cname, gtitle"
 
+def sanitizeInput(data: str) -> str:
+    """Return the data after being prepped for SQL insertion.
+    
+    This allows for data to be entered with apostrophes, which would 
+    ordinarily allow for incorrect syntax or code injection.
+    """
+    return data.replace("'", "''")
 
 #===================#
 # CHARACTER QUERIES #
@@ -34,7 +41,7 @@ ALL_APPEARS_IN = "cname, gtitle"
 def insertCharacter(cname: str) -> str: 
     """Return a query to insert a character into the database."""
     return (f"INSERT IGNORE INTO game_character (name) "
-            f"VALUES ('{cname}');"
+            f"VALUES ('{sanitizeInput(cname)}');"
     )
 
 def getCharacterLikeName(cname: str) -> str: 
@@ -45,7 +52,7 @@ def getCharacterLikeName(cname: str) -> str:
     """
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
-            f"WHERE name LIKE '%{cname}%' "
+            f"WHERE name LIKE '%{sanitizeInput(cname)}%' "
             f"ORDER BY ryu_number ASC, name ASC;"
     )
 
@@ -57,7 +64,7 @@ def getCharacterByName(cname: str) -> str:
     """
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
-            f"WHERE name='{cname}';"
+            f"WHERE name='{sanitizeInput(cname)}';"
     )
 
 def getCharactersByNames(cnames: Tuple) -> str: 
@@ -68,7 +75,7 @@ def getCharactersByNames(cnames: Tuple) -> str:
     """
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
-            f"WHERE name IN {cnames} "
+            f"WHERE name IN {tuple(sanitizeInput(name) for name in cnames)} "
             f"ORDER BY ryu_number ASC;"
     )
 
@@ -80,7 +87,7 @@ def getCharactersByGame(gtitle: str) -> str:
     """
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character, appears_in "
-            f"WHERE appears_in.cname=game_character.name AND appears_in.gtitle='{gtitle}';"
+            f"WHERE appears_in.cname=game_character.name AND appears_in.gtitle='{sanitizeInput(gtitle)}';"
     )
 
 def getCharacterByRyu(rn: int) -> str: 
@@ -97,14 +104,14 @@ def getCharacterByRyu(rn: int) -> str:
 def removeCharacter(cname: str) -> str: 
     """Return a query to remove a given character from the database."""
     return (f"DELETE FROM game_character "
-            f"WHERE name='{cname}';"
+            f"WHERE name='{sanitizeInput(cname)}';"
     )
 
 def updateCharacterName(old_name: str, new_name: str) -> str: 
     """Return a query to update a given character's name."""
     return (f"UPDATE game_character "
-            f"SET name='{new_name}' "
-            f"WHERE name='{old_name}';"
+            f"SET name='{sanitizeInput(new_name)}' "
+            f"WHERE name='{sanitizeInput(old_name)}';"
     )
 
 def getNumCharacters() -> str:
@@ -121,7 +128,7 @@ def getNumCharacters() -> str:
 def insertGame(gtitle: str, release_date: str="0000-00-00") -> str: 
     """Return a query to insert a game into the database."""
     return (f"INSERT IGNORE INTO game (title, release_date) "
-            f"VALUES ('{gtitle}', '{release_date}');"
+            f"VALUES ('{sanitizeInput(gtitle)}', '{release_date}');"
     )
 
 def getGameLikeTitle(gtitle: str) -> str: 
@@ -131,7 +138,7 @@ def getGameLikeTitle(gtitle: str) -> str:
     """
     return (f"SELECT {ALL_GAME} "
             f"FROM game "
-            f"WHERE title LIKE '%{gtitle}%' "
+            f"WHERE title LIKE '%{sanitizeInput(gtitle)}%' "
             f"ORDER BY release_date ASC, ryu_number ASC;"
     )
 
@@ -152,7 +159,7 @@ def getGamesByTitles(gtitles: Tuple) -> str:
     """
     return (f"SELECT {ALL_GAME} "
             f"FROM game "
-            f"WHERE title IN {gtitles} "
+            f"WHERE title IN {tuple(sanitizeInput(title) for title in gtitles)} "
             f"ORDER BY ryu_number ASC;"
     )
 
@@ -163,7 +170,7 @@ def getGamesByCharacter(cname: str) -> str:
     """
     return (f"SELECT {ALL_GAME} "
             f"FROM appears_in, game "
-            f"WHERE appears_in.cname='{cname}' AND appears_in.gtitle=game.title "
+            f"WHERE appears_in.cname='{sanitizeInput(cname)}' AND appears_in.gtitle=game.title "
             f"ORDER BY release_date ASC;"
     )
 
@@ -180,21 +187,21 @@ def getGamesByRyu(rn: int) -> str:
 def removeGame(gtitle: str) -> str: 
     """Return a query to remove a given game from the database."""
     return (f"DELETE FROM game "
-            f"WHERE title='{gtitle}';"
+            f"WHERE title='{sanitizeInput(gtitle)}';"
     )
 
 def updateGameTitle(old_title: str, new_title: str) -> str: 
     """Return a query to update the title of a given game."""
     return (f"UPDATE game "
-            f"SET title='{new_title}' "
-            f"WHERE title='{old_title}';"
+            f"SET title='{sanitizeInput(new_title)}' "
+            f"WHERE title='{sanitizeInput(old_title)}';"
     )
 
 def updateGameReleaseDate(gtitle: str, new_rdate: str) -> str: 
     """Return a query to update the release date of a given game."""
     return (f"UPDATE game "
             f"SET release_date='{new_rdate}' "
-            f"WHERE title='{gtitle}';"
+            f"WHERE title='{sanitizeInput(gtitle)}';"
     )
 
 def getNumGames() -> str:
@@ -211,7 +218,7 @@ def getNumGames() -> str:
 def insertRelation(cname: str, gtitle: str) -> str: 
     """Return a query to insert an `appears_in` relation to the database."""
     return (f"INSERT IGNORE INTO appears_in (cname, gtitle) "
-            f"VALUES ('{cname}', '{gtitle}');"
+            f"VALUES ('{sanitizeInput(cname)}', '{sanitizeInput(gtitle)}');"
     )
 
 def getRelationsByCharacter(cname: str) -> str: 
@@ -222,7 +229,7 @@ def getRelationsByCharacter(cname: str) -> str:
     """
     return (f"SELECT {ALL_APPEARS_IN} "
             f"FROM appears_in "
-            f"WHERE cname='{cname}';"
+            f"WHERE cname='{sanitizeInput(cname)}';"
     )
 
 def getRelationsByGame(gtitle: str) -> str: 
@@ -233,7 +240,7 @@ def getRelationsByGame(gtitle: str) -> str:
     """
     return (f"SELECT {ALL_APPEARS_IN} "
             f"FROM appears_in "
-            f"WHERE gtitle='{gtitle}';"
+            f"WHERE gtitle='{sanitizeInput(gtitle)}';"
     )
 
 def getRelationsAndRNByCharacter(cname: str, rn: int) -> str: 
@@ -249,7 +256,7 @@ def getRelationsAndRNByCharacter(cname: str, rn: int) -> str:
     return (f"SELECT AI.cname, AI.gtitle, G.ryu_number "
             f"FROM appears_in AS AI "
             f"JOIN game AS G ON G.title=AI.gtitle "
-            f"WHERE cname='{cname}' AND G.ryu_number>={rn};"
+            f"WHERE cname='{sanitizeInput(cname)}' AND G.ryu_number>={rn};"
     )
 
 def getRelationsAndRNByGame(gtitle: str, rn: int) -> str: 
@@ -265,25 +272,25 @@ def getRelationsAndRNByGame(gtitle: str, rn: int) -> str:
     return (f"SELECT AI.cname, AI.gtitle, C.ryu_number "
             f"FROM appears_in AS AI "
             f"JOIN game_character AS C ON C.name=AI.cname "
-            f"WHERE gtitle='{gtitle}' AND C.ryu_number>={rn}-1;"
+            f"WHERE gtitle='{sanitizeInput(gtitle)}' AND C.ryu_number>={rn}-1;"
     )
 
 def removeCharacterRelations(cname: str) -> str: 
     """Return a query to remove all of a character's relations."""
     return (f"DELETE FROM appears_in "
-            f"WHERE cname='{cname}';"
+            f"WHERE cname='{sanitizeInput(cname)}';"
     )
 
 def removeGameRelations(gtitle: str) -> str: 
     """Return a query to remove all of a game's relations."""
     return (f"DELETE FROM appears_in "
-            f"WHERE gtitle='{gtitle}';"
+            f"WHERE gtitle='{sanitizeInput(gtitle)}';"
     )
 
 def removeRelation(cname: str, gtitle: str) -> str: 
     """Return a query to remove a specific relation."""
     return (f"DELETE FROM appears_in "
-            f"WHERE cname='{cname}' AND gtitle='{gtitle}';"
+            f"WHERE cname='{sanitizeInput(cname)}' AND gtitle='{sanitizeInput(gtitle)}';"
     )
 
 
@@ -304,7 +311,7 @@ def getGameFromCharacter(cname: str) -> str:
             f"FROM appears_in "
             f"INNER JOIN game_character AS C ON cname=C.name "
             f"INNER JOIN game AS G ON gtitle=G.title "
-            f"WHERE cname LIKE '{cname}' AND G.ryu_number=C.ryu_number;"
+            f"WHERE cname LIKE '{sanitizeInput(cname)}' AND G.ryu_number=C.ryu_number;"
     )
 
 def getCharacterFromGame(gtitle: str) -> str: 
@@ -321,7 +328,7 @@ def getCharacterFromGame(gtitle: str) -> str:
             f"FROM appears_in "
             f"INNER JOIN game_character AS C ON cname=C.name "
             f"INNER JOIN game AS G ON gtitle=G.title "
-            f"WHERE gtitle LIKE '{gtitle}' AND C.ryu_number=G.ryu_number-1;"
+            f"WHERE gtitle LIKE '{sanitizeInput(gtitle)}' AND C.ryu_number=G.ryu_number-1;"
     )
 
 def getNumCharactersWithRN(rn: int) -> str: 

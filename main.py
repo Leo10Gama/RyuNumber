@@ -73,7 +73,7 @@ MENU_COMPACT = (f"\n+------------------RYU DATABASE------------------+\n"
                   f"+------------------------------------------------+\n"
 )
 
-PATH = "Games List"
+GAMES_PATH = "data/games"
 
 illegalCharacters = ["/", "\\", ":", "*", "?", "\"", "<", ">", "|", "`", "%"]
 defaultLimiter = 3
@@ -490,7 +490,7 @@ def insertGame() -> None:
     print("Creating file for game...", end="")
     if fm.writeGameFile(newGame, releaseDate, charactersToAdd): print("Done")
     else:
-        print(f"\nAn error occurred during file creation.\nPlease check the {PATH} folder or try again later.\n")
+        print(f"\nAn error occurred during file creation.\nPlease check the {GAMES_PATH} folder or try again later.\n")
         return
     # Insert into the database
     print("Adding to database...", end="")
@@ -504,7 +504,7 @@ def insertGame() -> None:
         if charactersToAdd: rdb.insertCharactersToGame(charactersToAdd, newGame)
         print("Done")
     else:
-        print(f"\nAn error occurred during file insertion.\nPlease check the {PATH} folder or try again later.\n")
+        print(f"\nAn error occurred during file insertion.\nPlease check the {GAMES_PATH} folder or try again later.\n")
         return
 
 def addToGame() -> None:
@@ -539,7 +539,7 @@ def addToGame() -> None:
             charactersToAdd.remove(c)
     if fm.appendGameFile(gameTitle, charactersToAdd): print("Done")
     else:
-        print(f"\nAn error occurred during file insertion.\nPlease check {gameTitle}.txt in {PATH} or try again later.")
+        print(f"\nAn error occurred during file insertion.\nPlease check {gameTitle}.txt in {GAMES_PATH} or try again later.")
         return
     # Insert into the database
     print("Adding to database...", end="")
@@ -567,7 +567,7 @@ def removeFromDatabase() -> None:
             if fm.removeCharacterFromGame(cName, gTitle) and rdb.removeCharacterFromGame(cName, gTitle):
                 print(f"Removed '{cName}' from '{gTitle}'")
             else:
-                print(f"An error occurred during file removal.\nPlease check {PATH}/{gTitle} and try again.")
+                print(f"An error occurred during file removal.\nPlease check {GAMES_PATH}/{gTitle} and try again.")
 
         # Select character
         cname: str = removeIllegalChars(input("Enter character name: "))
@@ -620,7 +620,7 @@ def removeFromDatabase() -> None:
             if fm.removeGame(g.title) and rdb.removeGame(g.title):
                 print(f"'{g.title}' successfully removed")
             else:
-                print(f"An error occurred during file removal.\nPlease check {PATH}/{g.title} and try again later.")
+                print(f"An error occurred during file removal.\nPlease check {GAMES_PATH}/{g.title} and try again later.")
         else:
             print(f"Cancelling...")
             
@@ -706,7 +706,7 @@ def updateData() -> None:
                 if fm.updateGameTitle(oldTitle, newTitle) and rdb.updateGameTitle(oldTitle, newTitle):
                     print("Changes made successfully.")         
                 else:
-                    print(f"An error occurred during file operations.\nPlease check {PATH} and try again later.")          
+                    print(f"An error occurred during file operations.\nPlease check {GAMES_PATH} and try again later.")          
             else:
                 print("Update cancelled.")
 
@@ -722,7 +722,7 @@ def updateData() -> None:
                 if fm.updateGameReleaseDate(gameTitle, newRDate) and rdb.updateGameReleaseDate(gameTitle, newRDate):
                     print("Changes made successfully.")
                 else:
-                    print(f"An error occurred during file operations.\nPlease check {PATH} and try again later.")
+                    print(f"An error occurred during file operations.\nPlease check {GAMES_PATH} and try again later.")
             else:
                 print("Update cancelled.")
 

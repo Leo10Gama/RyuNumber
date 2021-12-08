@@ -9,7 +9,7 @@ import os
 from typing import Dict, Optional, List
 
 from classes.nodes import GameCharacter
-from main import PATH
+from main import GAMES_PATH
 
 
 ERROR_MESSAGES = {
@@ -77,7 +77,7 @@ def parseFile(filename: str) -> Optional[Dict[str, tuple]]:
         and list of names respectively. If any errors occur, None is returned.
     """
     try:
-        data = open("%s/%s" % (PATH, filename), "r").read().splitlines()
+        data = open("%s/%s" % (GAMES_PATH, filename), "r").read().splitlines()
         returnVal = {}
         filename = filename[:-4]
         returnVal["game"] = (filename, data.pop(0))
@@ -94,7 +94,7 @@ def parseFile(filename: str) -> Optional[Dict[str, tuple]]:
 
 def getGameFiles() -> List[str]:
     """Return an array containing the names of all files in `main.PATH`."""
-    return os.listdir(PATH)
+    return os.listdir(GAMES_PATH)
 
 def writeGameFile(gtitle: str, release_date: str, characters: List[str]) -> bool:
     """Create a file for a game according to the database format.
@@ -106,7 +106,7 @@ def writeGameFile(gtitle: str, release_date: str, characters: List[str]) -> bool
     Returns whether or not the file was created successfully.
     """
     try:
-        with open("%s/%s.txt" % (PATH, gtitle), "w") as f:
+        with open("%s/%s.txt" % (GAMES_PATH, gtitle), "w") as f:
             f.write("%s" % release_date)
             for c in characters:
                 f.write("\n%s" % c)
@@ -131,7 +131,7 @@ def appendGameFile(gtitle: str, characters: List[str]) -> bool:
     successfully.
     """
     try:
-        with open("%s/%s.txt" % (PATH, gtitle), "a") as f:
+        with open("%s/%s.txt" % (GAMES_PATH, gtitle), "a") as f:
             for c in characters:
                 f.write("\n%s" % c)
         return True
@@ -148,7 +148,7 @@ def removeCharacterFromGame(cname: str, gtitle: str) -> bool:
     Returns whether or not the character's name was removed successfully.
     """
     try:
-        replaceLine(cname, "", "%s/%s.txt" % (PATH, gtitle), end = "")
+        replaceLine(cname, "", "%s/%s.txt" % (GAMES_PATH, gtitle), end = "")
         return True
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
@@ -163,8 +163,8 @@ def removeGame(gtitle: str) -> bool:
     Returns whether or not the file was removed successfully.
     """
     try:
-        if os.path.exists("%s/%s.txt" % (PATH, gtitle)):
-            os.remove("%s/%s.txt" % (PATH, gtitle))
+        if os.path.exists("%s/%s.txt" % (GAMES_PATH, gtitle)):
+            os.remove("%s/%s.txt" % (GAMES_PATH, gtitle))
             return True
         else:
             raise OSError()
@@ -182,7 +182,7 @@ def updateCharacterName(c: GameCharacter, new_name: str) -> bool:
     """
     try:
         for gtitle in c.appears_in:
-            replaceLine(c.name, new_name, "%s/%s.txt" % (PATH, gtitle))
+            replaceLine(c.name, new_name, "%s/%s.txt" % (GAMES_PATH, gtitle))
         return True
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
@@ -197,7 +197,7 @@ def updateGameTitle(old_title: str, new_title: str) -> bool:
     Returns whether or not the game's title was updated successfully.
     """
     try:
-        os.rename("%s/%s.txt" % (PATH, old_title), "%s/%s.txt" % (PATH, new_title))
+        os.rename("%s/%s.txt" % (GAMES_PATH, old_title), "%s/%s.txt" % (GAMES_PATH, new_title))
         return True
     except OSError:
         print(ERROR_MESSAGES["os_nopath"](old_title))
@@ -214,10 +214,10 @@ def updateGameReleaseDate(gtitle: str, new_release_date: str) -> bool:
     """
     try:
         lines: List[str] = []
-        with open("%s/%s.txt" % (PATH, gtitle), "r") as f:
+        with open("%s/%s.txt" % (GAMES_PATH, gtitle), "r") as f:
             lines = f.readlines()
             lines[0] = "%s\n" % new_release_date    # The release date is the first line of the text file
-        with open("%s/%s.txt" % (PATH, gtitle), "w") as f:
+        with open("%s/%s.txt" % (GAMES_PATH, gtitle), "w") as f:
             f.writelines(lines)
         return True
     except OSError:
