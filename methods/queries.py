@@ -2,7 +2,8 @@
 
 All methods within the class return a string that, when executed as an
 SQL query, perform the task specified by the method signature and
-docstring.
+docstring. In addition, all data that is passed to a query is properly
+sanitized to prevent SQL injection or invalid data.
 
 All method parameters will relate either directly to a field in the
 database, or be self-explanatory. For those that are not self-
