@@ -16,6 +16,9 @@ game(Node)
 from abc import ABC, abstractmethod
 from typing import List
 
+from methods import queries
+from classes.ryu_connector import RyuConnector
+
 
 class Node(ABC):
     """An abstract representation of a node in the Ryu database.
@@ -56,6 +59,16 @@ class Node(ABC):
         """
         pass
 
+    def getMissingData(self) -> bool:
+        """Retrieve any data that may be missing to the class.
+        
+        This method is intended to connect to the database to fill in any empty
+        fields that a Node may be missing. This is intended to abstract-ify the
+        data retrieval process, putting the onus on the object itself rather 
+        than the class retrieving the object itself.
+        """
+        return True
+
 
 class GameCharacter(Node):
     """A class meant to represent a character table in the database.
@@ -74,6 +87,9 @@ class GameCharacter(Node):
     appears_in: List[str]
         A list of the titles of games that the character appears in. This is 
         meant to illustrate the `appears_in` table in the database.
+    aliases: List[str]
+        A list of aliases that the character is known by. This is meant to
+        illustrate the `alias` table in the database.
     """
     def __init__ (self, name: str, ryu_number: int, appears_in: List[str]=None, aliases: List[str]=None) -> None:
         super().__init__(name, ryu_number)
@@ -89,6 +105,8 @@ class GameCharacter(Node):
 
     def __str__ (self) -> str:
         returnStr = "(%d) %s\n" % (self.ryu_number, self.name)
+        if self.aliases:
+            returnStr += f"\t(AKA {', '.join(self.aliases)})\n"
         for g in self.appears_in:
             returnStr += "\t%s\n" % g
         return returnStr
@@ -111,6 +129,8 @@ class GameCharacter(Node):
         elif limit < 0: limit = 0
         returnStr = "%s" % self.name
         if withRn: returnStr += " [%d]" % self.ryu_number
+        if self.aliases:
+            returnStr += f"\n\t(AKA {', '.join(self.aliases)})"
         for i in range(min(limit, len(self.appears_in))):
             returnStr += "\n\t%s" % self.appears_in[i]
         if limit < len(self.appears_in) and limit != 0:
@@ -118,6 +138,32 @@ class GameCharacter(Node):
         elif limit == 0:
             returnStr += "\n\t(Appears in %d game%s)" % (len(self.appears_in), "" if len(self.appears_in) == 1 else "s")
         return returnStr
+
+    def getMissingData(self) -> bool:
+        """Retrieve any data that may be missing to the class.
+        
+        This method is overridden from its parent. The character will connect 
+        to the database and fill in the missing `self.appears_in` and 
+        `self.aliases` fields.
+        """
+        try:
+            with RyuConnector() as rdb:
+                # Get appears_in relations
+                if not self.appears_in:
+                    rdb.execute(queries.getGamesByCharacter(self.name))
+                    mygames = rdb.fetchall()
+                    for row in mygames:
+                        self.appears_in.append(row[0])
+                # Get alias relations
+                if not self.aliases:
+                    rdb.execute(queries.getAliasesFromName(self.name))
+                    myaliases = rdb.fetchall()
+                    for row in myaliases:
+                        self.aliases.append(row[1])
+            return True
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
 
 
 class Game(Node):

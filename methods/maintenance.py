@@ -107,7 +107,7 @@ def fill_db(debug: bool=False, debug_detailed: bool=False) -> None:
         if debug or debug_detailed: print("Reading files...")
         for filename in fm.getGameFiles():
             if debug_detailed: print(f"\tReading {filename}...")
-            data = fm.parseFile(filename)
+            data = fm.parseGameFile(filename)
             rdb.execute(queries.insertGame(data["game"][0], data["game"][1]))
             # Get priority inserts
             rdb.execute(queries.getCharactersByNames(tuple(data["game_characters"])))

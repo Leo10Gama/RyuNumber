@@ -3,14 +3,28 @@
 All methods within this module serve the purpose of interacting with
 local files, allowing changes made to the database to be accurately
 reflected in local text files.
+
+The files that can be changed include the following:
+    The `.txt` files holding all information about games and characters.
+    The `.csv` file holding all information about character aliases. (TODO)
 """
 
 import os
 from typing import Dict, Optional, List
 
-from classes.nodes import GameCharacter
-from main import GAMES_PATH
+import csv
 
+from classes.nodes import GameCharacter
+from main import GAMES_PATH, TABLES_PATH
+
+
+ALIAS_FILE = f"{TABLES_PATH}/alias.csv"
+ALIAS_HEADER = ["cname", "aname"]
+CSV_PROPERTIES = {
+    "delimiter": ",",
+    "quotechar": ":",
+    "quoting": csv.QUOTE_MINIMAL
+}
 
 ERROR_MESSAGES = {
     "default":      lambda e: f"ERROR: {e}",
@@ -19,6 +33,10 @@ ERROR_MESSAGES = {
     "os_nopath":    lambda f: f"Path to {f} does not exist"
 }
 
+
+#======================#
+# GAME FILE OPERATIONS #
+#======================#
 
 def replaceLine(oldLine: str, newLine: str, filePath: str, end: str='\n') -> bool:
     """Replace a given line in a file with another line.
@@ -63,7 +81,7 @@ def replaceLine(oldLine: str, newLine: str, filePath: str, end: str='\n') -> boo
         print(ERROR_MESSAGES["default"](e))
         return False
 
-def parseFile(filename: str) -> Optional[Dict[str, tuple]]:
+def parseGameFile(filename: str) -> Optional[Dict[str, tuple]]:
     """Parse a game's text file and return its dictionary representation.
     
     Since every file is saved in an identical format, parsing each file is
@@ -222,6 +240,34 @@ def updateGameReleaseDate(gtitle: str, new_release_date: str) -> bool:
         return True
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
+        return False
+    except Exception as e:
+        print(ERROR_MESSAGES["default"](e))
+        return False
+
+#=======================#
+# ALIAS FILE OPERATIONS #
+#=======================#
+
+def appendAlias(cname: str, aname: str) -> bool:
+    """Add a character's alias to local files.
+    
+    Returns whether or not the file was written successfully.
+    """
+    try:
+        write_mode = "a" if os.path.exists(ALIAS_FILE) else "w"
+        with open(ALIAS_FILE, write_mode) as f:
+            csv_writer = csv.DictWriter(f, 
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            if write_mode == "w": csv_writer.writeheader()
+            csv_writer.writerow(dict(zip(ALIAS_HEADER, (cname, aname))))
+        return True
+    except OSError as e:
+        print(ERROR_MESSAGES["os_open"](e))
         return False
     except Exception as e:
         print(ERROR_MESSAGES["default"](e))

@@ -36,13 +36,7 @@ def tupleToCharacter(t: Tuple[str, int]) -> Optional[GameCharacter]:
     invalid or errors occur during connection, nothing is returned.
     """
     try:
-        with RyuConnector() as rdb:
-            rdb.execute(queries.getGamesByCharacter(t[0]))
-            gamesList = rdb.fetchall()
-            ai = []
-            for g in gamesList:
-                ai.append(g[0])
-            return GameCharacter(t[0], t[1], ai)
+        return GameCharacter(t[0], t[1]).getMissingData()
     except Exception as e:
         print(f"ERROR: {e}")
         return None
@@ -133,12 +127,9 @@ def getCharacterByName(name: str) -> Optional[GameCharacter]:
             rdb.execute(queries.getCharacterByName(name))
             for row in rdb.fetchall():
                 result = GameCharacter(row[0], row[1])
-            # Get games character is in as well
+            # Fill missing fields
             if result:
-                rdb.execute(queries.getGamesByCharacter(result.name))
-                mygames = rdb.fetchall()
-                for row in mygames:
-                    result.appears_in.append(row[0])
+                result.getMissingData()
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -157,11 +148,9 @@ def getCharactersLikeName(name: str) -> Optional[List[GameCharacter]]:
             rdb.execute(queries.getCharacterLikeName(name))
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
-            # Get games character is in as well
+            # Fill missing data
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
-                for row in rdb.fetchall():
-                    c.appears_in.append(row[0])
+                c.getMissingData()
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -180,11 +169,9 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[GameCharacter]]:
             rdb.execute(queries.getCharactersByNames(names))
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
-            # Get the games that the characters are in as well
+            # Fill missing data
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
-                for row in rdb.fetchall():
-                    c.appears_in.append(row[0])
+                c.getMissingData()
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -203,11 +190,9 @@ def getCharactersByGame(title: str) -> Optional[List[GameCharacter]]:
             rdb.execute(queries.getCharactersByGame(title))
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
-            # Get the games that the characters are in as well
+            # Fill missing data
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
-                for row in rdb.fetchall():
-                    c.appears_in.append(row[0])
+                c.getMissingData()
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -226,11 +211,26 @@ def getCharactersByRyuNumber(rn: int) -> Optional[List[GameCharacter]]:
             rdb.execute(queries.getCharacterByRyu(int(rn)))
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
-            # Get the games that the characters are in as well
+            # Fill missing data
             for c in result:
-                rdb.execute(queries.getGamesByCharacter(c.name))
-                for row in rdb.fetchall():
-                    c.appears_in.append(row[0])
+                c.getMissingData()
+            return result
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return None
+
+def getCharacterByAlias(aname: str) -> Optional[GameCharacter]:
+    """Get a character object based on that character's alias."""
+    result: Optional[GameCharacter] = None
+    try:
+        with RyuConnector() as rdb:
+            # Get the character
+            rdb.execute(queries.getCharacterByAlias(aname))
+            for row in rdb.fetchall():
+                result = GameCharacter(row[0], row[1])
+            # Fill missing data
+            if result:
+                result.getMissingData()
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -439,6 +439,81 @@ def updateGameReleaseDate(title: str, release_date: str) -> bool:
         print(ERROR_MESSAGES["default_error"](e))
         return False
 
+
+#===============#
+# ALIAS METHODS #
+#===============#
+# INSERT
+def insertAlias(cname: str, aname: str) -> bool:
+    """Insert an alias to the database.
+    
+    Returns whether or not the insertion was successful.
+    """
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.insertAlias(cname, aname))
+            return True
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return False
+
+# REMOVE
+def removeAlias(aname: str) -> bool:
+    """Remove an alias from the database.
+    
+    Since each alias is only mapped to one character, we only need the
+    alias to remove the relation.
+    """
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.removeAlias(aname))
+            return True
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return False
+
+# RETRIEVE
+def getAliasesFromName(cname: str) -> Optional[List[str]]:
+    """Get a list of aliases that a character goes by.
+    
+    An empty array is returned if the character has no aliases, 
+    but None is returned if any errors occur.
+    """
+    result: List[str] = []
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.getAliasesFromName(cname))
+            for row in rdb.fetchall():
+                result.append(row[1])
+            return result
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return None
+
+def getNameFromAlias(aname: str) -> Optional[str]:
+    """Get a character's name from their alias."""
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(queries.getNameFromAlias(aname))
+            for row in rdb.fetchall():
+                return row[0]
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return None
+
+# UPDATE
+def updateAlias(old_alias: str, new_alias: str) -> bool:
+    """Update the name of an alias in the database.
+    
+    Returns whether or not the alias has been updated successfully.
+    """
+    try:
+        with RyuConnector() as rdb:
+            rdb.execute(updateAlias(old_alias, new_alias))
+            return True
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return False
 
 #====================#
 # RYU NUMBER METHODS #

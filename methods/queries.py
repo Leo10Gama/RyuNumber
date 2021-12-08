@@ -103,6 +103,17 @@ def getCharacterByRyu(rn: int) -> str:
             f"WHERE ryu_number={rn};"
     )
 
+def getCharacterByAlias(aname: str) -> str:
+    """Return a query to get a character with a given alias.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT DISTINCT {', '.join([f'C.{x}' for x in ALL_GAME_CHARACTER])} "
+            f"FROM game_character AS C, alias AS A "
+            f"WHERE aname='{sanitizeInput(aname)}';"
+    )
+
 def removeCharacter(cname: str) -> str: 
     """Return a query to remove a given character from the database."""
     return (f"DELETE FROM game_character "
@@ -349,4 +360,47 @@ def getNumGamesWithRN(rn: int) -> str:
     """
     return (f"SELECT COUNT(*) FROM game "
             f"WHERE ryu_number={rn};"
+    )
+
+
+#===============#
+# ALIAS QUERIES #
+#===============#
+def insertAlias(cname: str, aname: str) -> str:
+    """Return a query to insert an `alias` relation."""
+    return (f"INSERT IGNORE INTO alias (cname, aname) "
+            f"VALUES ('{sanitizeInput(cname)}', '{sanitizeInput(aname)}');"
+    )
+
+def getAliasesFromName(cname: str) -> str:
+    """Return a query to get all the aliases of a character.
+    
+    The resulting tuple gets fields from, and in order of `ALL_ALIAS`.
+    """
+    return (f"SELECT {ALL_ALIAS} "
+            f"FROM alias "
+            f"WHERE cname='{sanitizeInput(cname)}';"
+    )
+
+def getNameFromAlias(aname: str) -> str:
+    """Return a query to get a character's name, given their alias.
+    
+    The resulting tuple gets fields from, and in order of `ALL_ALIAS`.
+    """
+    return (f"SELECT {ALL_ALIAS} "
+            f"FROM alias "
+            f"WHERE aname='{sanitizeInput(aname)}';"
+    )
+
+def removeAlias(aname: str) -> str:
+    """Return a query to remove a character's alias."""
+    return (f"DELETE FROM alias "
+            f"WHERE aname='{sanitizeInput(aname)}';"
+    )
+
+def updateAlias(old_alias: str, new_alias: str) -> str:
+    """Return a query to update a character's alias."""
+    return (f"UPDATE alias "
+            f"SET aname='{sanitizeInput(new_alias)}' "
+            f"WHERE aname='{sanitizeInput(old_alias)}';"
     )

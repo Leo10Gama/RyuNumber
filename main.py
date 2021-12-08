@@ -582,12 +582,15 @@ def addAlias() -> None:
         print("A character by that name already exists!")
         return
     # Perform the operations
-    option = input(f"You are about to add the alias '{alias}'\n to the character '{c.name}'.\nProceed? (y/n): ").lower()
+    option = input(f"\nYou are about to add the alias '{alias}'\nto the character '{c.name}'.\n\nProceed? (y/n): ").lower()
     if option != "y":
         print("Cancelling...")
         return
-    # TODO: Add table to database
-    # TODO: Write alias to local files
+    if fm.appendAlias(c.name, alias) and rdb.insertAlias(c.name, alias):
+        print("Alias added successfully.")
+    else:
+        print("An error occurred during insertion.\nPlease try again later.")
+        return
 
 def removeFromDatabase() -> None:
     """Remove an item from the database.
