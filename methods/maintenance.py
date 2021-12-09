@@ -105,8 +105,11 @@ def fill_db(debug: bool=False, debug_detailed: bool=False) -> None:
     with RyuConnector() as rdb:
         # Start reading files and adding data
         if debug or debug_detailed: print("Reading files...")
+
         for filename in fm.getGameFiles():
+
             if debug_detailed: print(f"\tReading {filename}...")
+
             data = fm.parseGameFile(filename)
             rdb.execute(queries.insertGame(data["game"][0], data["game"][1]))
             # Get priority inserts
@@ -121,6 +124,12 @@ def fill_db(debug: bool=False, debug_detailed: bool=False) -> None:
             for c in data["game_characters"]:
                 rdb.execute(queries.insertCharacter(c))
                 rdb.execute(queries.insertRelation(c, data["game"][0]))
+        # Insert the aliases as well
+        if debug or debug_detailed: print("Adding aliases...")
+
+        for alias in fm.parseAliases():
+            rdb.execute(queries.insertAlias(alias['cname'], alias['aname']))
+
         if debug or debug_detailed: print("Raw data inserted successfully.")
     
     updateRelations(debug, debug_detailed)

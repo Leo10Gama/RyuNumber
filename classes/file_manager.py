@@ -6,7 +6,7 @@ reflected in local text files.
 
 The files that can be changed include the following:
     The `.txt` files holding all information about games and characters.
-    The `.csv` file holding all information about character aliases. (TODO)
+    The `.csv` file holding all information about character aliases.
 """
 
 import os
@@ -268,7 +268,7 @@ def appendAlias(cname: str, aname: str) -> bool:
             csv_writer.writerow(dict(zip(ALIAS_HEADER, (cname, aname))))
         return True
     except OSError as e:
-        print(ERROR_MESSAGES["os_open"](e))
+        print(ERROR_MESSAGES["os_open"](ALIAS_FILE))
         return False
     except Exception as e:
         print(ERROR_MESSAGES["default"](e))
@@ -303,7 +303,7 @@ def removeAlias(aname: str) -> bool:
         os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
         return True
     except OSError as e:
-        print(ERROR_MESSAGES["os_open"](e))
+        print(ERROR_MESSAGES["os_open"](ALIAS_FILE))
         return False
     except Exception as e:
         print(ERROR_MESSAGES["default"](e))
@@ -341,8 +341,30 @@ def updateAlias(old_aname: str, new_aname: str) -> bool:
         os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
         return True
     except OSError as e:
-        print(ERROR_MESSAGES["os_open"](e))
+        print(ERROR_MESSAGES["os_open"](ALIAS_FILE))
         return False
     except Exception as e:
         print(ERROR_MESSAGES["default"](e))
         return False
+
+def parseAliases() -> Optional[List[Dict[str, str]]]:
+    """Return a dictionary mapping all alias tables.
+    
+    The resulting dictionary has multiple dictionaries mapping cname and
+    aname. If any errors occur, None is returned.
+    """
+    try:
+        with open(ALIAS_FILE, "r") as f:
+            csv_reader = csv.DictReader(f,
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            result: List[Dict[str, str]] = []
+            for row in csv_reader:
+                result.append(row)
+        return result
+    except Exception as e:
+        print(ERROR_MESSAGES["os_open"](ALIAS_FILE))
+        return None

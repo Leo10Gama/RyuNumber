@@ -55,6 +55,11 @@ def getCharacterLikeName(cname: str) -> str:
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name LIKE '%{sanitizeInput(cname)}%' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '%{sanitizeInput(cname)}%' "
             f"ORDER BY ryu_number ASC, name ASC;"
     )
 
@@ -66,7 +71,12 @@ def getCharacterByName(cname: str) -> str:
     """
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
-            f"WHERE name='{sanitizeInput(cname)}';"
+            f"WHERE name='{sanitizeInput(cname)}' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname='{sanitizeInput(cname)}';"
     )
 
 def getCharactersByNames(cnames: Tuple) -> str: 
@@ -78,6 +88,11 @@ def getCharactersByNames(cnames: Tuple) -> str:
     return (f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name IN {tuple(sanitizeInput(name) for name in cnames)} "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname IN {tuple(sanitizeInput(name) for name in cnames)} "
             f"ORDER BY ryu_number ASC;"
     )
 
