@@ -12,7 +12,7 @@ database, updating things in the database, and resetting the database.
 """
 
 from enum import Enum, auto
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar, Union
 
 from classes import file_manager as fm
 from classes.nodes import Node, Game, GameCharacter
@@ -134,7 +134,7 @@ def resultViewer(results: List[T], canSelect: bool=False, page: int=1, resultsPe
         # Print all results
         print(f"\t{len(results)} results:\n")
         for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
-            print(f"({i + 1}) {results[i].printSelf(limit=limiter, withRn=False) if issubclass(type(results[i]), Node) else results[i]}")
+            print(f"({i + 1})\t{results[i].printSelf(limit=limiter, withRn=False) if issubclass(type(results[i]), Node) else results[i]}")
         else:
             print()
 
@@ -246,13 +246,13 @@ def queryCharacter(exact: bool=False, limiter: int=-1) -> None:
             return
         print(myCharacters.printSelf(limiter, withRn=True))                
     else:           # Querying by generalized name (myCharacters is a list of GameCharacter objects)
-        myCharacters: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(charToQuery)  
+        myCharacters: Optional[Union[List[GameCharacter], List[str]]] = rdb.getCharactersLikeName(charToQuery, only_names=True)  
         if not myCharacters:    # No character found
             print("No characters by that name could be found")
             return
-        myChar: Optional[GameCharacter] = resultViewer(myCharacters, canSelect=True)
+        myChar: Optional[str] = resultViewer(myCharacters, canSelect=True, resultsPerPage=20)
         if myChar:      # We have a character selected, print them
-            print(myChar.printSelf(withRn=True))
+            print(rdb.getCharacterByName(myChar).printSelf(withRn=True))
 
 def queryGame(exact=False) -> None:
     """Find a game in the database

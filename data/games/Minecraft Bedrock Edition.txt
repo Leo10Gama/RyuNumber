@@ -488,15 +488,14 @@ Hulk
 Thor (Marvel)
 Nick Fury
 A-Bomb (Marvel)
-Abomination Emil Blonsky
+Abomination
 Ant-Man
 Arnim Zola
 Black Panther
-Bucky Barnes
+Winter Soldier
 Falcon (Marvel)
 Giant-Man
 Iron Man
-Iron Patriot
 Wasp (Marvel)
 Kang the Conqueror
 Loki (Marvel)
@@ -534,10 +533,10 @@ Hammerhead (Marvel)
 Gwen Stacy
 Green Goblin
 Electro (Marvel)
-Dr. Otto Octavius
+Doctor Octopus
 Chameleon (Marvel)
 Carnage (Marvel)
-Black Cat Felicia Hardy
+Black Cat (Marvel)
 Aunt May Parker
 Miles Morales
 Star-Lord
@@ -559,7 +558,7 @@ Nova (Marvel)
 Quasar (Marvel)
 Thanos
 Zak-Del
-Drax
+Drax the Destroyer
 Gamora
 The Doctor (Doctor Who)
 The Twelfth Doctor

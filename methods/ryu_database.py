@@ -54,6 +54,7 @@ def tupleToGame(t: Tuple[str, int, str]) -> Optional[Game]:
         print(f"ERROR: {e}")
         return None
 
+
 #============================#
 # CHARACTER DATABASE METHODS #
 #============================#
@@ -135,17 +136,25 @@ def getCharacterByName(name: str) -> Optional[GameCharacter]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersLikeName(name: str) -> Optional[List[GameCharacter]]:
+def getCharactersLikeName(name: str, only_names=False) -> Optional[Union[List[GameCharacter], List[str]]]:
     """Get characters from the database whose names are similar to the arg.
     
+    If only_names is set to False (default), the full GameCharacter objects
+    are returned. Otherwise, only a list of strings of the characters'
+    names.
+
     Returns an empty array if no characters can be found, but returns None 
     if any sorts of errors occur.
     """
-    result: List[GameCharacter] = []
+    result: Union[List[GameCharacter], List[str]] = []
     try:
         with RyuConnector() as rdb:
             # Get the character(s)
             rdb.execute(queries.getCharacterLikeName(name))
+            if only_names:
+                for row in rdb.fetchall():
+                    result.append(row[0])
+                return result
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
@@ -543,6 +552,7 @@ def updateAlias(old_alias: str, new_alias: str) -> bool:
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return False
+
 
 #====================#
 # RYU NUMBER METHODS #

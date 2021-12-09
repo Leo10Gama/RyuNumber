@@ -10,7 +10,6 @@ Scarlet Witch
 Vision (Marvel)
 Falcon (Marvel)
 War Machine
-Iron Patriot
 Nick Fury
 Maria Hill
 Phillip Coulson
@@ -29,10 +28,10 @@ Agent Jemma Simmons
 Agent Eric Koenig
 Agent Melinda May
 Agent Lincoln Campbell
-Fandral
+Fandral the Dashing
 Volstagg
-Hogun
-Sif
+Hogun the Grim
+Lady Sif
 Heimdall
 Harley Keener
 Erik Selvig
@@ -44,7 +43,7 @@ Scarlet Spider
 Spider-Girl
 Miles Morales
 Loki (Marvel)
-Malekith
+Malekith the Accursed
 Kurse
 Aldrich Killian
 Ellen Brandt
@@ -74,7 +73,7 @@ Butterball Emery Schaub
 Daredevil
 Iron Fist
 Jewel Jessica Jones
-Power Man Luke Cage
+Power Man (Marvel)
 Cloud 9 Abigail Boylen
 Gorilla Girl
 Komodo Melati Kusuma
@@ -118,7 +117,7 @@ Tigra Greer Grant
 Wasp (Marvel)
 Doctor Strange
 Squirrel Girl
-Abomination Emil Blonsky
+Abomination
 Absorbing Man
 Amadeus Cho
 Ant-Man
@@ -149,9 +148,9 @@ Mantis (Marvel)
 Moon-Boy
 Moon Knight
 Ragnarok
-Viper Ophelia Sarkissian
+Viper (Marvel)
 Wendigo
-Wizard Bentley Whitman
+The Wizard (Marvel)
 X-Ray James Darnell
 Deathlok
 Grant Ward

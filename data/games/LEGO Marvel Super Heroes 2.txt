@@ -7,7 +7,7 @@ Captain Marvel
 Crystal Crystalia Amaquelin
 Daredevil
 Doctor Strange
-Drax
+Drax the Destroyer
 Gamora
 Giant-Man
 Groot
@@ -45,7 +45,7 @@ Ayesha
 Baron Zemo
 Beta Ray Bill
 Bill Furlock
-Black Cat Felicia Hardy
+Black Cat (Marvel)
 Black Knight Dane Whitman
 Black Widow
 Blade (Marvel)
@@ -64,7 +64,7 @@ Cosmo the Spacedog
 Crimson Dynamo
 Darkhawk
 Darkstar
-Dr. Otto Octavius
+Doctor Octopus
 Dormammu
 Electro 2099
 Elektra Noir
@@ -100,8 +100,8 @@ Kraven the Hunter
 NKantu the Living Mummy
 Living Totem
 Loki (Marvel)
-Power Man Luke Cage
-Viper Ophelia Sarkissian
+Power Man (Marvel)
+Viper (Marvel)
 Maestro
 Mantis (Marvel)
 Man-Ape
@@ -137,7 +137,7 @@ Scarlet Spider
 Scorpion (Marvel)
 Shocker (Marvel)
 Shuri
-Sif
+Lady Sif
 Silk (Marvel)
 Skaar
 Songbird (Marvel)

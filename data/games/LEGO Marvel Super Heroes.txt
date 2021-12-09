@@ -1,6 +1,6 @@
 2013-10-22
 A-Bomb (Marvel)
-Abomination Emil Blonsky
+Abomination
 Absorbing Man
 Phillip Coulson
 Aldrich Killian
@@ -8,11 +8,11 @@ Ant-Man
 Arnim Zola
 Archangel
 Aunt May Parker
-Beast Henry McCoy
-Beetle Janice Lincoln
+Beast (X-Men)
+Beetle (Marvel)
 Beta Ray Bill
 Black Bolt
-Black Cat Felicia Hardy
+Black Cat (Marvel)
 Black Panther
 Black Widow
 Blade (Marvel)
@@ -22,22 +22,21 @@ Captain America
 Captain Britain
 Carnage (Marvel)
 Colossus
-Curt Connors
+The Lizard (Marvel)
 Cyclops
 Daredevil
-Dark Phoenix
 Deadpool
 Doctor Doom
-Dr. Otto Octavius
+Doctor Octopus
 Doctor Strange
 Dormammu
-Drax
+Drax the Destroyer
 Electro (Marvel)
 Elektra Natchios
 Falcon (Marvel)
-Fandral
+Fandral the Dashing
 Galactus
-Gambit Remy LeBeau
+Gambit
 Gamora
 Ghost Rider
 Green Goblin
@@ -47,7 +46,7 @@ Havok Alexander Summers
 Hawkeye
 Heimdall
 H.E.R.B.I.E.
-Hogun
+Hogun the Grim
 Howard the Duck
 Hulk
 Human Torch
@@ -55,10 +54,8 @@ Iceman (X-Men)
 Invisible Woman
 Iron Fist
 Iron Man
-Iron Patriot
 J. Jonah Jameson
 Jane Foster
-Jean Grey
 Juggernaut (X-Men)
 Kingpin (Marvel)
 Kraven the Hunter
@@ -67,7 +64,7 @@ Lady Liberty
 Laufey
 Loki (Marvel)
 Magneto
-Malekith
+Malekith the Accursed
 Mandarin
 Maria Hill
 Mary Jane Watson
@@ -77,28 +74,27 @@ M.O.D.O.K.
 Moon Knight
 Ms. Marvel
 Mysterio
-Mystique Raven Darkholme
+Mystique
 Nick Fury
 Nightmare (Marvel)
 Nova (Marvel)
 Odin
 Pepper Potts
 Phoenix (Marvel)
-Polaris Lorna Dane
-Power Man Luke Cage
+Polaris (Marvel)
+Power Man (Marvel)
 Professor X
 Psylocke
 Punisher
 Red Hulk
 Red Skull
 Rhino (Marvel)
-Rick Jones
 Rocket Raccoon
 Ronan the Accuser
 Sabretooth
 Sandman (Marvel)
 She-Hulk
-Sif
+Lady Sif
 Shocker (Marvel)
 Silver Samurai
 Silver Surfer
@@ -108,22 +104,22 @@ Squirrel Girl
 Star-Lord
 Storm (Marvel)
 Stan Lee
-Super-Skrull Klrt
+Super-Skrull Kl'rt
 Taskmaster
 Thanos
-Thing Ben Grimm
+The Thing
 Thor (Marvel)
-Toad Mortimer Toynbee
+Toad (Marvel)
 Union Jack
 Venom
-Viper Ophelia Sarkissian
+Viper (Marvel)
 Volstagg
 Vulture (Marvel)
 War Machine
 Wasp (Marvel)
-Whiplash Ivan Antonovich Vanko
+Whiplash (Marvel)
 Winter Soldier
-Wizard Bentley Whitman
+The Wizard (Marvel)
 Wolverine
 Axel Alonso
 Joe Quesada
