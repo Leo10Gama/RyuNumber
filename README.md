@@ -125,10 +125,8 @@ There are a few things you'll need to set if you'd like to use this database for
   - Line 2: Your user name
   - Line 3: The password to your user name
   - Line 4: `ryu_number` (leave as is, as this is the database name)
-4. Begin by running the command `python3 init.py` to set up the proper schema, table, and triggers.
-5. Run the command `python3 fill_db.py` to insert all the data in "Games List" into the database.
-6. Run the command `python3 main.py` and type "r" to reset the database, ensuring the existing characters' Ryu numbers update correctly.
-7. Have fun running any other commands you wish!
+4. Run the command `python3 main.py` and type "r", then "h" to initialize and reset the database, ensuring the existing characters' Ryu numbers update correctly.
+5. Have fun running any other commands you wish!
 
 # Potential Improvements
 
