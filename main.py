@@ -663,14 +663,36 @@ def removeFromDatabase() -> None:
                 print(f"An error occurred during file removal.\nPlease check {GAMES_PATH}/{g.title} and try again later.")
         else:
             print(f"Cancelling...")
-            
+
+    def removeAlias() -> None:
+        """Remove an alias from the database and local files."""
+        # Get alias in question
+        cname: str = removeIllegalChars(input("Enter character name: "))
+        c: GameCharacter = resultViewer(rdb.getCharactersLikeName(cname), True)
+        if not c:
+            print("No character selected. Cancelling...")
+            return
+        print("Select which alias you would like to remove:")
+        aname: str = resultViewer(c.aliases, True)
+        # Confirm deletion
+        confirmDelete: str = input(f"You are about to remove the alias:\n'{aname}' from the character\n'{c.name}'.\n\nAre you sure you want to proceed? (y/n): ").lower()
+        if confirmDelete == "y":
+            if fm.removeAlias(aname) and rdb.removeAlias(aname):
+                print(f"'{aname}' successfully removed")
+            else:
+                print(f"An error occurred during removal.\nPlease try again later.")
+        else:
+            print(f"Cancelling...")
+
     # Select what to remove
-    option = optionPicker("What would you like to remove?", {"c": "Character", "g": "Game"})
+    option = optionPicker("What would you like to remove?", {"c": "Character", "g": "Game", "a": "Alias"})
     print()
     if option == "c":
         removeCharacter()
     elif option == "g":
         removeGame()
+    elif option == "a":
+        removeAlias()
     else:
         print("Cancelling...")
 
@@ -713,6 +735,30 @@ def updateData() -> None:
                 else:
                     print("Update cancelled.")
 
+        def updateAlias(c: GameCharacter) -> None:
+            """Select and update a character's alias."""
+            # Pick the alias to update
+            oldAlias: str = resultViewer(c.aliases, True)
+            if not oldAlias:
+                print("No alias selected. Cancelling...")
+                return
+            newAlias: str = removeIllegalChars(input("Enter new alias: "))
+            print()
+            # Make sure there is no character that exists using that alias
+            if rdb.getCharacterByAlias(newAlias) or rdb.getAliasesFromName(newAlias):
+                print("A character already exists by that alias!")
+                return
+            # Do the updating
+            confirmUpdate = input(f"You are about to change the alias:\n'{oldAlias}' -> '{newAlias}'\nConfirm update? (y/n): ").lower()
+            print()
+            if confirmUpdate == "y":
+                if fm.updateAlias(oldAlias, newAlias) and rdb.updateAlias(oldAlias, newAlias):
+                    print("Alias updated successfully.")
+                else:
+                    print(f"An error occurred during the update. Please try again later.")
+            else:
+                print("Cancelling...")
+
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
@@ -724,10 +770,12 @@ def updateData() -> None:
             return
         # Decide what to update and what to change it to
         # NOTE: Right now, the only attribute characters have is `name`, but more functionality could be possible in the future
-        attribute: str = optionPicker("What would you like to update?", {"n": "Name"})
+        attribute: str = optionPicker("What would you like to update?", {"n": "Name", "a": "Alias"})
         print()
         if attribute == "n":    # Update name
             updateName(c.name)
+        elif attribute == "a":  # Update alias
+            updateAlias(c)
         else:
             print("No valid option selected. Cancelling the operation...")        
 

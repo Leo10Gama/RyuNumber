@@ -109,9 +109,20 @@ def getCharacterByAlias(aname: str) -> str:
     The resulting tuple gets fields from, and in order of 
     `ALL_GAME_CHARACTER`.
     """
-    return (f"SELECT DISTINCT {', '.join([f'C.{x}' for x in ALL_GAME_CHARACTER])} "
+    return (f"SELECT DISTINCT {ALL_GAME_CHARACTER} "
             f"FROM game_character AS C, alias AS A "
             f"WHERE aname='{sanitizeInput(aname)}';"
+    )
+
+def getCharactersLikeAlias(aname: str) -> str:
+    """Return a query to get a character with a similar alias.
+    
+    The resulting tuple gets fields from, and in order of 
+    `ALL_GAME_CHARACTER`.
+    """
+    return (f"SELECT DISTINCT {ALL_GAME_CHARACTER} "
+            f"FROM game_character AS C, alias AS A "
+            f"WHERE aname LIKE '%{sanitizeInput(aname)}%';"
     )
 
 def removeCharacter(cname: str) -> str: 

@@ -236,6 +236,27 @@ def getCharacterByAlias(aname: str) -> Optional[GameCharacter]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
+def getCharactersLikeAlias(aname: str) -> Optional[List[GameCharacter]]:
+    """Get characters from the database whose names are similar to the arg.
+    
+    Returns an empty array if no characters can be found, but returns None 
+    if any sorts of errors occur.
+    """
+    result: List[GameCharacter] = []
+    try:
+        with RyuConnector() as rdb:
+            # Get the character(s)
+            rdb.execute(queries.getCharactersLikeAlias(aname))
+            for row in rdb.fetchall():
+                result.append(GameCharacter(row[0], row[1]))
+            # Fill missing data
+            for c in result:
+                c.getMissingData()
+            return result
+    except Exception as e:
+        print(ERROR_MESSAGES["default_error"](e))
+        return None
+
 def getNumCharacters() -> Optional[int]:
     """Get the total number of characters in the database."""
     try:
@@ -509,7 +530,7 @@ def updateAlias(old_alias: str, new_alias: str) -> bool:
     """
     try:
         with RyuConnector() as rdb:
-            rdb.execute(updateAlias(old_alias, new_alias))
+            rdb.execute(queries.updateAlias(old_alias, new_alias))
             return True
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))

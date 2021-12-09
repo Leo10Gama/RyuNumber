@@ -19,6 +19,7 @@ from main import GAMES_PATH, TABLES_PATH
 
 
 ALIAS_FILE = f"{TABLES_PATH}/alias.csv"
+TEMP_FILE = f"{TABLES_PATH}/temp.csv"
 ALIAS_HEADER = ["cname", "aname"]
 CSV_PROPERTIES = {
     "delimiter": ",",
@@ -265,6 +266,79 @@ def appendAlias(cname: str, aname: str) -> bool:
             )
             if write_mode == "w": csv_writer.writeheader()
             csv_writer.writerow(dict(zip(ALIAS_HEADER, (cname, aname))))
+        return True
+    except OSError as e:
+        print(ERROR_MESSAGES["os_open"](e))
+        return False
+    except Exception as e:
+        print(ERROR_MESSAGES["default"](e))
+        return False
+
+def removeAlias(aname: str) -> bool:
+    """Remove a character's alias from local files.
+    
+    Returns whether or not the item was removed from files successfully.
+    """
+    try:
+        if not os.path.exists(ALIAS_FILE): 
+            return True     # If the file doesn't exist, there's nothing to remove! True by default
+        with open(ALIAS_FILE, "r") as f_in, open(TEMP_FILE, "w+") as f_out:
+            # Set up reader and writer
+            csv_reader = csv.DictReader(f_in, 
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            csv_writer = csv.DictWriter(f_out,
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            # Iterate, only writing the line if it isn't the one we want to remove
+            for row in csv_reader:
+                if row[ALIAS_HEADER[1]] != aname:
+                    csv_writer.writerow(row)
+        os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
+        return True
+    except OSError as e:
+        print(ERROR_MESSAGES["os_open"](e))
+        return False
+    except Exception as e:
+        print(ERROR_MESSAGES["default"](e))
+        return False
+
+def updateAlias(old_aname: str, new_aname: str) -> bool:
+    """Update a character's alias from local files.
+    
+    Returns whether or not the item was updated from files successfully.
+    """
+    try:
+        if not os.path.exists(ALIAS_FILE): 
+            return True     # If the file doesn't exist, there's nothing to remove! True by default
+        with open(ALIAS_FILE, "r") as f_in, open(TEMP_FILE, "w+") as f_out:
+            # Set up reader and writer
+            csv_reader = csv.DictReader(f_in, 
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            csv_writer = csv.DictWriter(f_out,
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            # Iterate, only rewriting the line we want to change
+            for row in csv_reader:
+                if row[ALIAS_HEADER[1]] != old_aname:
+                    csv_writer.writerow(row)
+                else:
+                    row[ALIAS_HEADER[1]] = new_aname
+                    csv_writer.writerow(row)
+        os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
         return True
     except OSError as e:
         print(ERROR_MESSAGES["os_open"](e))
