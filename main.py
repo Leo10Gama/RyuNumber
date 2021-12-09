@@ -25,55 +25,121 @@ class MenuStyle(Enum):
     DEFAULT = auto()
     COMPACT = auto()
 
-MENU = (f"\n+------------------RYU DATABASE------------------+\n"
-          f"|         Enter a letter to get started.         |\n"
-          f"|                                                |\n"
-          f"+---QUERY COMMANDS-------------------------------+\n"
-          f"|                                                |\n"
-          f"| (c/C) Query a character (exactly)              |\n"
-          f"| (g/G) Query a game (exactly)                   |\n"
-          f"| (p/P) Get a path from a character to Ryu       |\n"
-          f"| (n/N) See stats about the database             |\n"
-          f"|                                                |\n"
-          f"+---ALTER DATABASE COMMANDS----------------------+\n"
-          f"|                                                |\n"
-          f"| (i/I) Insert a game and characters into the DB |\n"
-          f"| (a/A) Add characters to an existing game       |\n"
-          f"| (l/L) Add an alias to an existing character    |\n"
-          f"| (x/X) Remove an item from the database         |\n"
-          f"| (u/U) Update a character or game               |\n"
-          f"|                                                |\n"
-          f"+---MAINTENANCE----------------------------------+\n"
-          f"|                                                |\n"
-          f"| (v/V) Toggle view to be compact or descriptive |\n"
-          f"| (r/R) Reset the database (include all details) |\n"
-          f"| (q/Q) Close the database and quit              |\n"
-          f"|                                                |\n"
-          f"+------------------------------------------------+\n"
-          f"|   (Note: brackets in desc. = capital letter)   |\n"
-          f"+------------------------------------------------+\n"
-)
+MENU_DISPLAY = {
+    "header": "RYU DATABASE",
+    "subheader": "Enter a letter to get started.",
+    "innersize": 48,
+    "commands": [
+        {
+            "type": "QUERY COMMANDS",
+            "commands": [
+                {
+                    "letter": "c",
+                    "description": "Query a character (exactly)"
+                },
+                {
+                    "letter": "g",
+                    "description": "Query a game (exactly)"
+                },
+                {
+                    "letter": "p",
+                    "description": "Get a path from a character to Ryu"
+                },
+                {
+                    "letter": "n",
+                    "description": "See stats about the database"
+                }
+            ]
+        },
+        {
+            "type": "ALTER DATABASE COMMANDS",
+            "commands": [
+                {
+                    "letter": "i",
+                    "description": "Insert a game and characters into the DB"
+                },
+                {
+                    "letter": "a",
+                    "description": "Add characters to an existing game"
+                },
+                {
+                    "letter": "l",
+                    "description": "Add an alias to an existing character"
+                },
+                {
+                    "letter": "x",
+                    "description": "Remove an item from the database"
+                },
+                {
+                    "letter": "u",
+                    "description": "Update a character or game"
+                }
+            ]
+        },
+        {
+            "type": "MAINTENANCE",
+            "commands": [
+                {
+                    "letter": "v",
+                    "description": "Toggle view to be compact or verbose"
+                },
+                {
+                    "letter": "r",
+                    "description": "Reset the database (include all details)"
+                },
+                {
+                    "letter": "q",
+                    "description": "Close the database and quit"
+                }
+            ]
+        }
+    ],
+    "footer": "(Note: brackets in desc. = capital letter)"
+}
 
-MENU_COMPACT = (f"\n+------------------RYU DATABASE------------------+\n"
-                  f"|         Enter a letter to get started.         |\n"
-                  f"|                                                |\n"
-                  f"| (c/C) Query a character (exactly)              |\n"
-                  f"| (g/G) Query a game (exactly)                   |\n"
-                  f"| (p/P) Get a path from a character to Ryu       |\n"
-                  f"| (n/N) See stats about the database             |\n"
-                  f"| (i/I) Insert a game and characters into the DB |\n"
-                  f"| (a/A) Add characters to an existing game       |\n"
-                  f"| (l/L) Add an alias to an existing character    |\n"
-                  f"| (x/X) Remove an item from the database         |\n"
-                  f"| (u/U) Update a character or game               |\n"
-                  f"| (v/V) Toggle view to be compact or descriptive |\n"
-                  f"| (r/R) Reset the database (include all details) |\n"
-                  f"| (q/Q) Close the database and quit              |\n"
-                  f"|                                                |\n"
-                  f"+------------------------------------------------+\n"
-                  f"|   (Note: brackets in desc. = capital letter)   |\n"
-                  f"+------------------------------------------------+\n"
-)
+def makeMenu(style: MenuStyle) -> str:
+    """Make a menu of a given style"""
+    head = (f"\n+{MENU_DISPLAY['header'].ljust(int(MENU_DISPLAY['innersize']/2) + (int(len(MENU_DISPLAY['header'])/2)), '-').rjust(MENU_DISPLAY['innersize'], '-')}+\n"
+            f"|{MENU_DISPLAY['subheader'].ljust(int(MENU_DISPLAY['innersize']/2) + (int(len(MENU_DISPLAY['subheader'])/2)), ' ').rjust(MENU_DISPLAY['innersize'], ' ')}|\n"
+            f"|{' ' * MENU_DISPLAY['innersize']}|\n"
+    )
+    foot = (f"+{'-' * MENU_DISPLAY['innersize']}+\n"
+            f"|{MENU_DISPLAY['footer'].ljust(int(MENU_DISPLAY['innersize']/2) + (int(len(MENU_DISPLAY['footer'])/2)), ' ').rjust(MENU_DISPLAY['innersize'], ' ')}|\n"
+            f"+{'-' * MENU_DISPLAY['innersize']}+\n"
+    )
+    menu_rows: List[str] = []
+    for groups in MENU_DISPLAY['commands']:
+        menu_rows.extend([f"| ({c['letter']}/{c['letter'].upper()}) {c['description'].ljust(MENU_DISPLAY['innersize'] - 8)} |\n" for c in groups['commands']])
+    if style == MenuStyle.COMPACT:
+        return (
+            f"{head}"
+            f"{''.join(menu_rows)}"
+            f"|{' ' * MENU_DISPLAY['innersize']}|\n"
+            f"{foot}"
+        )
+    elif style == MenuStyle.DEFAULT:
+        blocks = []
+        i = 0
+        for groups in MENU_DISPLAY['commands']:
+            blocks.append(f"+{groups['type'].rjust(len(groups['type']) + 3, '-').ljust(MENU_DISPLAY['innersize'], '-')}+\n")
+            blocks.append(f"|{' ' * MENU_DISPLAY['innersize']}|\n")
+            for j in range(len(groups['commands'])):
+                blocks.append(menu_rows[i+j])
+            else:
+                i += j + 1
+            blocks.append(f"|{' ' * MENU_DISPLAY['innersize']}|\n")
+        return (
+            f"{head}"
+            f"{''.join(blocks)}"
+            f"{foot}"
+        )
+    else:
+        return ""
+
+MENUS = {
+    MenuStyle.DEFAULT: makeMenu(MenuStyle.DEFAULT),
+    MenuStyle.COMPACT: makeMenu(MenuStyle.COMPACT)
+}
 
 GAMES_PATH = "data/games"
 TABLES_PATH = "data/tables"
@@ -886,7 +952,7 @@ def main() -> None:
     command = ""
     menuStyle: MenuStyle = MenuStyle.DEFAULT
     while (command != "Q" and command != "q"):
-        print(MENU_COMPACT if menuStyle == MenuStyle.COMPACT else MENU)
+        print(MENUS[menuStyle])
         command = input().strip()
         print()
         if command != "":
