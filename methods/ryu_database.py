@@ -15,7 +15,7 @@ as (FromGame, ByName, LikeTitle, etc.), with the exceptions of Ryu
 Number methods.
 """
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 from random import choice
 
 from classes.nodes import Node, Game, GameCharacter
@@ -177,17 +177,25 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[GameCharacter]]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByGame(title: str) -> Optional[List[GameCharacter]]:
+def getCharactersByGame(title: str, only_names=False) -> Optional[Union[List[GameCharacter], List[str]]]:
     """Get a list of all characters who appear in a given Game.
     
+    If only_names is set to False (default), the full GameCharacter objects
+    are returned. Otherwise, only a list of strings of the characters'
+    names.
+
     Returns an empty array if no characters exist in the game, or if the
     game doesn't exist, and returns None if errors occur.
     """
-    result: List[GameCharacter] = []
+    result: Union[List[GameCharacter], List[str]] = []
     try:
         with RyuConnector() as rdb:
             # Get the characters
             rdb.execute(queries.getCharactersByGame(title))
+            if only_names:
+                for row in rdb.fetchall():
+                    result.append(row[0])
+                return result
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data

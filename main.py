@@ -289,7 +289,7 @@ def queryGame(exact=False) -> None:
         print(g.printSelf(withRn=True))            
     # Prompt to see characters in the selected game
     if input("\nSee characters from this game? (y/n) ").lower() == "y":
-        resultViewer([c.name for c in rdb.getCharactersByGame(g.title)], resultsPerPage=20, limiter=0)        
+        resultViewer(rdb.getCharactersByGame(g.title, only_names=True), resultsPerPage=20, limiter=0)        
 
 def getPath(limiter: int=defaultLimiter) -> None:
     """Print a path from a character to Ryu.
