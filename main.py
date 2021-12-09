@@ -762,12 +762,13 @@ def updateData() -> None:
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
-        results: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(cname)
+        results: Optional[List[str]] = rdb.getCharactersLikeName(cname, only_names=True)
         # Select character
-        c: Optional[GameCharacter] = resultViewer(results, True)
-        if not c:
+        cname = resultViewer(results, True)
+        if not cname:
             print("No character selected. Cancelling the operation...")
             return
+        c = rdb.getCharacterByName(cname)
         # Decide what to update and what to change it to
         # NOTE: Right now, the only attribute characters have is `name`, but more functionality could be possible in the future
         attribute: str = optionPicker("What would you like to update?", {"n": "Name", "a": "Alias"})

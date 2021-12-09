@@ -202,7 +202,9 @@ def updateCharacterName(c: GameCharacter, new_name: str) -> bool:
     try:
         for gtitle in c.appears_in:
             replaceLine(c.name, new_name, "%s/%s.txt" % (GAMES_PATH, gtitle))
-        return True
+        if updateAliasCname(c.name, new_name):
+            return True
+        return False
     except OSError:
         print(ERROR_MESSAGES["os_open"](gtitle))
         return False
@@ -299,6 +301,44 @@ def removeAlias(aname: str) -> bool:
             # Iterate, only writing the line if it isn't the one we want to remove
             for row in csv_reader:
                 if row[ALIAS_HEADER[1]] != aname:
+                    csv_writer.writerow(row)
+        os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
+        return True
+    except OSError as e:
+        print(ERROR_MESSAGES["os_open"](ALIAS_FILE))
+        return False
+    except Exception as e:
+        print(ERROR_MESSAGES["default"](e))
+        return False
+
+def updateAliasCname(old_cname: str, new_cname: str) -> bool:
+    """Update a character's name in local csv files.
+    
+    Returns whether or not the item was updated from files successfully.
+    """
+    try:
+        if not os.path.exists(ALIAS_FILE): 
+            return True     # If the file doesn't exist, there's nothing to remove! True by default
+        with open(ALIAS_FILE, "r") as f_in, open(TEMP_FILE, "w+") as f_out:
+            # Set up reader and writer
+            csv_reader = csv.DictReader(f_in, 
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            csv_writer = csv.DictWriter(f_out,
+                fieldnames=ALIAS_HEADER,
+                delimiter=CSV_PROPERTIES["delimiter"],
+                quotechar=CSV_PROPERTIES["quotechar"],
+                quoting=CSV_PROPERTIES["quoting"]
+            )
+            # Iterate, only rewriting the line we want to change
+            for row in csv_reader:
+                if row[ALIAS_HEADER[0]] != old_cname:
+                    csv_writer.writerow(row)
+                else:
+                    row[ALIAS_HEADER[0]] = new_cname
                     csv_writer.writerow(row)
         os.rename(TEMP_FILE, ALIAS_FILE)    # temp file is now our new alias.csv
         return True
