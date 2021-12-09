@@ -65,9 +65,13 @@ When you are finished entering names for the game, simply press enter with nothi
 
 While the `A` also stands for "append", this command lets you include more characters to a game. After being prompted for the name of the game and making a selection, you run through a similar screen as adding characters to a new game, except that the names entered will go into the game you selected. This is useful for games that include DLC that has yet to be announced (like Super Smash Bros. Ultimate), or games that were added with missing characters.
 
+`(l/L) Add an alias to an existing character`
+
+A prompt will appear to enter a character's name, and after selecting a character, you can enter a possible alias for them. This allows queries to match with different potential names. For instance, querying "Spider-Man" and "Peter Parker" will give the same character, despite the two names being nothing alike.
+
 `(x/X) Remove an item from the database`
 
-After entering this command, you will be prompted as to whether you'd like to remove a character or game. You can then enter the character's name or game's title to search and select the one you'd like to remove.
+After entering this command, you will be prompted as to whether you'd like to remove a character, game, or a character's alias. You can then enter the character's name or game's title to search and select what you'd like to remove.
 
 If you're removing a character, you will be asked whether you'd like to remove it from one game specifically, or from the entire database. Removing from the entire database will also remove them from every game they've appeared in.
 
@@ -75,7 +79,7 @@ If you're removing a game, you'll be asked to confirm the deletion. However, any
 
 `(u/U) Update a character or game`
 
-This command is useful for updating a character's name, or a game's title or release date. After searching for the desired element to change, you'll be asked what you'd like to change, and what you want to change it to. Upon confirmation, the changes will occur instantly in the database.
+This command is useful for updating a character's name or aliases, or a game's title or release date. After searching for the desired element to change, you'll be asked what you'd like to change, and what you want to change it to. Upon confirmation, the changes will occur instantly in the database.
 
 ### Maintenance
 
