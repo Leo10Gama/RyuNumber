@@ -46,7 +46,7 @@ RX-24
 Luke Skywalker
 Han Solo
 Chewbacca
-Princess Leia
+Leia Organa
 Darth Vader
 C-3PO
 Ben Kenobi
@@ -109,7 +109,7 @@ Wu Zetian
 Longmu
 Li Jing
 Daji
-Chang e
+Chang'e
 Princess Zhao of Pingyang
 Nüwa
 Subhūti
@@ -147,7 +147,7 @@ Helen of Troy
 Minos
 Cerberus
 Prometheus
-Heracles
+Hercules
 Achilles
 Theseus
 Odysseus

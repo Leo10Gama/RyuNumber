@@ -32,12 +32,12 @@ Wolfgang Amadeus Mozart
 Mr. Edward Hyde
 Mrs. Claus
 Napoleon Bonaparte
-Odin
+Odin Borson
 Princess Peach
 Rumpelstiltskin
 Santa Claus
 Socrates
-Thor
+Thor Odinson
 William Shakespeare
 Zelda
 Jabberwock
@@ -63,7 +63,7 @@ Cthulhu
 Moby Dick
 Minotaur
 Bowser
-Moctezuma II
+Montezuma
 Barack Obama
 Michelle Obama
 Humpty Dumpty
@@ -106,3 +106,4 @@ Garrett Hunter
 Eric Baudour
 Derrick Acosta
 Satan
+Death

@@ -200,7 +200,7 @@ def resultViewer(results: List[T], canSelect: bool=False, page: int=1, resultsPe
         # Print all results
         print(f"\t{len(results)} results:\n")
         for i in range((page - 1) * resultsPerPage, min(((page - 1) * resultsPerPage) + resultsPerPage, len(results))):
-            print(f"({i + 1})\t{results[i].printSelf(limit=limiter, withRn=False) if issubclass(type(results[i]), Node) else results[i]}")
+            print(f"{f'({i + 1})'.ljust(5, ' ')} {results[i].printSelf(limit=limiter, withRn=False) if issubclass(type(results[i]), Node) else results[i]}")
         else:
             print()
 
@@ -312,11 +312,11 @@ def queryCharacter(exact: bool=False, limiter: int=-1) -> None:
             return
         print(myCharacters.printSelf(limiter, withRn=True))                
     else:           # Querying by generalized name (myCharacters is a list of GameCharacter objects)
-        myCharacters: Optional[Union[List[GameCharacter], List[str]]] = rdb.getCharactersLikeName(charToQuery, only_names=True)  
+        myCharacters: Optional[Union[List[GameCharacter], List[str]]] = rdb.getCharactersLikeName(charToQuery)  
         if not myCharacters:    # No character found
             print("No characters by that name could be found")
             return
-        myChar: Optional[str] = resultViewer(myCharacters, canSelect=True, resultsPerPage=20)
+        myChar: Optional[str] = resultViewer(myCharacters, canSelect=True)
         if myChar:      # We have a character selected, print them
             print(rdb.getCharacterByName(myChar).printSelf(withRn=True))
 
@@ -355,7 +355,7 @@ def queryGame(exact=False) -> None:
         print(g.printSelf(withRn=True))            
     # Prompt to see characters in the selected game
     if input("\nSee characters from this game? (y/n) ").lower() == "y":
-        resultViewer(rdb.getCharactersByGame(g.title, only_names=True), resultsPerPage=20, limiter=0)        
+        resultViewer(rdb.getCharactersByGame(g.title), resultsPerPage=20, limiter=0)        
 
 def getPath(limiter: int=defaultLimiter) -> None:
     """Print a path from a character to Ryu.
@@ -384,12 +384,12 @@ def getPath(limiter: int=defaultLimiter) -> None:
         print("Nothing entered. Cancelling the operation...")
         return
     # Check that character exists
-    characterToQuery = rdb.getCharactersLikeName(charToPath)
+    characterToQuery: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(charToPath)
     if not characterToQuery:
         print("No character by that name could be found in the database.")
         return
     # Check that a selection was made
-    myChar: Optional[Node] = resultViewer(characterToQuery, True)
+    myChar: Optional[GameCharacter] = resultViewer(characterToQuery, True)
     if not myChar:
         print("No character selected. Cancelling...")
         return
@@ -537,6 +537,9 @@ def insertGame() -> None:
     """
     newGame: str = removeIllegalChars(input("Enter the game's name: "))
     print()
+    if not newGame:
+        print("Nothing entered. Cancelling...")
+        return
     if rdb.getGameByTitle(newGame):
         print("That game already exists in the database!")
         return
@@ -828,7 +831,7 @@ def updateData() -> None:
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
-        results: Optional[List[str]] = rdb.getCharactersLikeName(cname, only_names=True)
+        results: Optional[List[str]] = rdb.getCharactersLikeName(cname)
         # Select character
         cname = resultViewer(results, True)
         if not cname:

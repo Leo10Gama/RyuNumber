@@ -33,7 +33,7 @@ Wolfgang Amadeus Mozart
 Mr. Edward Hyde
 Mrs. Claus
 Napoleon Bonaparte
-Odin
+Odin Borson
 Poseidon
 Rumpelstiltskin
 Santa Claus
@@ -41,6 +41,6 @@ Sinestro
 Socrates
 Superman
 Thomas Wayne
-Thor
+Thor Odinson
 William Shakespeare
 Wonder Woman

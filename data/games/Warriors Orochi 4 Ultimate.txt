@@ -7,8 +7,8 @@ Daji
 Nüwa
 Gaia
 Fenrir
-Loki
-Odin
+Loki Laufeyson
+Odin Borson
 Achilles
 Joan of Arc
 Kaihime
@@ -43,7 +43,7 @@ Toyotomi Hideyoshi
 Oichi
 Maeda Toshimasu
 Hōjō Ujiyasu
-Komatsuhime Inahime
+Komatsuhime
 Hōjō Ujinao
 Gotō Nobuyasu
 Harada Munetoki

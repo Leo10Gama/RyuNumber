@@ -36,7 +36,10 @@ def tupleToCharacter(t: Tuple[str, int]) -> Optional[GameCharacter]:
     invalid or errors occur during connection, nothing is returned.
     """
     try:
-        return GameCharacter(t[0], t[1]).getMissingData()
+        c = GameCharacter(t[0], t[1])
+        with RyuConnector() as rdb:
+            c.getMissingData(rdb)
+        return c
     except Exception as e:
         print(f"ERROR: {e}")
         return None
@@ -136,12 +139,8 @@ def getCharacterByName(name: str) -> Optional[GameCharacter]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersLikeName(name: str, only_names=False) -> Optional[Union[List[GameCharacter], List[str]]]:
+def getCharactersLikeName(name: str) -> Optional[Union[List[GameCharacter], List[str]]]:
     """Get characters from the database whose names are similar to the arg.
-    
-    If only_names is set to False (default), the full GameCharacter objects
-    are returned. Otherwise, only a list of strings of the characters'
-    names.
 
     Returns an empty array if no characters can be found, but returns None 
     if any sorts of errors occur.
@@ -151,15 +150,11 @@ def getCharactersLikeName(name: str, only_names=False) -> Optional[Union[List[Ga
         with RyuConnector() as rdb:
             # Get the character(s)
             rdb.execute(queries.getCharacterLikeName(name))
-            if only_names:
-                for row in rdb.fetchall():
-                    result.append(row[0])
-                return result
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
             for c in result:
-                c.getMissingData()
+                c.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -180,19 +175,15 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[GameCharacter]]:
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
             for c in result:
-                c.getMissingData()
+                c.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByGame(title: str, only_names=False) -> Optional[Union[List[GameCharacter], List[str]]]:
+def getCharactersByGame(title: str) -> Optional[Union[List[GameCharacter], List[str]]]:
     """Get a list of all characters who appear in a given Game.
     
-    If only_names is set to False (default), the full GameCharacter objects
-    are returned. Otherwise, only a list of strings of the characters'
-    names.
-
     Returns an empty array if no characters exist in the game, or if the
     game doesn't exist, and returns None if errors occur.
     """
@@ -201,15 +192,11 @@ def getCharactersByGame(title: str, only_names=False) -> Optional[Union[List[Gam
         with RyuConnector() as rdb:
             # Get the characters
             rdb.execute(queries.getCharactersByGame(title))
-            if only_names:
-                for row in rdb.fetchall():
-                    result.append(row[0])
-                return result
             for row in rdb.fetchall():
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
             for c in result:
-                c.getMissingData()
+                c.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -230,7 +217,7 @@ def getCharactersByRyuNumber(rn: int) -> Optional[List[GameCharacter]]:
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
             for c in result:
-                c.getMissingData()
+                c.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -247,7 +234,7 @@ def getCharacterByAlias(aname: str) -> Optional[GameCharacter]:
                 result = GameCharacter(row[0], row[1])
             # Fill missing data
             if result:
-                result.getMissingData()
+                result.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
@@ -268,7 +255,7 @@ def getCharactersLikeAlias(aname: str) -> Optional[List[GameCharacter]]:
                 result.append(GameCharacter(row[0], row[1]))
             # Fill missing data
             for c in result:
-                c.getMissingData()
+                c.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))

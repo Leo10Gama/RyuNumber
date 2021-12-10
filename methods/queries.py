@@ -188,7 +188,7 @@ def getGameByTitle(gtitle: str) -> str:
     """
     return (f"SELECT {ALL_GAME} "
             f"FROM game "
-            f"WHERE title='{gtitle}';"
+            f"WHERE title='{sanitizeInput(gtitle)}';"
     )
 
 def getGamesByTitles(gtitles: Tuple) -> str: 

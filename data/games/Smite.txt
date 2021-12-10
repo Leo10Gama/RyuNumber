@@ -1,7 +1,7 @@
 2014-03-25
 Zeus
 Hades
-Thor
+Thor Odinson
 Ares
 Poseidon
 Aphrodite
@@ -40,7 +40,7 @@ Gaia
 Discordia
 Hebo
 Guan Yu
-Change
+Chang'e
 Zhong Kui
 Sun Wukong
 Nüwa
@@ -85,7 +85,7 @@ Pele
 Yemọja
 Tiamat
 Horus
-Heracles
+Hercules
 Medusa
 Baba Yaga
 Gilgamesh
@@ -112,6 +112,6 @@ Merlin
 Hela
 Morgan Le Fay
 Heimdall
-Odin
+Odin Borson
 Kali
-Loki
+Loki Laufeyson

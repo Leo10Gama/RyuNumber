@@ -1,5 +1,5 @@
 2015-09-29
-Shaquille ONeal
+Shaquille O'Neal
 Dennis Rodman
 Mike Dunleavy Jr.
 Kirk Hinrich
@@ -15,7 +15,7 @@ Clifford Robinson
 Robert Horry
 Sam Cassell
 Doug Christie
-Penny Anfernee Hardaway
+Penny Hardaway
 Jon Barry
 Antonio Davis
 Damon Stoudamire
@@ -28,7 +28,7 @@ Quentin Richardson
 David Wesley
 Elgin Baylor
 Spud Webb
-Magic Earvin Johnson
+Earvin Johnson
 Joe Dumars
 Rick Mahorn
 Joe Johnson
@@ -252,7 +252,7 @@ Justin Holiday
 Shelvin Mack
 Mike Muscala
 Mike Scott
-Edy Walter Tavares
+Edy Tavares
 Al Jefferson
 Kemba Walker
 Michael Kidd-Gilchrist

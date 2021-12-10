@@ -59,13 +59,18 @@ class Node(ABC):
         """
         pass
 
-    def getMissingData(self) -> bool:
+    def getMissingData(self, rdb: RyuConnector) -> bool:
         """Retrieve any data that may be missing to the class.
         
         This method is intended to connect to the database to fill in any empty
         fields that a Node may be missing. This is intended to abstract-ify the
         data retrieval process, putting the onus on the object itself rather 
         than the class retrieving the object itself.
+
+        Parameters
+        ----------
+        rdb: RyuConnector.cursor
+            A cursor object opened by a RyuConnector.
         """
         return True
 
@@ -139,27 +144,31 @@ class GameCharacter(Node):
             returnStr += "\n\t(Appears in %d game%s)" % (len(self.appears_in), "" if len(self.appears_in) == 1 else "s")
         return returnStr
 
-    def getMissingData(self) -> bool:
+    def getMissingData(self, rdb: RyuConnector) -> bool:
         """Retrieve any data that may be missing to the class.
         
         This method is overridden from its parent. The character will connect 
         to the database and fill in the missing `self.appears_in` and 
         `self.aliases` fields.
+        
+        Parameters
+        ----------
+        rdb: RyuConnector.cursor
+            A cursor object opened by a RyuConnector.
         """
         try:
-            with RyuConnector() as rdb:
-                # Get appears_in relations
-                if not self.appears_in:
-                    rdb.execute(queries.getGamesByCharacter(self.name))
-                    mygames = rdb.fetchall()
-                    for row in mygames:
-                        self.appears_in.append(row[0])
-                # Get alias relations
-                if not self.aliases:
-                    rdb.execute(queries.getAliasesFromName(self.name))
-                    myaliases = rdb.fetchall()
-                    for row in myaliases:
-                        self.aliases.append(row[1])
+            # Get appears_in relations
+            if not self.appears_in:
+                rdb.execute(queries.getGamesByCharacter(self.name))
+                mygames = rdb.fetchall()
+                for row in mygames:
+                    self.appears_in.append(row[0])
+            # Get alias relations
+            if not self.aliases:
+                rdb.execute(queries.getAliasesFromName(self.name))
+                myaliases = rdb.fetchall()
+                for row in myaliases:
+                    self.aliases.append(row[1])
             return True
         except Exception as e:
             print(f"An error occurred: {e}")

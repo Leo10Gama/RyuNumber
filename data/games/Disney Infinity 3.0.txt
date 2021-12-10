@@ -1,4 +1,4 @@
-2013-08-18
+2015-08-28
 Perry the Platypus
 Anna (Frozen)
 Hector Barbossa
@@ -74,7 +74,7 @@ Darth Vader
 Disgust (Inside Out)
 Dory (Finding Nemo)
 Ezra Bridger
-Fa Mulan
+Hua Mulan
 Fear (Inside Out)
 Finn (Star Wars)
 Han Solo
@@ -90,7 +90,7 @@ Nick Wilde
 Obi-Wan Kenobi
 Olaf (Frozen)
 Poe Dameron
-Princess Leia
+Leia Organa
 Rey (Star Wars)
 Sabine Wren
 Sadness (Inside Out)
