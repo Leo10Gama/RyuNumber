@@ -8,7 +8,7 @@ Augustus Caesar
 Otto von Bismarck
 Boudica
 Casimir III the Great
-Catherine II
+Catherine the Great
 Darius I
 Dido
 Elizabeth I
@@ -23,13 +23,12 @@ Harun al-Rashid
 Hiawatha
 Isabella I of Castile
 Kamehameha I
-Maria I
+Maria I of Portugal
 Maria Theresa
-Montezuma
 Napoleon Bonaparte
 Nebuchadnezzar II
 Oda Nobunaga
-Pacal
+K'inich Janaab' Pakal
 Pachacuti
 Dom Pedro II
 Pocatello
@@ -40,5 +39,7 @@ Shaka Zulu
 Suleiman the Magnificent
 Theodora I
 George Washington
-William I
+William of Orange
 Wu Zetian
+Pedro II of Brazil
+Moctezuma I

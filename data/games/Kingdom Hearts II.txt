@@ -31,9 +31,9 @@ Flounder (Disney)
 Fuu
 Genie (Disney)
 Goofy
-Hades (Disney)
+Hades
 Hayner
-Hercules (Disney)
+Hercules
 Huey, Dewey, and Louie
 Hydra (Disney)
 Iago
@@ -102,3 +102,6 @@ Yen Sid
 Yuffie Kisaragi
 Zero (Disney)
 Zexion
+Owl (Winnie the Pooh)
+Pegasus (Disney)
+Lernaean Hydra
