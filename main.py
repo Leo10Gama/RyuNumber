@@ -12,7 +12,7 @@ database, updating things in the database, and resetting the database.
 """
 
 from enum import Enum, auto
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Dict, List, Optional, TypeVar
 
 from classes import file_manager as fm
 from classes.nodes import Node, Game, GameCharacter
@@ -312,13 +312,13 @@ def queryCharacter(exact: bool=False, limiter: int=-1) -> None:
             return
         print(myCharacters.printSelf(limiter, withRn=True))                
     else:           # Querying by generalized name (myCharacters is a list of GameCharacter objects)
-        myCharacters: Optional[Union[List[GameCharacter], List[str]]] = rdb.getCharactersLikeName(charToQuery)  
+        myCharacters: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(charToQuery)  
         if not myCharacters:    # No character found
             print("No characters by that name could be found")
             return
-        myChar: Optional[str] = resultViewer(myCharacters, canSelect=True)
+        myChar: Optional[GameCharacter] = resultViewer(myCharacters, canSelect=True)
         if myChar:      # We have a character selected, print them
-            print(rdb.getCharacterByName(myChar).printSelf(withRn=True))
+            print(myChar.printSelf(withRn=True))
 
 def queryGame(exact=False) -> None:
     """Find a game in the database
@@ -355,7 +355,7 @@ def queryGame(exact=False) -> None:
         print(g.printSelf(withRn=True))            
     # Prompt to see characters in the selected game
     if input("\nSee characters from this game? (y/n) ").lower() == "y":
-        resultViewer(rdb.getCharactersByGame(g.title), resultsPerPage=20, limiter=0)        
+        resultViewer(rdb.getCharactersByGame(g.title), limiter=0)        
 
 def getPath(limiter: int=defaultLimiter) -> None:
     """Print a path from a character to Ryu.
@@ -405,21 +405,21 @@ def getPath(limiter: int=defaultLimiter) -> None:
         p = []
         p.append(x)
         while True:     # Listen I KNOW this is bad practice, but this is the intuitive solution, cut me some slack >:/
-            x = rdb.getGameByTitle(resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20))
-            if x:
-                p.append(x)
-            else:
+            x = resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20)
+            if x is None:
                 print("Cancelling...")
                 break
-            x = rdb.getCharacterByName(resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20))
-            if x:
-                p.append(x)
-                if type(x) is GameCharacter and x.primary_key == "Ryu":
-                    printPath(p)
-                    break
-            else:
+            x = rdb.getGameByTitle(x)
+            p.append(x)
+            x = resultViewer(rdb.stepTowardsRyu(x), True, resultsPerPage=20)
+            if x is None:
                 print("Cancelling...")
                 break
+            x = rdb.getCharacterByName(x)
+            p.append(x)
+            if x.primary_key == "Ryu":
+                printPath(p)
+                break                
     else:
         print("Cancelling...")           
 
@@ -831,13 +831,12 @@ def updateData() -> None:
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
-        results: Optional[List[str]] = rdb.getCharactersLikeName(cname)
+        results: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(cname)
         # Select character
-        cname = resultViewer(results, True)
-        if not cname:
+        c = resultViewer(results, True)
+        if not c:
             print("No character selected. Cancelling the operation...")
             return
-        c = rdb.getCharacterByName(cname)
         # Decide what to update and what to change it to
         # NOTE: Right now, the only attribute characters have is `name`, but more functionality could be possible in the future
         attribute: str = optionPicker("What would you like to update?", {"n": "Name", "a": "Alias"})

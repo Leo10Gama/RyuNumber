@@ -15,7 +15,7 @@ as (FromGame, ByName, LikeTitle, etc.), with the exceptions of Ryu
 Number methods.
 """
 
-from typing import Optional, List, Tuple, Union
+from typing import Optional, List, Tuple
 from random import choice
 
 from classes.nodes import Node, Game, GameCharacter
@@ -133,19 +133,19 @@ def getCharacterByName(name: str) -> Optional[GameCharacter]:
                 result = GameCharacter(row[0], row[1])
             # Fill missing fields
             if result:
-                result.getMissingData()
+                result.getMissingData(rdb)
             return result
     except Exception as e:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersLikeName(name: str) -> Optional[Union[List[GameCharacter], List[str]]]:
+def getCharactersLikeName(name: str) -> Optional[List[GameCharacter]]:
     """Get characters from the database whose names are similar to the arg.
 
     Returns an empty array if no characters can be found, but returns None 
     if any sorts of errors occur.
     """
-    result: Union[List[GameCharacter], List[str]] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the character(s)
@@ -181,13 +181,13 @@ def getCharactersByNames(names: Tuple[str]) -> Optional[List[GameCharacter]]:
         print(ERROR_MESSAGES["default_error"](e))
         return None
 
-def getCharactersByGame(title: str) -> Optional[Union[List[GameCharacter], List[str]]]:
+def getCharactersByGame(title: str) -> Optional[List[GameCharacter]]:
     """Get a list of all characters who appear in a given Game.
     
     Returns an empty array if no characters exist in the game, or if the
     game doesn't exist, and returns None if errors occur.
     """
-    result: Union[List[GameCharacter], List[str]] = []
+    result: List[GameCharacter] = []
     try:
         with RyuConnector() as rdb:
             # Get the characters
@@ -544,7 +544,7 @@ def updateAlias(old_alias: str, new_alias: str) -> bool:
 #====================#
 # RYU NUMBER METHODS #
 #====================#
-def stepTowardsRyu(item: Node) -> Optional[List[Node]]:
+def stepTowardsRyu(item: Node) -> Optional[List[str]]:
     """Get one step of a path towards Ryu.
     
     If the passed item is a Game, then a list of all characters with a Ryu 
@@ -599,10 +599,12 @@ def getPathFromCharacter(name: str) -> Optional[List[Node]]:
             while (path[-1].ryu_number != 0):
                 rdb.execute(queries.getGameByTitle(choice(stepTowardsRyu(x))))
                 g = rdb.fetchone()
+                if not g: return None
                 path.append(tupleToGame(g))
                 x = path[-1]
                 rdb.execute(queries.getCharacterByName(choice(stepTowardsRyu(x))))
                 c = rdb.fetchone()
+                if not c: return None
                 path.append(tupleToCharacter(c))
                 x = path[-1]
             return path
