@@ -4,7 +4,6 @@ Abomination
 Absorbing Man
 Phillip Coulson
 Aldrich Killian
-Ant-Man
 Arnim Zola
 Archangel
 Aunt May Parker
@@ -124,3 +123,4 @@ Wolverine
 Axel Alonso
 Joe Quesada
 Tom Brevoort
+Ant-Man (Henry Pym)

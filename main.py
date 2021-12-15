@@ -831,6 +831,9 @@ def updateData() -> None:
         # Query character
         cname: str = removeIllegalChars(input("Enter character name: "))
         print()
+        if not cname:
+            print("Nothing entered. Cancelling...")
+            return
         results: Optional[List[GameCharacter]] = rdb.getCharactersLikeName(cname)
         # Select character
         c = resultViewer(results, True)
@@ -886,6 +889,9 @@ def updateData() -> None:
         # Query game
         gtitle: str = removeIllegalChars(input("Enter game title: "))
         print()
+        if not gtitle:
+            print("Nothing entered. Cancelling...")
+            return
         results: Optional[List[Game]] = rdb.getGamesLikeTitle(gtitle)
         # Select game
         g: Optional[Game] = resultViewer(results, True)
