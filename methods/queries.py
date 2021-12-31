@@ -44,12 +44,16 @@ def sanitize_inputs(func: Callable) -> Callable:
                 newargs.append(arg.replace("'", "''"))
             elif isinstance(arg, tuple):    # if tuple,  ' -> '' for each item in the tuple
                 newargs.append(tuple([a.replace("'", "''") for a in arg]))
+            else:
+                newargs.append(arg)
         # Sanitize kwargs: dict[str, any] (any is what we want to sanitize)
         for karg, warg in kwargs.items():
             if isinstance(warg, str):       # if string, ' -> ''
                 newkwargs[karg] = warg.replace("'", "''")
             elif isinstance(warg, tuple):   # if tuple,  ' -> '' for each item in the tuple
                 newkwargs[karg] = tuple([w.replace("'", "''") for w in list(warg)])
+            else:
+                newkwargs[karg] = warg
         return_val = func(*newargs, **newkwargs)
         return return_val
 
@@ -108,18 +112,6 @@ def getCharacterLikeName(cname: str) -> str:
 
             f"UNION "
 
-            # Next match start of a word
-            f"SELECT {ALL_GAME_CHARACTER} "
-            f"FROM game_character "
-            f"WHERE name LIKE '{cname}%' "
-            f"UNION "
-            f"SELECT {ALL_GAME_CHARACTER} "
-            f"FROM game_character "
-            f"JOIN alias ON name=cname "
-            f"WHERE aname LIKE '{cname}%' "
-
-            f"UNION "
-
             # Next match the last word
             f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
@@ -141,6 +133,18 @@ def getCharacterLikeName(cname: str) -> str:
             f"FROM game_character "
             f"JOIN alias ON name=cname "
             f"WHERE aname LIKE '% {cname} %' "
+
+            f"UNION "
+
+            # Next match start of a word
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '{cname}%' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '{cname}%' "
 
             f"UNION "
 
