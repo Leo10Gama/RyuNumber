@@ -406,7 +406,7 @@ Commander Video
 The Gunstringer
 Ittle Dew
 Juan (Guacamelee)
-Jak and Daxter
+Daxter
 Iota (Tearaway)
 Atoi (Tearaway)
 Altaïr Ibn-LaAhad
@@ -632,3 +632,4 @@ Dewey Largo
 Sherri Mackleberry
 Terri Mackleberry
 Ant-Man (Eric O'Grady)
+Jak (Jak & Daxter)

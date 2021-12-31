@@ -8,7 +8,7 @@ Sly Cooper
 Nathan Drake
 Cole MacGrath
 Ratchet & Clank
-Jak and Daxter
+Daxter
 Big Daddy
 Dante (Devil May Cry)
 Heihachi Mishima
@@ -24,3 +24,4 @@ Zeus (God of War)
 Isaac Clarke
 Hades (God of War)
 Lernaean Hydra
+Jak (Jak & Daxter)
