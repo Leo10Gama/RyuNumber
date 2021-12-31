@@ -72,7 +72,92 @@ def getCharacterLikeName(cname: str) -> str:
     The resulting tuple gets fields from, and in order of 
     `ALL_GAME_CHARACTER`.
     """
-    return (f"SELECT {ALL_GAME_CHARACTER} "
+    return (# First result should be exact matches
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '{cname}' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '{cname}' "
+
+            f"UNION "
+
+            # Next result should be matching word, but with brackets
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '{cname} (%)' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '{cname} (%)' "
+
+            f"UNION "
+
+            # Next match first word of name
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '{cname} %' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '{cname} %' "
+
+            f"UNION "
+
+            # Next match start of a word
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '{cname}%' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '{cname}%' "
+
+            f"UNION "
+
+            # Next match the last word
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '% {cname}' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '% {cname}' "
+
+            f"UNION "
+
+            # Next match a middle word
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '% {cname} %' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '% {cname} %' "
+
+            f"UNION "
+
+            # Next match beginning of *a* word
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"WHERE name LIKE '% {cname}%' "
+            f"UNION "
+            f"SELECT {ALL_GAME_CHARACTER} "
+            f"FROM game_character "
+            f"JOIN alias ON name=cname "
+            f"WHERE aname LIKE '% {cname}%' "
+
+            f"UNION "
+
+            # Last result is substrings
+            f"SELECT {ALL_GAME_CHARACTER} "
             f"FROM game_character "
             f"WHERE name LIKE '%{cname}%' "
             f"UNION "
@@ -80,7 +165,7 @@ def getCharacterLikeName(cname: str) -> str:
             f"FROM game_character "
             f"JOIN alias ON name=cname "
             f"WHERE aname LIKE '%{cname}%' "
-            f"ORDER BY ryu_number ASC, name ASC;"
+            f"LIMIT 1000"
     )
 
 @sanitize_inputs
